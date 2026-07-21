@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Newton–Raphson Simulator</title>
+  <style>
+    :root { color-scheme: dark; --bg:#09111f; --panel:#101c30; --ink:#e8eef8; --muted:#9fb0c9; --cyan:#42d7e8; --gold:#ffc857; --red:#ff6b75; --grid:#263650; }
+    * { box-sizing:border-box } body { margin:0; min-height:100vh; font:15px/1.45 Inter,system-ui,sans-serif; color:var(--ink); background:radial-gradient(circle at 20% 0,#172b4c 0,transparent 38%),var(--bg) }
+    main { width:min(1180px,94vw); margin:28px auto } h1 { margin:0; font-size:clamp(1.7rem,4vw,2.7rem) } .sub { color:var(--muted); margin:4px 0 20px }
+    .layout { display:grid; grid-template-columns:300px 1fr; gap:18px } .card { background:color-mix(in srgb,var(--panel) 94%,transparent); border:1px solid #293a55; border-radius:16px; box-shadow:0 18px 50px #0005 }
+    aside { padding:18px } label { display:block; color:var(--muted); font-size:.84rem; margin:13px 0 5px } input,select,button { width:100%; border:1px solid #344966; border-radius:9px; background:#0b1628; color:var(--ink); padding:10px 11px; font:inherit }
+    input:focus,select:focus { outline:2px solid #42d7e866; border-color:var(--cyan) } .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px } button { cursor:pointer; font-weight:700; transition:.15s } button:hover { transform:translateY(-1px); border-color:var(--cyan) } .primary { background:var(--cyan); color:#06202a; border:0 } .danger { color:#ffadb3 }
+    .hint { font-size:.78rem; color:var(--muted); margin-top:6px } #status { min-height:44px; margin-top:14px; padding:10px; border-radius:9px; background:#0a1424; color:var(--muted) } #status.good { color:#8af0bc } #status.bad { color:var(--red) }
+    .visual { overflow:hidden } #plot { display:block; width:100%; height:530px; touch-action:none } .legend { padding:0 18px 12px; color:var(--muted); font-size:.82rem } .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin:0 5px 0 14px } .dot:first-child { margin-left:0 }
+    .table-card { margin-top:18px; padding:15px; overflow:auto } table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums } th,td { text-align:right; padding:9px 12px; border-bottom:1px solid #243550 } th:first-child,td:first-child { text-align:center } th { color:var(--muted); font-size:.8rem } tbody tr:last-child { color:var(--gold) }
+    @media(max-width:780px){ .layout{grid-template-columns:1fr} #plot{height:420px} }
+  </style>
+</head>
+<body><main>
+  <h1>Newton–Raphson Simulator</h1><p class="sub">Watch each tangent line turn a guess into a better approximation.</p>
+  <section class="layout">
+    <aside class="card">
+      <label for="preset">Example</label><select id="preset"><option value="x^3-x-2|1.5">x³ − x − 2</option><option value="cos(x)-x|1">cos(x) − x</option><option value="x^2-2|1">x² − 2</option><option value="x^3-2*x+2|0">A difficult start</option></select>
+      <label for="fn">Function f(x)</label><input id="fn" value="x^3 - x - 2" spellcheck="false"><div class="hint">Use x, + − * / ^, sin, cos, tan, exp, log, sqrt.</div>
+      <label for="guess">Initial guess x₀</label><input id="guess" type="number" value="1.5" step="any">
+      <div class="row"><div><label for="tol">Tolerance</label><input id="tol" type="number" value="0.000001" step="any"></div><div><label for="limit">Max steps</label><input id="limit" type="number" value="20" min="1" max="100"></div></div>
+      <div class="row"><button id="reset">Reset</button><button id="step" class="primary">Next step</button></div>
+      <div class="row"><button id="play">▶ Animate</button><button id="all">Solve fully</button></div>
+      <div id="status" aria-live="polite">Ready. Press “Next step”.</div>
+    </aside>
+    <div class="card visual"><svg id="plot" role="img" aria-label="Function graph and Newton tangent lines"></svg><div class="legend"><span class="dot" style="background:var(--cyan)"></span>f(x)<span class="dot" style="background:var(--gold)"></span>tangent<span class="dot" style="background:var(--red)"></span>iterations · Drag to pan, wheel to zoom</div></div>
+  </section>
+  <section class="card table-card"><table><thead><tr><th>n</th><th>xₙ</th><th>f(xₙ)</th><th>f′(xₙ)</th><th>|xₙ₊₁ − xₙ|</th><th>Step ratio</th></tr></thead><tbody id="rows"></tbody></table><div class="hint">Step ratio = |Δxₙ| / |Δxₙ₋₁|. A value below 1 means the iteration steps are shrinking.</div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s), svg=$('#plot'); let f, hist=[], done=false, timer=null, view={xmin:-4,xmax:4,ymin:-6,ymax:6};
+function compile(raw){ let s=raw.toLowerCase().replace(/π/g,'pi').replace(/\^/g,'**'); if(!/^[0-9x+\-*/()., _a-z]+$/.test(s)) throw Error('Unsupported character in function.'); const allowed={sin:'sin',cos:'cos',tan:'tan',asin:'asin',acos:'acos',atan:'atan',sqrt:'sqrt',abs:'abs',exp:'exp',log:'log',floor:'floor',ceil:'ceil',pi:'PI',e:'E'}; s=s.replace(/\b(sin|cos|tan|asin|acos|atan|sqrt|abs|exp|log|floor|ceil|pi|e)\b/g,n=>'Math.'+allowed[n]); if(/[a-wyz]/i.test(s.replace(/Math\.[A-Za-z]+/g,''))) throw Error('Unknown name in function.'); return new Function('x','"use strict"; return ('+s+')') }
+function deriv(x){ const h=Math.cbrt(Number.EPSILON)*Math.max(1,Math.abs(x)); return (f(x+h)-f(x-h))/(2*h) }
+function reset(){ clearInterval(timer); timer=null; $('#play').textContent='▶ Animate'; try{ f=compile($('#fn').value); const x=Number($('#guess').value); if(!Number.isFinite(x)||!Number.isFinite(f(x))) throw Error('Choose a finite starting point.'); hist=[{x,fx:f(x)}]; done=false; autoView(); status('Ready. Press “Next step”.',''); render() }catch(e){ hist=[]; status(e.message,'bad'); render() } }
+function iterate(){ if(done||!hist.length)return; const p=hist.at(-1), d=deriv(p.x), tol=Math.abs(Number($('#tol').value))||1e-6, limit=Math.min(100,Math.max(1,Number($('#limit').value)||20)); p.d=d; if(!Number.isFinite(d)||Math.abs(d)<1e-12){done=true; status('Stopped: derivative is zero or undefined. Try another guess.','bad'); return render()} const nx=p.x-p.fx/d; p.delta=Math.abs(nx-p.x); if(!Number.isFinite(nx)){done=true;status('Stopped: the iteration diverged.','bad');return render()} hist.push({x:nx,fx:f(nx)}); autoView(); if(Math.abs(f(nx))<tol||p.delta<tol){done=true;status(`Converged to x ≈ ${fmt(nx)} in ${hist.length-1} steps.`,'good');stop()} else if(hist.length-1>=limit){done=true;status(`Stopped after ${limit} steps without reaching the tolerance.`,'bad');stop()} else status(`Iteration ${hist.length-1}: x = ${fmt(nx)}`,''); render() }
+function solve(){let guard=105;while(!done&&guard--)iterate()}
+function stop(){clearInterval(timer);timer=null;$('#play').textContent='▶ Animate'}
+function status(t,c){const e=$('#status');e.textContent=t;e.className=c}
+function fmt(v){return Number.isFinite(v)?Number(v).toPrecision(9).replace(/\.?0+$/,''):'—'}
+function autoView(){ if(!hist.length)return; const xs=hist.map(p=>p.x).filter(Number.isFinite), lo=Math.min(...xs),hi=Math.max(...xs), span=Math.max(2,(hi-lo)*1.8); view.xmin=(lo+hi)/2-span;view.xmax=(lo+hi)/2+span; const ys=[];for(let i=0;i<200;i++){let y=f(view.xmin+(view.xmax-view.xmin)*i/199);if(Number.isFinite(y)&&Math.abs(y)<1e5)ys.push(y)} const q=Math.max(2,...ys.map(Math.abs).sort((a,b)=>a-b).slice(0,Math.ceil(ys.length*.9)));view.ymin=-q;view.ymax=q }
+function render(){ const W=svg.clientWidth||800,H=svg.clientHeight||530, ns='http://www.w3.org/2000/svg'; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=''; const X=x=>(x-view.xmin)/(view.xmax-view.xmin)*W,Y=y=>H-(y-view.ymin)/(view.ymax-view.ymin)*H, add=(tag,a)=>{let e=document.createElementNS(ns,tag);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));svg.append(e);return e};
+  for(let i=0;i<=10;i++){let x=view.xmin+(view.xmax-view.xmin)*i/10,y=view.ymin+(view.ymax-view.ymin)*i/10;add('line',{x1:X(x),x2:X(x),y1:0,y2:H,stroke:'#263650','stroke-width':1});add('line',{x1:0,x2:W,y1:Y(y),y2:Y(y),stroke:'#263650','stroke-width':1})} if(view.xmin<=0&&view.xmax>=0)add('line',{x1:X(0),x2:X(0),y1:0,y2:H,stroke:'#7890ad'});if(view.ymin<=0&&view.ymax>=0)add('line',{x1:0,x2:W,y1:Y(0),y2:Y(0),stroke:'#7890ad'});
+  if(f){let d='',pen=false;for(let i=0;i<=800;i++){let x=view.xmin+(view.xmax-view.xmin)*i/800,y=f(x),ok=Number.isFinite(y)&&y>view.ymin*3&&y<view.ymax*3;d+=ok?(pen?'L':'M')+X(x)+','+Y(y):'';pen=ok}add('path',{d,fill:'none',stroke:'#42d7e8','stroke-width':3})}
+  hist.slice(0,-1).forEach((p,i)=>{if(!Number.isFinite(p.d))return;let a=view.xmin,b=view.xmax;add('line',{x1:X(a),y1:Y(p.fx+p.d*(a-p.x)),x2:X(b),y2:Y(p.fx+p.d*(b-p.x)),stroke:'#ffc857','stroke-width':1.5,opacity:.5});add('line',{x1:X(p.x),y1:Y(p.fx),x2:X(hist[i+1].x),y2:Y(0),stroke:'#ff6b75','stroke-dasharray':'5 5',opacity:.8})}); hist.forEach((p,i)=>{add('circle',{cx:X(p.x),cy:Y(p.fx),r:5,fill:'#ff6b75'});add('circle',{cx:X(p.x),cy:Y(0),r:4,fill:'#ffc857'});const label=add('text',{x:X(p.x)+8,y:Y(p.fx)-9,fill:'#ffffff','font-size':12,'font-weight':700,'paint-order':'stroke','stroke':'#09111f','stroke-width':4,'stroke-linejoin':'round'});label.textContent=`P${i} (${fmt(p.x)}, ${fmt(p.fx)})`});
+  $('#rows').innerHTML=hist.map((p,i)=>{const previous=i>0?hist[i-1].delta:NaN,ratio=Number.isFinite(p.delta)&&Number.isFinite(previous)&&previous!==0?p.delta/previous:NaN;return `<tr><td>${i}</td><td>${fmt(p.x)}</td><td>${fmt(p.fx)}</td><td>${fmt(p.d)}</td><td>${fmt(p.delta)}</td><td>${fmt(ratio)}</td></tr>`}).join('') }
+$('#reset').onclick=reset;$('#step').onclick=iterate;$('#all').onclick=solve;$('#play').onclick=()=>{if(timer)stop();else{if(done)reset();timer=setInterval(()=>{iterate();if(done)stop()},700);$('#play').textContent='⏸ Pause'}};$('#preset').onchange=e=>{let [fn,x]=e.target.value.split('|');$('#fn').value=fn;$('#guess').value=x;reset()};$('#fn').onchange=reset;$('#guess').onchange=reset;window.onresize=render;
+let drag;svg.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY,v:{...view}};svg.setPointerCapture(e.pointerId)};svg.onpointermove=e=>{if(!drag)return;let dx=(e.clientX-drag.x)/svg.clientWidth*(drag.v.xmax-drag.v.xmin),dy=(e.clientY-drag.y)/svg.clientHeight*(drag.v.ymax-drag.v.ymin);view={xmin:drag.v.xmin-dx,xmax:drag.v.xmax-dx,ymin:drag.v.ymin+dy,ymax:drag.v.ymax+dy};render()};svg.onpointerup=()=>drag=null;svg.onwheel=e=>{e.preventDefault();let k=e.deltaY>0?1.15:.87,cx=view.xmin+(e.offsetX/svg.clientWidth)*(view.xmax-view.xmin),cy=view.ymax-(e.offsetY/svg.clientHeight)*(view.ymax-view.ymin);view={xmin:cx+(view.xmin-cx)*k,xmax:cx+(view.xmax-cx)*k,ymin:cy+(view.ymin-cy)*k,ymax:cy+(view.ymax-cy)*k};render()};reset();
+</script></body></html>
