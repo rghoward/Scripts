@@ -1,0 +1,5 @@
+node_modules/
+ios/App/DerivedData/
+android/.gradle/
+android/app/build/
+*.xcuserstate

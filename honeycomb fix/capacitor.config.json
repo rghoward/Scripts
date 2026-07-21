@@ -1,0 +1,23 @@
+{
+  "appId": "com.o2bkids.honeycomb.family",
+  "appName": "Honeycomb Family",
+  "webDir": "www",
+  "server": {
+    "url": "https://honeycomb.o2bkids.com/",
+    "cleartext": false,
+    "allowNavigation": ["honeycomb.o2bkids.com"]
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#d88710",
+      "presentationOptions": ["badge", "sound", "banner", "list"]
+    }
+  }
+}

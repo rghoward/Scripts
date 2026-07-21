@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Honeycomb Family</string>
+    <string name="title_activity_main">Honeycomb Family</string>
+    <string name="package_name">com.o2bkids.honeycomb.family</string>
+    <string name="custom_url_scheme">com.o2bkids.honeycomb.family</string>
+</resources>

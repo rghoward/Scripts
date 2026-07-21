@@ -1,0 +1,61 @@
+# macOS and editor metadata
+.DS_Store
+._*
+.Spotlight-V100/
+.Trashes/
+*~
+*.swp
+*.swo
+
+# Backups and temporary files
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+*.temp
+*.log
+backup/
+backups/
+
+# JavaScript dependencies and generated web output
+node_modules/
+dist/
+coverage/
+.cache/
+.parcel-cache/
+.vite/
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Gradle and Android generated files
+.gradle/
+.gradle-cache/
+**/build/
+*.apk
+*.aab
+*.aar
+local.properties
+
+# Xcode, CocoaPods, and generated iOS files
+DerivedData/
+DeviceDerivedData/
+*.xcuserstate
+xcuserdata/
+Pods/
+
+# Generated stock-research datasets and reports
+/sp500_dip_research_dataset.csv
+/sp500_dip_research_summary.csv
+/sp500_dip_candidates_today.csv
+/sp500_underperformers_today.csv
+/sp500_drop_strategy_*.csv
+/unwarranted_drop_*.csv
+/real_portfolio_*.csv
