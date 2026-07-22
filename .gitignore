@@ -59,3 +59,11 @@ Pods/
 /sp500_drop_strategy_*.csv
 /unwarranted_drop_*.csv
 /real_portfolio_*.csv
+
+# Gradescope reminder local data and legacy credential-bearing tools
+/gradescope missing-submission reminders/emailer/
+**/config.local.toml
+**/o365_token*.txt
+**/emails.csv
+**/*.sqlite3
+**/logs/
