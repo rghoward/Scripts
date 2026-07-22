@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import unittest
 from zoneinfo import ZoneInfo
 
-from reminder import Student, effective_late_deadline, student_message
+from reminder import Student, effective_late_deadline, student_message, summary_message
 
 
 class ReminderTests(unittest.TestCase):
@@ -28,10 +28,10 @@ class ReminderTests(unittest.TestCase):
 
     def test_message_contains_student_assignment_and_deadlines(self):
         assignment = SimpleNamespace(name="HW07")
-        course = {"policy": "The lowest homework grade is dropped."}
+        course = {"code": "CS 1301", "policy": "The lowest homework grade is dropped."}
         due = datetime(2026, 7, 22, 23, 59, tzinfo=self.zone)
         late = datetime(2026, 7, 23, 23, 59, tzinfo=self.zone)
-        subject, body = student_message(
+        subject, body, html_body = student_message(
             Student("Taylor", "Example", "student@example.edu"),
             course, assignment, due, late,
         )
@@ -40,6 +40,24 @@ class ReminderTests(unittest.TestCase):
         self.assertIn("Thursday, July 23 at 11:59 PM EDT", body)
         self.assertIn("lowest homework grade", body)
         self.assertIn("already contacted me", body)
+        self.assertIn("Course policy", html_body)
+        self.assertIn("background:#003057", html_body)
+
+    def test_summary_html_contains_counts_and_exclusions(self):
+        assignment = SimpleNamespace(name="HW07")
+        course = {"code": "CS 1301", "name": "Intro to Computing", "term": "Summer 2026"}
+        due = datetime(2026, 7, 22, 23, 59, tzinfo=self.zone)
+        late = datetime(2026, 7, 23, 23, 59, tzinfo=self.zone)
+        student = Student("Taylor", "Example", "student@example.edu")
+        subject, text_body, html_body = summary_message(
+            course, assignment, due, late,
+            [student], [], [], [(student, "Approved exception")], [], True,
+        )
+        self.assertIn("CS 1301", subject)
+        self.assertIn("Instructor exclusions: 1", text_body)
+        self.assertIn("Instructor exclusions", html_body)
+        self.assertIn("Approved exception", html_body)
+        self.assertIn("background:#003057", html_body)
 
 
 if __name__ == "__main__":

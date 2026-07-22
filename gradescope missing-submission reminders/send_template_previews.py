@@ -56,13 +56,13 @@ def main() -> None:
             due = localize(assignment.due_date, timezone)
             late = effective_late_deadline(assignment, timezone, int(course["late_hours"]))
             sample_student = Student("Taylor", "Student", TEST_RECIPIENT)
-            subject, body = student_message(sample_student, course, assignment, due, late)
+            subject, body, html_body = student_message(sample_student, course, assignment, due, late)
             subject = f"[SAMPLE — {course['code']}] {subject}"
-            rendered.append((subject, body))
-            summary_subject, summary_body = summary_message(
+            rendered.append((subject, body, html_body))
+            summary_subject, summary_body, summary_html = summary_message(
                 course, assignment, due, late, [sample_student], [sample_student], [], [], [], True
             )
-            rendered.append((f"[SAMPLE — {course['code']}] {summary_subject}", summary_body))
+            rendered.append((f"[SAMPLE — {course['code']}] {summary_subject}", summary_body, summary_html))
     finally:
         if gs.logged_in:
             try:
@@ -70,7 +70,7 @@ def main() -> None:
             except Exception:
                 pass
 
-    for subject, body in rendered:
+    for subject, body, _html_body in rendered:
         print(f"\nTo: {TEST_RECIPIENT}\nSubject: {subject}\n\n{body}")
     if not args.send:
         print("DRY RUN: no samples sent. Add --send to deliver these messages.")
@@ -79,8 +79,8 @@ def main() -> None:
     account, _ = create_account()
     if not account.is_authenticated:
         fail("Microsoft authentication is unavailable. Run auth_check.py first.")
-    for subject, body in rendered:
-        send_message(account, TEST_RECIPIENT, subject, body)
+    for subject, body, html_body in rendered:
+        send_message(account, TEST_RECIPIENT, subject, body, html_body)
     secure_token_cache()
     print(f"Sent {len(rendered)} sample messages to {TEST_RECIPIENT}.")
 

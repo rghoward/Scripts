@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import html
 import io
 import os
 import re
@@ -125,7 +126,21 @@ def missing_students(connection: GSConnection, course_id: str, assignment_id: st
     return missing
 
 
-def student_message(student: Student, course: dict, assignment, due: datetime, late: datetime) -> tuple[str, str]:
+def email_shell(title: str, subtitle: str, content: str) -> str:
+    return f"""<!doctype html>
+<html><body style="margin:0;padding:0;background:#f3f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#243142;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3f5f7;padding:28px 12px;"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border:1px solid #dfe4ea;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(0,0,0,.06);">
+<tr><td style="background:#003057;border-top:6px solid #b3a369;padding:24px 30px;">
+<div style="font-size:12px;line-height:18px;letter-spacing:1.2px;text-transform:uppercase;color:#e7dfc6;font-weight:700;">{html.escape(subtitle)}</div>
+<div style="font-size:25px;line-height:32px;color:#ffffff;font-weight:700;margin-top:3px;">{html.escape(title)}</div>
+</td></tr>
+<tr><td style="padding:30px;">{content}</td></tr>
+</table>
+</td></tr></table></body></html>"""
+
+
+def student_message(student: Student, course: dict, assignment, due: datetime, late: datetime) -> tuple[str, str, str]:
     subject = f"Friendly reminder: {assignment.name} can still be submitted"
     greeting = student.first_name or "there"
     body = f"""Hello {greeting},
@@ -141,14 +156,32 @@ This is an automated reminder based on the current information in Gradescope. If
 Take care,
 Ronnie Howard
 """
-    return subject, body
+    safe_name = html.escape(greeting)
+    safe_assignment = html.escape(assignment.name)
+    safe_policy = html.escape(course["policy"])
+    content = f"""
+<p style="font-size:16px;line-height:25px;margin:0 0 18px;">Hello {safe_name},</p>
+<p style="font-size:16px;line-height:25px;margin:0 0 22px;">I hope you’re doing well. I wanted to reach out because Gradescope does not currently show a submission from you for <strong>{safe_assignment}</strong>.</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 22px;border-collapse:separate;border-spacing:0;background:#f7f8fa;border:1px solid #dfe4ea;border-radius:9px;overflow:hidden;">
+<tr>
+<td width="50%" valign="top" style="padding:17px 18px;border-right:1px solid #dfe4ea;"><div style="font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#5c6978;font-weight:700;margin-bottom:6px;">Original deadline</div><div style="font-size:15px;line-height:22px;font-weight:650;color:#243142;">{html.escape(display_time(due))}</div></td>
+<td width="50%" valign="top" style="padding:17px 18px;"><div style="font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#5c6978;font-weight:700;margin-bottom:6px;">Submit by</div><div style="font-size:15px;line-height:22px;font-weight:700;color:#8a6500;">{html.escape(display_time(late))}</div></td>
+</tr></table>
+<div style="border-left:4px solid #b3a369;background:#fbfaf5;padding:16px 18px;margin:0 0 22px;border-radius:0 7px 7px 0;"><div style="font-size:12px;letter-spacing:.7px;text-transform:uppercase;color:#6d5b22;font-weight:700;margin-bottom:7px;">Course policy</div><div style="font-size:15px;line-height:23px;color:#394657;">{safe_policy}</div></div>
+<p style="font-size:15px;line-height:24px;margin:0 0 18px;">If you plan to submit, please do so early enough to avoid any last-minute technical difficulties. If you believe you already submitted the assignment, please check Gradescope to confirm that your submission appears correctly.</p>
+<div style="font-size:13px;line-height:20px;color:#627083;background:#f3f5f7;border-radius:7px;padding:13px 15px;margin:22px 0;">This is an automated reminder based on the current information in Gradescope. If you have already contacted me about your circumstances or made other arrangements with me, there is no need to reply or explain your situation again.</div>
+<p style="font-size:15px;line-height:23px;margin:0;">Take care,<br><strong>Ronnie Howard</strong></p>
+"""
+    rendered_html = email_shell(assignment.name, course["code"], content)
+    return subject, body, rendered_html
 
 
-def send_message(account, recipient: str, subject: str, body: str) -> None:
+def send_message(account, recipient: str, subject: str, body: str, html_body: str | None = None) -> None:
     message = account.new_message()
     message.to.add(recipient)
     message.subject = subject
-    message.body = body
+    message.body_type = "HTML"
+    message.body = html_body or html.escape(body).replace("\n", "<br>")
     if not message.send():
         raise RuntimeError("Microsoft Graph did not confirm delivery")
 
@@ -171,7 +204,7 @@ def send_failure_summary(config: dict, error: Exception) -> None:
         pass
 
 
-def summary_message(course: dict, assignment, due: datetime, late: datetime, missing: list[Student], sent: list[Student], skipped: list[Student], excluded: list[tuple[Student, str]], failures: list[tuple[Student, str]], dry_run: bool) -> tuple[str, str]:
+def summary_message(course: dict, assignment, due: datetime, late: datetime, missing: list[Student], sent: list[Student], skipped: list[Student], excluded: list[tuple[Student, str]], failures: list[tuple[Student, str]], dry_run: bool) -> tuple[str, str, str]:
     label = "PREVIEW" if dry_run else "Report"
     subject = f"Gradescope reminder {label.lower()}: {course['code']} — {assignment.name}"
     lines = [
@@ -192,7 +225,48 @@ def summary_message(course: dict, assignment, due: datetime, late: datetime, mis
         lines.extend(["", "Failures:"] + [f"- {s.first_name} {s.last_name} <{s.email}>: {error}" for s, error in failures])
     if excluded:
         lines.extend(["", "Instructor exclusions:"] + [f"- {s.first_name} {s.last_name} <{s.email}>: {reason}" for s, reason in excluded])
-    return subject, "\n".join(lines) + "\n"
+    text_body = "\n".join(lines) + "\n"
+    metrics = [
+        ("Missing", len(missing), "#8a6500"),
+        ("Reminders" if not dry_run else "Would send", len(sent), "#176b45"),
+        ("Excluded", len(excluded), "#52657a"),
+        ("Failures", len(failures), "#a12622"),
+    ]
+    metric_cells = "".join(
+        f'<td width="25%" align="center" style="padding:14px 7px;border-right:1px solid #e1e5ea;"><div style="font-size:24px;font-weight:750;color:{color};">{value}</div><div style="font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#687687;margin-top:4px;">{html.escape(name)}</div></td>'
+        for name, value, color in metrics
+    )
+    detail_rows = "".join(
+        f'<tr><td style="padding:8px 0;border-bottom:1px solid #edf0f3;font-size:14px;line-height:20px;">{html.escape(student.first_name + " " + student.last_name)}<br><span style="color:#687687;">{html.escape(student.email)}</span></td></tr>'
+        for student in sent
+    ) or '<tr><td style="padding:8px 0;color:#687687;font-size:14px;">None</td></tr>'
+    excluded_rows = "".join(
+        f'<tr><td style="padding:8px 0;border-bottom:1px solid #edf0f3;font-size:14px;line-height:20px;">{html.escape(student.first_name + " " + student.last_name)} — {html.escape(reason)}</td></tr>'
+        for student, reason in excluded
+    )
+    failure_rows = "".join(
+        f'<tr><td style="padding:8px 0;border-bottom:1px solid #edf0f3;font-size:14px;line-height:20px;color:#8e2521;">{html.escape(student.first_name + " " + student.last_name)} — {html.escape(error)}</td></tr>'
+        for student, error in failures
+    )
+    extra_sections = ""
+    if excluded_rows:
+        extra_sections += f'<div style="font-size:13px;font-weight:700;color:#3d4b5c;margin:22px 0 5px;">Instructor exclusions</div><table role="presentation" width="100%">{excluded_rows}</table>'
+    if failure_rows:
+        extra_sections += f'<div style="font-size:13px;font-weight:700;color:#8e2521;margin:22px 0 5px;">Failures</div><table role="presentation" width="100%">{failure_rows}</table>'
+    content = f"""
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;line-height:21px;margin-bottom:20px;">
+<tr><td style="color:#687687;width:145px;padding:3px 0;">Course</td><td style="font-weight:650;padding:3px 0;">{html.escape(course['name'])} ({html.escape(course['term'])})</td></tr>
+<tr><td style="color:#687687;padding:3px 0;">Assignment</td><td style="font-weight:650;padding:3px 0;">{html.escape(assignment.name)}</td></tr>
+<tr><td style="color:#687687;padding:3px 0;">Regular deadline</td><td style="padding:3px 0;">{html.escape(display_time(due))}</td></tr>
+<tr><td style="color:#687687;padding:3px 0;">Effective late deadline</td><td style="padding:3px 0;">{html.escape(display_time(late))}</td></tr>
+</table>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f8fa;border:1px solid #e1e5ea;border-radius:9px;overflow:hidden;"><tr>{metric_cells}</tr></table>
+<div style="font-size:13px;font-weight:700;color:#3d4b5c;margin:24px 0 5px;">{'Preview recipients' if dry_run else 'Recipients'}</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0">{detail_rows}</table>
+{extra_sections}
+"""
+    rendered_html = email_shell(f"{course['code']} — {assignment.name}", f"Gradescope reminder {label}", content)
+    return subject, text_body, rendered_html
 
 
 def run(dry_run: bool, now: datetime | None = None) -> int:
@@ -251,8 +325,8 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
                         if not mail_account.is_authenticated:
                             raise RuntimeError("Microsoft authentication is unavailable; run auth_check.py")
                     try:
-                        subject, body = student_message(student, course, assignment, due, late)
-                        send_message(mail_account, student.email, subject, body)
+                        subject, body, html_body = student_message(student, course, assignment, due, late)
+                        send_message(mail_account, student.email, subject, body, html_body)
                         database.execute(
                             "INSERT INTO reminders VALUES (?, ?, ?, ?)",
                             (str(course["id"]), assignment.assignment_id, student.email.casefold(), current.isoformat()),
@@ -262,7 +336,7 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
                     except Exception as exc:
                         failures.append((student, str(exc)))
 
-                subject, body = summary_message(course, assignment, due, late, missing, sent, skipped, excluded, failures, dry_run)
+                subject, body, html_body = summary_message(course, assignment, due, late, missing, sent, skipped, excluded, failures, dry_run)
                 if dry_run:
                     print(f"\n{subject}\n{body}")
                 else:
@@ -270,7 +344,7 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
                         mail_account, _ = create_account()
                         if not mail_account.is_authenticated:
                             raise RuntimeError("Microsoft authentication is unavailable; run auth_check.py")
-                    send_message(mail_account, config["delivery"]["summary_email"], subject, body)
+                    send_message(mail_account, config["delivery"]["summary_email"], subject, body, html_body)
                     if not failures:
                         database.execute(
                             "INSERT OR REPLACE INTO completed_runs VALUES (?, ?, ?)",
