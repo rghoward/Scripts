@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Georgia Tech Canvas Grade Change Helper
 // @namespace    https://forms.registrar.gatech.edu/
-// @version      1.6.1
+// @version      1.7.0
 // @description  Fill the GT grade-change form from Canvas and filter reviewers using the official reviewer table.
 // @author       Ronnie Howard
 // @match        https://forms.registrar.gatech.edu/secure/gcrf*
@@ -449,10 +449,24 @@
 
   function selectedSection(student, course) {
     const enrollments = student.enrollments || [];
-    const enrollment = enrollments.find((item) => String(item.course_id) === String(course.id)) || enrollments[0];
-    return state.sections.find((section) => String(section.id) === String(enrollment?.course_section_id)) ||
-      (course.sections || []).find((section) => String(section.id) === String(enrollment?.course_section_id)) ||
-      state.sections[0] || course.sections?.[0] || {};
+    const availableSections = [...state.sections, ...(course.sections || [])]
+      .filter((section, index, all) => all.findIndex((item) => String(item.id) === String(section.id)) === index);
+    const courseEnrollments = enrollments.filter((item) => String(item.course_id) === String(course.id));
+    const enrolledSections = courseEnrollments
+      .map((enrollment) => availableSections.find((section) =>
+        String(section.id) === String(enrollment.course_section_id)))
+      .filter(Boolean);
+
+    // A student may have both lecture and recitation enrollments. Grade changes
+    // must use the primary lecture section, never “Recitation” or an R section.
+    return enrolledSections.find((section) => !isRecitationSection(section)) ||
+      availableSections.find((section) => !isRecitationSection(section)) || {};
+  }
+
+  function isRecitationSection(section) {
+    const source = `${section.name || ''} ${section.sis_section_id || ''}`;
+    if (/\brecitation\b/i.test(source)) return true;
+    return /^R\d*$/i.test(sectionCode(section));
   }
 
   function extractCrn(course, section) {
@@ -520,6 +534,33 @@
   });
   rosterButton.addEventListener('click', loadFullRoster);
   refreshButton.addEventListener('click', loadCourses);
+
+  form.addEventListener('submit', (event) => {
+    const value = (id) => document.getElementById(id)?.value.trim() || '';
+    const selectedReviewers = [...reviewerSelect.selectedOptions]
+      .filter((option) => option.value && option.value !== '---');
+    const errors = [];
+
+    if (!value('academicTerm')) errors.push('academic term');
+    if (!/^\d{9}$/.test(value('gtid'))) errors.push('valid 9-digit GTID');
+    if (!value('studentFirstName') || !value('studentLastName')) errors.push('student name');
+    if (!/^\d{5}$/.test(value('crn'))) errors.push('valid 5-digit CRN');
+    if (!value('course')) errors.push('course');
+    if (!value('section') || /^R\d*$/i.test(value('section'))) errors.push('non-recitation section');
+    if (!value('newGrade')) errors.push('new grade');
+    if (!value('contentBlob')) errors.push('reason');
+    if (selectedReviewers.length < 1 || selectedReviewers.length > 4) errors.push('1–4 reviewers');
+
+    if (!errors.length) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setStatus(`Cannot submit. Please provide: ${errors.join(', ')}.`, 'error');
+    if (selectedReviewers.length < 1 || selectedReviewers.length > 4) {
+      reviewerSelect.hidden = false;
+      reviewerToggle.textContent = 'Hide full reviewer list';
+    }
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, true);
 
   loadCourses();
 })();
