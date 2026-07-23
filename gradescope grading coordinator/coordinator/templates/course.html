@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ course.code }} · Grading Coordinator{% endblock %}
+{% block content %}
+<a class="back" href="/">← Courses</a>
+<section class="hero compact-hero">
+  <div><p class="eyebrow">{{ course.term }}</p><h1>{{ course.code }}</h1><p class="lede">{{ course.name }}</p></div>
+  <form method="post" action="/courses/{{ course.id }}/discover"><button class="button primary">Refresh assignments</button></form>
+</section>
+
+<section class="section-heading"><div><p class="eyebrow">Assignment library</p><h2>Assignments</h2></div><span class="privacy-note">Metadata only until you import an assignment</span></section>
+{% if assignments %}
+<div class="assignment-library">
+  {% for assignment in assignments %}
+  <article class="library-row">
+    <div class="library-status"><span class="state-icon {% if assignment.imported_at %}done{% else %}open{% endif %}">{% if assignment.imported_at %}✓{% else %}○{% endif %}</span></div>
+    <div><h3>{{ assignment.title }}</h3><p>{% if assignment.is_container %}Version group · choose a version below{% elif assignment.regular_deadline %}Due {{ assignment.regular_deadline }}{% else %}No deadline reported{% endif %}</p></div>
+    <div class="library-counts">{% if assignment.is_container %}<span>Version group</span>{% elif assignment.imported_at %}<strong>{{ assignment.submission_count }}</strong><span>submissions</span><strong>{{ assignment.question_count }}</strong><span>questions</span>{% if assignment.total_cells and assignment.graded_cells >= assignment.total_cells %}<strong class="ready-state">✓</strong><span>Fully graded</span>{% else %}<strong class="ready-state">●</strong><span>Ready</span>{% endif %}{% else %}<span>Discovered</span><span>Not imported</span>{% endif %}</div>
+    <div class="library-actions">{% if assignment.is_container %}<a class="button primary" href="/version-groups/{{ assignment.id }}">Open combined workspace</a>{% elif assignment.imported_at %}<a class="button ghost" href="/assignments/{{ assignment.id }}">Open workspace</a>{% else %}<form method="post" action="/assignments/{{ assignment.id }}/sync"><button class="button primary">Import for planning</button></form>{% endif %}</div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><h3>No assignments discovered</h3><p>Refresh this course to read its assignment titles and deadlines from Gradescope.</p></div>
+{% endif %}
+{% endblock %}

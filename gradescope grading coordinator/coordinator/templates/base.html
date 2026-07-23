@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Grading Coordinator{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/planner.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/modes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/redesign.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/assignment.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/distribution.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/team-controls.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/discovery.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/consistency.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/grader.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/deadlines.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/versions.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">GC</span><span>Grading Coordinator</span></a>
+    <nav class="topnav"><a href="/instructor/view-as">View as TA</a><a href="/statistics/deadlines">Deadline statistics</a><a href="/notifications">Notification outbox</a></nav>
+  </header>
+  <main class="page">{% block content %}{% endblock %}</main>
+</body>
+</html>

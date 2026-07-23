@@ -1,0 +1,2 @@
+requests>=2.31,<3
+gradescopeapi>=1.8,<2

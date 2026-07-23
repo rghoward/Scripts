@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ assignment.title }} · Grading Coordinator{% endblock %}
+{% block content %}
+{% set open_batches = rounds|rejectattr('status', 'equalto', 'closed')|list %}
+{% set archived_batches = rounds|selectattr('status', 'equalto', 'closed')|list %}
+{% set initial_batches = open_batches|selectattr('kind', 'equalto', 'initial')|list %}
+<a class="back" href="/courses/{{ assignment.course_id }}">← {{ assignment.course_code }}</a>
+
+<section class="assignment-hero">
+  <div class="assignment-identity"><div class="header-meta"><span class="course-pill">{{ assignment.course_code }}</span><span>{{ assignment.term }}</span><span>Synced from Gradescope</span></div><h1>{{ assignment.title }}</h1><p>{{ submissions|length }} submissions · {{ questions|length }} questions · {{ graders|length }} course staff</p></div>
+  <div class="assignment-actions"><a class="button ghost" href="/assignments/{{ assignment.id }}/consistency">Grading consistency</a><form method="post" action="/assignments/{{ assignment.id }}/sync"><button class="button primary">Refresh from Gradescope</button></form><a class="button ghost" target="_blank" href="https://www.gradescope.com/courses/{{ assignment.course_gs_id }}/assignments/{{ assignment.gradescope_id }}/review_grades">Open Gradescope ↗</a></div>
+</section>
+
+{% if progress.total_cells %}
+{% set percentage = (progress.graded_cells * 100 / progress.total_cells)|round|int %}
+<section class="overview-strip">
+  <div class="progress-donut" style="--progress:{{ percentage }}"><div><strong>{{ percentage }}%</strong><span>graded</span></div></div>
+  <div class="overview-stat"><strong>{{ progress.total_cells - progress.graded_cells }}</strong><span>cells remaining</span></div>
+  <div class="overview-stat"><strong>{{ progress.completed_questions }}</strong><span>questions complete</span></div>
+  <div class="overview-stat"><strong>{{ late_unassigned|length }}</strong><span>late submissions waiting</span></div>
+  <div class="overview-copy"><strong>Live grading progress</strong><p>Refresh the Gradescope import to update completion and discover newly submitted late work.</p></div>
+</section>
+{% endif %}
+
+<div class="plan-layout">
+  <section class="workspace-card plan-card">
+    <div class="workspace-heading"><div><p class="step-label">Assignment workspace</p><h2>Grading plan</h2><p>One plan keeps the initial workload and every later submission batch together.</p></div>{% if open_batches %}<span class="plan-state">Active</span>{% endif %}</div>
+    {% if open_batches %}
+    <div class="batch-timeline">
+      {% for batch in open_batches %}
+      <a class="batch-node" href="/rounds/{{ batch.id }}"><span class="timeline-dot {{ batch.status }}">{% if batch.status == 'published' %}✓{% else %}{{ loop.index }}{% endif %}</span><div><strong>{{ batch.name }}</strong><small>{% if batch.kind == 'initial' %}Initial snapshot{% else %}Late submissions{% endif %} · {{ batch.submission_count }} papers · {{ batch.cell_count }} assigned cells</small></div><span class="status {{ batch.status }}">{{ batch.status }}</span><span class="chevron">›</span></a>
+      {% endfor %}
+      <div class="timeline-end"><span>+</span><div><strong>Future late work</strong><small>New submissions append here without changing earlier ranges.</small></div></div>
+    </div>
+    {% else %}
+    <div class="plan-empty"><span>01</span><h3>Start with a frozen snapshot</h3><p>Create one initial batch from the submissions currently in Gradescope. You will configure effort and the grading team before publishing.</p></div>
+    {% endif %}
+  </section>
+
+  <aside class="workspace-card plan-action-card">
+    {% if not initial_batches %}
+    <p class="step-label">Get started</p><h2>Create the plan</h2><p>Freeze {{ submissions|rejectattr('is_late')|list|length }} current submissions. Nothing is sent or changed in Gradescope.</p>
+    <form method="post" action="/assignments/{{ assignment.id }}/rounds" class="stacked-form"><input type="hidden" name="kind" value="initial"><input type="hidden" name="pool" value="initial"><input type="hidden" name="name" value="Initial grading batch"><button class="button primary full-button">Create initial batch →</button></form>
+    {% else %}
+    <p class="step-label">Late-work inbox</p><h2>{{ late_unassigned|length }} waiting</h2>
+    {% if late_unassigned %}<p>Add these papers to the existing plan. Effort settings and question handling carry forward automatically.</p><form method="post" action="/assignments/{{ assignment.id }}/rounds" class="stacked-form"><input type="hidden" name="kind" value="supplemental"><input type="hidden" name="pool" value="late"><input type="hidden" name="name" value="Late submission batch {{ open_batches|selectattr('kind', 'equalto', 'supplemental')|list|length + 1 }}"><button class="button primary full-button">Add late submissions →</button></form>{% else %}<p>No new submissions need assignment. They will appear here after the next synchronization.</p><button class="button muted-button full-button" disabled>Nothing to add</button>{% endif %}
+    <details class="plan-settings"><summary>Plan settings</summary><form method="post" action="/assignments/{{ assignment.id }}/archive-plan" onsubmit="return confirm('Archive this local plan? Gradescope will not be changed, and the batches remain available as history.');"><button class="text-danger">Archive local plan and start over</button></form></details>
+    {% endif %}
+  </aside>
+</div>
+
+{% if archived_batches %}<details class="archive-history"><summary>Show {{ archived_batches|length }} archived batch{% if archived_batches|length != 1 %}es{% endif %}</summary><div class="archive-list">{% for batch in archived_batches %}<a href="/rounds/{{ batch.id }}">{{ batch.name }} <span>{{ batch.submission_count }} submissions</span></a>{% endfor %}</div></details>{% endif %}
+{% endblock %}

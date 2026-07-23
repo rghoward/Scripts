@@ -67,3 +67,6 @@ Pods/
 **/emails.csv
 **/*.sqlite3
 **/logs/
+
+# Gradescope grading coordinator runtime data
+/gradescope grading coordinator/data/

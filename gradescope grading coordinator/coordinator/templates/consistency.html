@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Grading consistency · {{ assignment.title }}{% endblock %}
+{% block content %}
+<a class="back" href="/assignments/{{ assignment.id }}">← {{ assignment.title }}</a>
+<section class="workflow-header consistency-header"><div><div class="header-meta"><span class="course-pill">{{ assignment.course_code }}</span><span>{{ assignment.term }}</span><span>Instructor only</span></div><h1>Grading consistency</h1><p class="lede">Question-normalized signals help identify grading patterns worth reviewing. They are diagnostic—not performance rankings.</p></div></section>
+
+{% if related|length > 1 %}<div class="version-strip"><strong>Version group</strong>{% for item in related %}<span>{{ item.title }}</span>{% endfor %}</div>{% endif %}
+
+<section class="consistency-overview">
+  <div><strong>{{ analysis.observation_count }}</strong><span>comparable graded responses</span></div>
+  <div><strong>{{ analysis.comparable_question_count }}</strong><span>questions graded by multiple people</span></div>
+  <div><strong>{{ analysis.graders|length }}</strong><span>human graders compared</span></div>
+  <div><strong>{{ analysis.excluded_question_count }}</strong><span>single-grader questions excluded</span></div>
+</section>
+
+{% if analysis.graders %}
+<section class="workspace-card"><div class="workspace-heading"><div><p class="step-label">Adjusted overview</p><h2>Grader tendencies</h2><p>Each response is compared with the average deduction on that same logical question. Positive values indicate greater deductions; negative values indicate smaller deductions.</p></div></div>
+  <div class="tendency-list">
+    {% for grader in analysis.graders %}
+    <article class="tendency-row"><div><strong>{{ grader.grader_name }}</strong><span>{{ grader.count }} responses across {{ grader.question_count }} questions</span></div><div class="tendency-track"><i></i><b style="left:{{ 50 + [[grader.tendency * 250, -45]|max, 45]|min }}%"></b></div><div class="tendency-value {% if grader.significant %}flagged{% endif %}"><strong>{% if grader.tendency > 0 %}+{% endif %}{{ (grader.tendency * 100)|round(1) }} pp</strong><span>{{ grader.label }}</span></div></article>
+    {% endfor %}
+  </div>
+  <p class="method-note">“pp” means percentage points of possible-score deduction after controlling for question. Statistical flags require at least 10 comparable responses and a 95% interval that does not cross zero.</p>
+</section>
+
+<section class="workspace-card"><div class="workspace-heading"><div><p class="step-label">Same-question evidence</p><h2>Question comparisons</h2><p>These comparisons are the most reliable because graders handled the same question or an equivalently titled question in another exam version.</p></div></div>
+  <div class="consistency-table"><div class="consistency-table-head"><span>Question</span><span>Grader</span><span>Responses</span><span>Average</span><span>Difference</span><span></span></div>
+  {% for row in analysis.questions %}<div class="consistency-table-row"><span><strong>{{ row.display_question }}</strong><small>{{ row.assignment_title }}</small></span><span>{{ row.grader_name }}</span><span>{{ row.count }}</span><span>{{ row.average_score|round(2) }} / {{ row.average_max|round(2) }}</span><span class="{% if row.harshness_points > 0 %}harsher{% else %}generous{% endif %}">{% if row.harshness_points > 0 %}+{% endif %}{{ (row.harshness_points * 100)|round(1) }} pp</span><a target="_blank" href="/gradescope/question/{{ row.course_gs_id }}/{{ row.question_gs_id }}">Review ↗</a></div>{% endfor %}
+  </div>
+</section>
+{% else %}
+<div class="empty"><h3>Not enough comparable grading yet</h3><p>At least two human graders must grade the same question before a consistency comparison can be calculated. Refresh this assignment after grading progresses.</p></div>
+{% endif %}
+{% endblock %}

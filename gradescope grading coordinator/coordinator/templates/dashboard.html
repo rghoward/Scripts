@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Assignments · Grading Coordinator{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Instructor workspace</p>
+    <h1>Coordinate grading without getting in the way.</h1>
+    <p class="lede">Freeze submission pools, distribute work several ways, publish supplemental late rounds, and send graders directly to Gradescope.</p>
+  </div>
+  <form method="post" action="/courses/discover"><button class="button primary">Refresh Gradescope courses</button></form>
+</section>
+
+<section class="section-heading"><div><p class="eyebrow">Course library</p><h2>Gradescope courses</h2></div></section>
+{% if courses %}
+<div class="course-grid">
+  {% for course in courses %}
+  <a class="course-card" href="/courses/{{ course.id }}">
+    <div class="card-top"><span class="course-pill">{{ course.code }}</span><span class="term">{{ course.term }}</span></div>
+    <h3>{{ course.name or course.code }}</h3>
+    <p>{{ course.assignment_count }} discovered assignments · {{ course.imported_count }} imported</p>
+    <span class="course-open">Browse assignments →</span>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><h3>No courses discovered yet</h3><p>Refresh Gradescope to import course names and identifiers only. No roster or student data is read during discovery.</p><form method="post" action="/demo"><button class="button ghost">Or create the fictional demo</button></form></div>
+{% endif %}
+
+<section class="section-heading"><div><p class="eyebrow">Active work</p><h2>Imported assignments</h2></div></section>
+{% set imported_assignments = assignments|selectattr('imported_at')|list %}
+{% if imported_assignments %}
+<div class="assignment-grid">
+  {% for assignment in imported_assignments %}
+  <a class="assignment-card" href="/assignments/{{ assignment.id }}">
+    <div class="card-top"><span class="course-pill">{{ assignment.course_code }}</span><span class="term">{{ assignment.term }}</span></div>
+    <h3>{{ assignment.title }}</h3>
+    <div class="metrics">
+      <div><strong>{{ assignment.submission_count }}</strong><span>submissions</span></div>
+      <div><strong>{{ assignment.question_count }}</strong><span>questions</span></div>
+      <div><strong>{{ assignment.published_rounds }}</strong><span>published rounds</span></div>
+    </div>
+    {% if assignment.total_cells %}<div class="progress-line"><span style="width:{{ (assignment.graded_cells * 100 / assignment.total_cells)|round }}%"></span></div><small class="progress-caption">{{ assignment.graded_cells }} of {{ assignment.total_cells }} grading cells complete</small>{% endif %}
+    {% if assignment.late_unassigned %}<div class="late-alert">{{ assignment.late_unassigned }} late submissions awaiting assignment</div>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><h3>No imported assignments yet</h3><p>Open a course, discover its assignments, and choose the one you want to prepare for grading.</p></div>
+{% endif %}
+{% endblock %}

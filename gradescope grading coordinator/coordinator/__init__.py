@@ -1,0 +1,1 @@
+"""Gradescope grading coordination application."""

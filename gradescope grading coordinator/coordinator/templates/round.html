@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ round.name }} · Grading Coordinator{% endblock %}
+{% block content %}
+<a class="back" href="{% if version_container_id %}/version-groups/{{ version_container_id }}{% else %}/assignments/{{ round.assignment_id }}{% endif %}">← {{ round.assignment_title }}</a>
+
+<section class="workflow-header">
+  <div>
+    <div class="header-meta"><span class="course-pill">{{ round.course_code }}</span><span>{% if round.kind == 'initial' %}Initial batch{% else %}Late-submission batch{% endif %}</span><span>Frozen {{ round.snapshot_at[:10] }}</span></div>
+    <h1>{{ round.name }}</h1>
+    <p class="lede">Choose how to divide the work, select the grading team, then review the proposal before anyone is notified.</p>
+  </div>
+  <span class="status large {{ round.status }}">{{ round.status }}</span>
+</section>
+
+<section class="deadline-card">
+  <div><p class="step-label">Managed deadline</p><h2>{% if round.due_at %}{{ display_deadline(round.due_at, round.deadline_timezone) }}{% else %}Set a grading deadline{% endif %}</h2><p>The app will prepare individual assignment notices and a single reminder 24 hours before this deadline. Delivery remains disabled during development.</p></div>
+  <form method="post" action="/rounds/{{ round.id }}/deadline" class="deadline-form"><label>Due date and time<input required type="datetime-local" name="due_at" value="{{ deadline_input(round.due_at, round.deadline_timezone) }}"></label><label>Time zone<select name="deadline_timezone"><option value="America/New_York" {% if round.deadline_timezone == 'America/New_York' %}selected{% endif %}>Eastern Time</option><option value="UTC" {% if round.deadline_timezone == 'UTC' %}selected{% endif %}>UTC</option></select></label><label class="deadline-note">Instructions or note<input name="deadline_note" value="{{ round.deadline_note }}" placeholder="Optional note shown to graders"></label><button class="button primary">{% if round.due_at %}Update deadline{% else %}Save deadline{% endif %}</button></form>
+</section>
+
+<nav class="stepper" aria-label="Planning steps">
+  <a href="#questions" class="step active"><span>1</span><div><strong>Questions</strong><small>Classify the work</small></div></a>
+  <a href="#team" class="step"><span>2</span><div><strong>Team</strong><small>Choose graders</small></div></a>
+  <a href="#review" class="step {% if allocations %}ready{% endif %}"><span>3</span><div><strong>Review</strong><small>Balance and publish</small></div></a>
+</nav>
+
+{% if round.status == 'draft' %}
+<form method="post" action="/rounds/{{ round.id }}/allocate-weighted" id="weighted-form">
+  <section class="workspace-card" id="questions">
+    <div class="workspace-heading">
+      <div><p class="step-label">Step 1</p><h2>Which questions need people?</h2><p>Completed cells are never reassigned. Mark autograded or specially handled questions as staff-managed so future late work stays out of the general pool.</p></div>
+      <div class="live-total"><strong id="estimated-units">0</strong><span id="estimate-label">estimated effort units</span></div>
+    </div>
+
+    <div class="distribution-choice">
+      <div><strong>How should balanced work be divided?</strong><small>Staff-managed questions remain with their designated owner either way.</small></div>
+      <div class="distribution-options">
+        {% if round.kind == 'initial' %}
+        <label><input type="radio" name="distribution_style" value="by_question" {% if round.distribution_style == 'by_question' %}checked{% endif %}><span><strong>By question</strong><small>Keep question ranges together; split difficult questions when needed.</small></span></label>
+        <label><input type="radio" name="distribution_style" value="whole_submissions" {% if round.distribution_style == 'whole_submissions' %}checked{% endif %}><span><strong>Whole submissions</strong><small>Split students evenly; one TA receives each student’s remaining balanced questions.</small></span></label>
+        {% else %}
+        <input type="hidden" name="distribution_style" value="{{ round.distribution_style }}">
+        <div class="inherited-style"><span>Inherited from the plan</span><strong>{% if round.distribution_style == 'whole_submissions' %}Whole submissions{% else %}By question{% endif %}</strong></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="question-toolbar">
+      <div class="segmented" role="group" aria-label="Filter questions">
+        <button type="button" class="selected" data-filter="attention">Needs attention</button>
+        <button type="button" data-filter="all">All {{ questions|length }}</button>
+        <button type="button" data-filter="complete">Completed</button>
+      </div>
+      <div class="bulk-tools">
+        <span>Selected:</span>
+        <button type="button" data-bulk-mode="balanced">TA grading</button>
+        <button type="button" data-bulk-mode="staff_managed">Staff-managed</button>
+        <button type="button" data-bulk-mode="excluded">Exclude</button>
+      </div>
+    </div>
+
+    <div class="question-list">
+      <div class="question-list-head"><span></span><span>Question</span><span>Current status</span><span class="effort-column">Effort</span><span>Handling</span></div>
+      {% for question in questions %}
+      {% set is_complete = question.total_count and question.graded_count >= question.total_count %}
+      <article class="question-item" data-complete="{{ 'true' if is_complete else 'false' }}" data-question-id="{{ question.id }}" data-logical="{{ question_logical[question.id] }}">
+        <label class="row-check"><input type="checkbox" class="question-select" aria-label="Select {{ question.label }}"></label>
+        <div class="question-name"><strong>{{ question.label }} {% if round.version_group %}<button type="button" class="equivalent-select">Select equivalents</button>{% endif %}</strong><span>{% if round.version_group %}<b class="version-tag">{{ question.version_title }}</b> · {% endif %}{{ question.title or 'Untitled question' }}</span></div>
+        <div class="question-state">{% if is_complete %}<span class="state-icon done">✓</span><span><strong>Already graded</strong><small>{{ question.graded_count }} of {{ question.total_count }}</small></span>{% else %}<span class="state-icon open">{{ question.total_count - question.graded_count }}</span><span><strong>Still ungraded</strong><small>{{ question.graded_count }} of {{ question.total_count }} complete</small></span>{% endif %}</div>
+        <label class="effort-control"><button type="button" class="effort-minus" aria-label="Decrease effort">−</button><input class="effort-value" type="number" min="0.25" step="0.25" name="effort_{{ question.id }}" value="{{ question.effort_weight }}" data-remaining="{{ question.total_count - question.graded_count }}"><button type="button" class="effort-plus" aria-label="Increase effort">+</button><span>units</span></label>
+        <div class="handling-control"><select class="mode-select" name="mode_{{ question.id }}"><option value="balanced" {% if question.grading_mode == 'balanced' %}selected{% endif %}>Balanced TA grading</option><option value="staff_managed" {% if question.grading_mode == 'staff_managed' %}selected{% endif %}>Instructor / head TA</option><option value="excluded" {% if question.grading_mode == 'excluded' %}selected{% endif %}>Do not assign</option></select><select class="owner-select" name="owner_{{ question.id }}" aria-label="Staff owner"><option value="">Choose owner…</option>{% for grader in graders %}<option value="{{ grader.id }}" {% if question.staff_owner_id == grader.id %}selected{% endif %}>{{ grader.name }}</option>{% endfor %}</select></div>
+      </article>
+      {% endfor %}
+    </div>
+    <div class="completed-hint"><span>✓</span> Fully graded questions are hidden from “Needs attention,” but their persistent handling rule still controls future late submissions.</div>
+  </section>
+
+  <section class="workspace-card" id="team">
+    <div class="workspace-heading">
+      <div><p class="step-label">Step 2</p><h2>Who is grading?</h2><p>Select the general TA pool once. Staff-managed questions use the owner selected above instead.</p></div>
+      <div class="team-heading-actions"><div class="team-bulk-actions"><button type="button" id="select-all-tas">Select all TAs</button><button type="button" id="clear-graders">Clear selection</button></div><div class="live-total"><strong id="selected-count">0</strong><span>selected graders</span></div></div>
+    </div>
+    <div class="team-grid">
+      {% for grader in graders %}
+      <label class="person-card"><input class="grader-checkbox" type="checkbox" name="grader_ids" value="{{ grader.id }}" data-role="{{ grader.role|lower }}" {% if grader.id in selected_graders and grader.role != 'Instructor' %}checked{% endif %}><span class="person-avatar">{{ grader.name[0] }}</span><span class="person-info"><strong>{{ grader.name }}</strong><small>{{ grader.role }} · {{ grader.email }}</small></span><span class="selection-mark">✓</span></label>
+      {% endfor %}
+    </div>
+    <div class="balance-preview"><div><span>Estimated target</span><strong><span id="target-units">0</span> <span id="target-label">units per selected grader</span></strong></div><p id="balance-description">The final proposal keeps ranges contiguous and splits a question only when needed to approach this target.</p></div>
+  </section>
+
+  <div class="build-bar"><div><strong>Ready for a proposal?</strong><span>This only updates the local draft. It does not contact graders or change Gradescope.</span></div><button class="button primary large-action">Build balanced proposal →</button></div>
+</form>
+{% endif %}
+
+<section class="workspace-card review-card" id="review">
+  <div class="workspace-heading">
+    <div><p class="step-label">Step 3</p><h2>Review the workload</h2><p>{% if allocations %}The proposed ranges below are still local until you publish.{% else %}Build a proposal above to see each grader’s effort and exact question ranges.{% endif %}</p></div>
+    {% if allocations and round.status == 'draft' %}<form method="post" action="/rounds/{{ round.id }}/publish"><button class="button success large-action" {% if not round.due_at %}disabled title="Set a deadline first"{% endif %}>Publish plan</button></form>{% endif %}
+  </div>
+
+  {% if allocations %}
+  <div class="balance-grid">
+    {% for item in workload if item.cell_count %}
+    <article class="balance-card">
+      <div class="balance-person"><span class="person-avatar">{{ item.name[0] }}</span><div><strong>{{ item.name }}</strong><small>{{ item.cell_count }} grading cells</small></div><strong class="unit-total">{% if round.distribution_style == 'whole_submissions' %}{{ item.submission_count }}{% else %}{{ item.effort_units|round(1) }}{% endif %}</strong></div>
+      <div class="workload-bar"><span style="width:{{ ((item.submission_count if round.distribution_style == 'whole_submissions' else item.effort_units) * 100 / max_effort) if max_effort else 0 }}%"></span></div>
+      <span class="unit-caption">{% if round.distribution_style == 'whole_submissions' %}student submissions{% else %}effort units{% endif %}</span>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="range-review">
+    <div class="range-review-head"><span>Grader</span><span>Question</span><span>Frozen range</span><span>{% if round.distribution_style == 'whole_submissions' %}Count{% else %}Effort{% endif %}</span><span>Progress</span></div>
+    {% for item in ranges %}
+    <div class="range-review-row"><strong>{{ item.grader_name }}</strong><span>{% if round.version_group %}<small>{{ item.version_title }}</small>{% endif %} {{ item.question_label }}</span><span>#{{ item.range_start }}–#{{ item.range_end }} <small>({{ item.cell_count }} submissions)</small></span><span>{% if round.distribution_style == 'whole_submissions' %}{{ item.cell_count }}{% else %}{{ item.effort_units|round(1) }} units{% endif %}</span><span>{{ item.completed_count }}/{{ item.cell_count }}</span></div>
+    {% endfor %}
+  </div>
+
+  <details class="raw-details"><summary>Show individual question–submission cells</summary><div class="table-panel"><table><thead><tr><th>Question</th><th>Frozen submission</th><th>Student</th><th>Assigned grader</th></tr></thead><tbody>{% for item in allocations %}<tr><td>{{ item.question_label }}</td><td>#{{ item.snapshot_index }}</td><td>{{ item.student_name }}</td><td>{{ item.grader_name }}</td></tr>{% endfor %}</tbody></table></div></details>
+  {% else %}
+  <div class="review-empty"><span>↗</span><h3>No proposal yet</h3><p>Your workload visualization and range summary will appear here.</p></div>
+  {% endif %}
+</section>
+
+{% if round.status == 'draft' %}<script src="{{ url_for('static', path='/planner.js') }}"></script>{% endif %}
+{% endblock %}

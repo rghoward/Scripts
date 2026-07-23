@@ -1,0 +1,4 @@
+.venv/
+config.local.toml
+__pycache__/
+*.pyc

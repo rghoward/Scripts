@@ -1,0 +1,12 @@
+[gradescope]
+email = "YOUR_GRADESCOPE_EMAIL"
+keychain_service = "gradescope-reminder-gradescope-password"
+password_env = "GRADING_COORDINATOR_GRADESCOPE_PASSWORD"
+
+[import]
+course_id = "GRADESCOPE_COURSE_ID"
+course_code = "CS 2050"
+course_name = "Course name"
+term = "Summer 2026"
+assignment_id = "GRADESCOPE_ASSIGNMENT_ID"
+assignment_title = "Exam 2"

@@ -1,0 +1,22 @@
+[canvas]
+base_url = "https://gatech.instructure.com"
+token_keychain_service = "canvas-deadline-manager-token"
+token_keychain_account = "canvas"
+token_env = "CANVAS_DEADLINE_MANAGER_TOKEN"
+
+[gradescope]
+email = "YOUR_GRADESCOPE_EMAIL"
+keychain_service = "gradescope-reminder-gradescope-password"
+password_env = "GRADESCOPE_REMINDER_PASSWORD"
+
+[app]
+timezone = "America/New_York"
+host = "127.0.0.1"
+port = 8877
+
+# Optional explicit mappings. Automatic matching is used when no mapping exists.
+#[gradescope_course_map]
+#"12345" = "67890" # Canvas course ID = Gradescope course ID
+
+#[gradescope_assignment_map."12345"]
+#"111" = "222" # Canvas assignment ID = Gradescope assignment ID
