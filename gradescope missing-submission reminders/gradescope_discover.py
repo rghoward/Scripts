@@ -3,20 +3,19 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
 import sys
 import tomllib
+from datetime import datetime
 from pathlib import Path
 
-from gradescopeapi.classes.connection import GSConnection
+from reminder import PersistentGradescopeConnection, open_database, run_lock
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = PROJECT_DIR / "config.local.toml"
 
 
-def load_settings() -> tuple[str, str, str]:
+def load_settings() -> dict:
     if not CONFIG_PATH.exists():
         raise RuntimeError(
             "config.local.toml is missing; copy config.example.toml and configure it first."
@@ -35,29 +34,11 @@ def load_settings() -> tuple[str, str, str]:
         raise RuntimeError("The [gradescope] email setting is required.")
     if sys.platform == "darwin" and not service:
         raise RuntimeError("The [gradescope] keychain_service setting is required on macOS.")
-    return email, service, password_env
-
-
-def read_password(email: str, service: str, password_env: str) -> str:
-    if password_env and os.environ.get(password_env):
-        return os.environ[password_env]
-    if sys.platform != "darwin":
-        raise RuntimeError(
-            f"Set {password_env or 'GRADESCOPE_REMINDER_PASSWORD'} on this system."
-        )
-    result = subprocess.run(
-        ["/usr/bin/security", "find-generic-password", "-a", email, "-s", service, "-w"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    password = result.stdout.rstrip("\n")
-    if result.returncode != 0 or not password:
-        raise RuntimeError(
-            f"No Gradescope password was found in Keychain for account {email!r} "
-            f"and service {service!r}."
-        )
-    return password
+    return {
+        "email": email,
+        "keychain_service": service,
+        "password_env": password_env,
+    }
 
 
 def format_date(value: object) -> str:
@@ -65,16 +46,16 @@ def format_date(value: object) -> str:
 
 
 def main() -> int:
-    connection = GSConnection()
-    logged_in = False
+    database = open_database()
+    connection = None
     try:
-        email, service, password_env = load_settings()
-        password = read_password(email, service, password_env)
+        settings = load_settings()
         print("Connecting to Gradescope in read-only discovery mode…")
-        connection.login(email, password)
-        logged_in = True
+        connection = PersistentGradescopeConnection(settings, database, datetime.now().astimezone())
 
-        courses = connection.account.get_courses().get("instructor", {})
+        courses = connection.call(
+            lambda current: current.account.get_courses()
+        ).get("instructor", {})
         if not courses:
             print("Connection succeeded, but no instructor courses were found.")
             return 0
@@ -85,7 +66,7 @@ def main() -> int:
             term = " ".join(part for part in (course.semester, course.year) if part)
             suffix = f" — {term}" if term else ""
             print(f"\n{title}{suffix} [course {course_id}]")
-            assignments = connection.account.get_assignments(course_id)
+            assignments = connection.get_assignments(course_id)
             if not assignments:
                 print("  No assignments found.")
                 continue
@@ -100,12 +81,13 @@ def main() -> int:
         print(f"ERROR: Gradescope discovery failed: {exc}", file=sys.stderr)
         return 1
     finally:
-        if logged_in:
-            try:
-                connection.logout()
-            except Exception:
-                pass
+        if connection is not None:
+            connection.save()
+        database.close()
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    with run_lock() as acquired:
+        if not acquired:
+            raise SystemExit("Another Gradescope process is already running.")
+        raise SystemExit(main())
