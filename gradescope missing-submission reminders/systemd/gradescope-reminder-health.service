@@ -1,0 +1,13 @@
+[Unit]
+Description=Gradescope reminder daily health check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/gradescope-missing-submission-reminders
+EnvironmentFile=%h/.config/gradescope-reminder/secrets.env
+ExecStart=%h/gradescope-missing-submission-reminders/.venv/bin/python health_check.py
+
+[Install]
+WantedBy=default.target

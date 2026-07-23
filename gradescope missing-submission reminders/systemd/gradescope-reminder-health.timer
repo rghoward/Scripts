@@ -1,0 +1,10 @@
+[Unit]
+Description=Send the Gradescope reminder health check each morning
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 America/New_York
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import tomllib
@@ -15,7 +16,7 @@ PROJECT_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = PROJECT_DIR / "config.local.toml"
 
 
-def load_settings() -> tuple[str, str]:
+def load_settings() -> tuple[str, str, str]:
     if not CONFIG_PATH.exists():
         raise RuntimeError(
             "config.local.toml is missing; copy config.example.toml and configure it first."
@@ -27,14 +28,25 @@ def load_settings() -> tuple[str, str]:
     gradescope = config.get("gradescope", {})
     email = str(gradescope.get("email", "")).strip()
     service = str(gradescope.get("keychain_service", "")).strip()
-    if not email or not service:
-        raise RuntimeError("The [gradescope] email and keychain_service settings are required.")
-    return email, service
+    password_env = str(
+        gradescope.get("password_env", "GRADESCOPE_REMINDER_PASSWORD")
+    ).strip()
+    if not email:
+        raise RuntimeError("The [gradescope] email setting is required.")
+    if sys.platform == "darwin" and not service:
+        raise RuntimeError("The [gradescope] keychain_service setting is required on macOS.")
+    return email, service, password_env
 
 
-def read_password(email: str, service: str) -> str:
+def read_password(email: str, service: str, password_env: str) -> str:
+    if password_env and os.environ.get(password_env):
+        return os.environ[password_env]
+    if sys.platform != "darwin":
+        raise RuntimeError(
+            f"Set {password_env or 'GRADESCOPE_REMINDER_PASSWORD'} on this system."
+        )
     result = subprocess.run(
-        ["security", "find-generic-password", "-a", email, "-s", service, "-w"],
+        ["/usr/bin/security", "find-generic-password", "-a", email, "-s", service, "-w"],
         check=False,
         capture_output=True,
         text=True,
@@ -56,8 +68,8 @@ def main() -> int:
     connection = GSConnection()
     logged_in = False
     try:
-        email, service = load_settings()
-        password = read_password(email, service)
+        email, service, password_env = load_settings()
+        password = read_password(email, service, password_env)
         print("Connecting to Gradescope in read-only discovery mode…")
         connection.login(email, password)
         logged_in = True

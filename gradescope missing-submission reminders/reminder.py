@@ -86,6 +86,12 @@ def open_database() -> sqlite3.Connection:
         course_id TEXT NOT NULL, assignment_id TEXT NOT NULL, completed_at TEXT NOT NULL,
         PRIMARY KEY (course_id, assignment_id))"""
     )
+    database.execute(
+        """CREATE TABLE IF NOT EXISTS assignment_schedules (
+        course_id TEXT NOT NULL, assignment_id TEXT NOT NULL,
+        due_at TEXT NOT NULL, late_at TEXT NOT NULL, observed_at TEXT NOT NULL,
+        PRIMARY KEY (course_id, assignment_id))"""
+    )
     database.commit()
     path.chmod(0o600)
     return database
@@ -106,6 +112,36 @@ def effective_late_deadline(assignment, timezone: ZoneInfo, late_hours: int) -> 
     policy_deadline = due + timedelta(hours=late_hours)
     gradescope_deadline = localize(assignment.late_due_date, timezone)
     return min(policy_deadline, gradescope_deadline) if gradescope_deadline else policy_deadline
+
+
+def sync_assignment_schedule(
+    database: sqlite3.Connection,
+    course_id: str,
+    assignment_id: str,
+    due: datetime,
+    late: datetime,
+    observed_at: datetime,
+) -> bool:
+    """Record current deadlines and reopen a completed run when they change."""
+    previous = database.execute(
+        "SELECT due_at, late_at FROM assignment_schedules WHERE course_id=? AND assignment_id=?",
+        (course_id, assignment_id),
+    ).fetchone()
+    current = (due.isoformat(), late.isoformat())
+    changed = previous is not None and tuple(previous) != current
+    database.execute(
+        """INSERT INTO assignment_schedules VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(course_id, assignment_id) DO UPDATE SET
+        due_at=excluded.due_at, late_at=excluded.late_at, observed_at=excluded.observed_at""",
+        (course_id, assignment_id, current[0], current[1], observed_at.isoformat()),
+    )
+    if changed:
+        database.execute(
+            "DELETE FROM completed_runs WHERE course_id=? AND assignment_id=?",
+            (course_id, assignment_id),
+        )
+    database.commit()
+    return changed
 
 
 def missing_students(connection: GSConnection, course_id: str, assignment_id: str) -> list[Student]:
@@ -289,6 +325,13 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
                     continue
                 due = localize(assignment.due_date, timezone)
                 late = effective_late_deadline(assignment, timezone, int(course["late_hours"]))
+                if not dry_run and sync_assignment_schedule(
+                    database, str(course["id"]), assignment.assignment_id, due, late, current
+                ):
+                    print(
+                        f"{course['code']} {assignment.name}: deadline changed; "
+                        "reopened using the current Gradescope schedule"
+                    )
                 if current < due + delay or current > late:
                     continue
                 completed = database.execute(

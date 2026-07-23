@@ -3,7 +3,15 @@ from types import SimpleNamespace
 import unittest
 from zoneinfo import ZoneInfo
 
-from reminder import Student, effective_late_deadline, student_message, summary_message
+import sqlite3
+
+from reminder import (
+    Student,
+    effective_late_deadline,
+    student_message,
+    summary_message,
+    sync_assignment_schedule,
+)
 
 
 class ReminderTests(unittest.TestCase):
@@ -58,6 +66,28 @@ class ReminderTests(unittest.TestCase):
         self.assertIn("Instructor exclusions", html_body)
         self.assertIn("Approved exception", html_body)
         self.assertIn("background:#003057", html_body)
+
+    def test_deadline_change_reopens_completed_assignment(self):
+        database = sqlite3.connect(":memory:")
+        database.execute(
+            "CREATE TABLE completed_runs (course_id TEXT, assignment_id TEXT, completed_at TEXT, PRIMARY KEY (course_id, assignment_id))"
+        )
+        database.execute(
+            "CREATE TABLE assignment_schedules (course_id TEXT, assignment_id TEXT, due_at TEXT, late_at TEXT, observed_at TEXT, PRIMARY KEY (course_id, assignment_id))"
+        )
+        due = datetime(2026, 7, 22, 23, 59, tzinfo=self.zone)
+        late = datetime(2026, 7, 23, 23, 59, tzinfo=self.zone)
+        self.assertFalse(sync_assignment_schedule(database, "1", "2", due, late, due))
+        database.execute("INSERT INTO completed_runs VALUES ('1', '2', 'now')")
+        database.commit()
+        new_due = datetime(2026, 7, 23, 23, 59, tzinfo=self.zone)
+        new_late = datetime(2026, 7, 24, 23, 59, tzinfo=self.zone)
+        self.assertTrue(sync_assignment_schedule(database, "1", "2", new_due, new_late, due))
+        self.assertIsNone(
+            database.execute(
+                "SELECT 1 FROM completed_runs WHERE course_id='1' AND assignment_id='2'"
+            ).fetchone()
+        )
 
 
 if __name__ == "__main__":

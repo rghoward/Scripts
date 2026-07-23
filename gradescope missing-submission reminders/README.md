@@ -12,7 +12,9 @@ Current status: Microsoft authentication and test delivery work. The reminder ru
 - The initial delivery mode is `dry-run`.
 - The effective late deadline is the earlier of the Gradescope late deadline and the course-policy limit.
 - A completed assignment is processed once, and each student can receive at most one reminder per assignment.
+- Gradescope deadlines are refreshed on every check. If a recorded deadline changes, the completed assignment is reopened under the new schedule without resending to students who were already contacted successfully.
 - Per-student, per-assignment exclusions can be placed in the ignored local configuration when you have already made special arrangements.
+- A daily health check verifies Microsoft delivery, Gradescope login, live mode, and the next matching homework for each configured course.
 
 ## Authentication check
 
@@ -82,7 +84,7 @@ Protect that file with `chmod 600`. Copy the files under `systemd/` to `~/.confi
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable --now gradescope-reminder.timer
+systemctl --user enable --now gradescope-reminder.timer gradescope-reminder-health.timer
 ```
 
-The timer checks every five minutes and is persistent across downtime. The application processes each assignment only once. Authenticate Microsoft once on Ubuntu with `auth_check.py` before enabling automatic delivery.
+The reminder timer checks every five minutes and is persistent across downtime. The health timer sends a report each morning at 8:00 AM Eastern. The application processes each assignment only once unless its Gradescope deadline changes. Authenticate Microsoft once on Ubuntu with `auth_check.py` before enabling automatic delivery.
