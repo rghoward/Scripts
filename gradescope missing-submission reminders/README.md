@@ -8,6 +8,7 @@ Current status: Microsoft authentication and test delivery work. The reminder ru
 
 - The client secret is read from macOS Keychain.
 - OAuth tokens are stored under `~/Library/Application Support/Gradescope Reminder/`.
+- The Gradescope session cookie is stored with owner-only permissions and reused across routine checks. A new password login occurs only when no session exists or Gradescope reports that it expired.
 - Local configuration, token files, student CSVs, logs, and databases are excluded from Git.
 - The initial delivery mode is `dry-run`.
 - The effective late deadline is the earlier of the Gradescope late deadline and the course-policy limit.
@@ -15,6 +16,8 @@ Current status: Microsoft authentication and test delivery work. The reminder ru
 - Gradescope deadlines are refreshed on every check. If a recorded deadline changes, the completed assignment is reopened under the new schedule without resending to students who were already contacted successfully.
 - Per-student, per-assignment exclusions can be placed in the ignored local configuration when you have already made special arrangements.
 - A daily health check verifies Microsoft delivery, Gradescope login, live mode, and the next matching homework for each configured course.
+- A shared process lock prevents reminder, preview, discovery, and health-check runs from overlapping.
+- Failed Gradescope logins use persistent exponential backoff, beginning at five minutes and capped at six hours.
 
 ## Authentication check
 
@@ -31,7 +34,7 @@ Do not paste OAuth callback URLs, authorization codes, tokens, or client secrets
 
 ## Gradescope connection check
 
-The Gradescope password is read from macOS Keychain. This command signs in, lists instructor courses and their assignments, then signs out. It does not retrieve student records or send email:
+The Gradescope password is read from macOS Keychain. This command reuses the persisted session when available, lists instructor courses and their assignments, and preserves the session for future runs. It does not retrieve student records or send email:
 
 ```bash
 .venv/bin/python gradescope_discover.py

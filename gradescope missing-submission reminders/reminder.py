@@ -5,26 +5,42 @@ from __future__ import annotations
 
 import argparse
 import csv
+import fcntl
 import html
 import io
+import json
 import os
 import re
 import sqlite3
 import subprocess
 import sys
 import tomllib
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from gradescopeapi.classes.connection import GSConnection
+from gradescopeapi.classes.account import Account
+from requests.cookies import RequestsCookieJar, create_cookie
 
 from auth_check import create_account, secure_token_cache
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = PROJECT_DIR / "config.local.toml"
+AUTH_BACKOFF_MINUTES = 5
+AUTH_BACKOFF_MAX_MINUTES = 360
+
+
+class GradescopeAuthenticationExpired(RuntimeError):
+    """The persisted Gradescope session is no longer authenticated."""
+
+
+class GradescopeAuthenticationBackoff(RuntimeError):
+    """A fresh login is temporarily suppressed after authentication failures."""
 
 
 def state_dir() -> Path:
@@ -92,9 +108,166 @@ def open_database() -> sqlite3.Connection:
         due_at TEXT NOT NULL, late_at TEXT NOT NULL, observed_at TEXT NOT NULL,
         PRIMARY KEY (course_id, assignment_id))"""
     )
+    database.execute(
+        """CREATE TABLE IF NOT EXISTS authentication_state (
+        provider TEXT PRIMARY KEY, consecutive_failures INTEGER NOT NULL,
+        retry_after TEXT NOT NULL, last_error TEXT NOT NULL)"""
+    )
     database.commit()
     path.chmod(0o600)
     return database
+
+
+@contextmanager
+def run_lock():
+    """Hold a non-blocking process lock shared by all Gradescope routines."""
+    directory = state_dir()
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    path = directory / "run.lock"
+    with path.open("a+") as handle:
+        path.chmod(0o600)
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+class PersistentGradescopeConnection:
+    """Reuse a cookie-backed Gradescope session and reauthenticate on expiry."""
+
+    def __init__(self, settings: dict, database: sqlite3.Connection, now: datetime):
+        self.settings = settings
+        self.database = database
+        self.now = now
+        self.cookie_path = state_dir() / "gradescope_cookies.json"
+        self.connection = GSConnection()
+        self._checking_auth = True
+        self._install_cookie_jar()
+        self.connection.session.hooks["response"].append(self._detect_expiration)
+        if not self.connection.session.cookies:
+            self._authenticate()
+        else:
+            self.connection.logged_in = True
+            self.connection.account = Account(
+                self.connection.session, self.connection.gradescope_base_url
+            )
+
+    def _install_cookie_jar(self) -> None:
+        jar = RequestsCookieJar()
+        if self.cookie_path.exists():
+            try:
+                for item in json.loads(self.cookie_path.read_text()):
+                    jar.set_cookie(create_cookie(**item))
+            except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                pass
+        self.connection.session.cookies = jar
+
+    def _detect_expiration(self, response, *args, **kwargs):
+        if not self._checking_auth:
+            return response
+        path = urlparse(response.url).path.rstrip("/")
+        redirected_to_login = path == "/login" or any(
+            urlparse(item.headers.get("Location", "")).path.rstrip("/") == "/login"
+            for item in response.history
+        )
+        if response.status_code == 401 or redirected_to_login:
+            raise GradescopeAuthenticationExpired("Gradescope session expired")
+        return response
+
+    def _backoff_until(self) -> datetime | None:
+        row = self.database.execute(
+            "SELECT retry_after FROM authentication_state WHERE provider='gradescope'"
+        ).fetchone()
+        return datetime.fromisoformat(row[0]) if row else None
+
+    def _record_auth_failure(self, error: Exception) -> None:
+        row = self.database.execute(
+            "SELECT consecutive_failures FROM authentication_state WHERE provider='gradescope'"
+        ).fetchone()
+        failures = (int(row[0]) if row else 0) + 1
+        minutes = min(
+            AUTH_BACKOFF_MINUTES * (2 ** (failures - 1)), AUTH_BACKOFF_MAX_MINUTES
+        )
+        retry_after = self.now + timedelta(minutes=minutes)
+        self.database.execute(
+            """INSERT INTO authentication_state VALUES ('gradescope', ?, ?, ?)
+            ON CONFLICT(provider) DO UPDATE SET
+            consecutive_failures=excluded.consecutive_failures,
+            retry_after=excluded.retry_after, last_error=excluded.last_error""",
+            (failures, retry_after.isoformat(), str(error)),
+        )
+        self.database.commit()
+
+    def _authenticate(self) -> None:
+        retry_after = self._backoff_until()
+        if retry_after and self.now < retry_after:
+            raise GradescopeAuthenticationBackoff(
+                f"Gradescope login backoff is active until {retry_after.isoformat()}"
+            )
+        self.connection = GSConnection()
+        self._install_cookie_jar()
+        self.connection.session.hooks["response"].append(self._detect_expiration)
+        self._checking_auth = False
+        try:
+            self.connection.login(
+                self.settings["email"], read_gradescope_password(self.settings)
+            )
+        except Exception as exc:
+            self._record_auth_failure(exc)
+            raise RuntimeError(f"Gradescope authentication failed: {exc}") from exc
+        finally:
+            self._checking_auth = True
+        self.database.execute(
+            "DELETE FROM authentication_state WHERE provider='gradescope'"
+        )
+        self.database.commit()
+        self.save()
+
+    def _refresh_after_expiration(self) -> None:
+        if self.cookie_path.exists():
+            self.cookie_path.unlink()
+        self._authenticate()
+
+    def call(self, operation, *args, **kwargs):
+        try:
+            return operation(self.connection, *args, **kwargs)
+        except GradescopeAuthenticationExpired:
+            self._refresh_after_expiration()
+            return operation(self.connection, *args, **kwargs)
+
+    def get_assignments(self, course_id: str):
+        return self.call(
+            lambda connection: connection.account.get_assignments(course_id)
+        )
+
+    def get(self, url: str, **kwargs):
+        return self.call(lambda connection: connection.session.get(url, **kwargs))
+
+    def save(self) -> None:
+        self.cookie_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        cookies = [
+            {
+                "name": cookie.name,
+                "value": cookie.value,
+                "domain": cookie.domain,
+                "path": cookie.path,
+                "secure": cookie.secure,
+                "expires": cookie.expires,
+                "rest": cookie._rest,
+            }
+            for cookie in self.connection.session.cookies
+            if cookie.expires is None or cookie.expires > self.now.timestamp()
+        ]
+        temporary = self.cookie_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(cookies))
+        temporary.chmod(0o600)
+        temporary.replace(self.cookie_path)
+        self.cookie_path.chmod(0o600)
 
 
 def localize(value: datetime | None, timezone: ZoneInfo) -> datetime | None:
@@ -144,9 +317,9 @@ def sync_assignment_schedule(
     return changed
 
 
-def missing_students(connection: GSConnection, course_id: str, assignment_id: str) -> list[Student]:
-    url = f"{connection.gradescope_base_url}/courses/{course_id}/assignments/{assignment_id}/scores.csv"
-    response = connection.session.get(url, timeout=30)
+def missing_students(connection: PersistentGradescopeConnection, course_id: str, assignment_id: str) -> list[Student]:
+    url = f"{connection.connection.gradescope_base_url}/courses/{course_id}/assignments/{assignment_id}/scores.csv"
+    response = connection.get(url, timeout=30)
     response.raise_for_status()
     reader = csv.DictReader(io.StringIO(response.text.lstrip("\ufeff")))
     required = {"First Name", "Last Name", "Email", "Status"}
@@ -311,14 +484,13 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
     current = now.astimezone(timezone) if now else datetime.now(timezone)
     delay = timedelta(minutes=int(config["schedule"].get("check_delay_minutes", 5)))
     database = open_database()
-    gs = GSConnection()
+    gs = None
     mail_account = None
     eligible_count = 0
     try:
-        gs_settings = config["gradescope"]
-        gs.login(gs_settings["email"], read_gradescope_password(gs_settings))
+        gs = PersistentGradescopeConnection(config["gradescope"], database, current)
         for course in config["courses"]:
-            assignments = gs.account.get_assignments(str(course["id"]))
+            assignments = gs.get_assignments(str(course["id"]))
             pattern = re.compile(course["assignment_pattern"])
             for assignment in assignments:
                 if not pattern.search(assignment.name) or assignment.due_date is None:
@@ -399,11 +571,8 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
             print("No configured homework is currently awaiting its first reminder run.")
         return 0
     finally:
-        if gs.logged_in:
-            try:
-                gs.logout()
-            except Exception:
-                pass
+        if gs is not None:
+            gs.save()
         if mail_account is not None:
             secure_token_cache()
         database.close()
@@ -418,7 +587,14 @@ def main() -> None:
     if args.send and configured_mode != "automatic":
         raise SystemExit("Refusing to send: set [delivery] mode = \"automatic\" after approving a preview")
     try:
-        raise SystemExit(run(dry_run=not args.send))
+        with run_lock() as acquired:
+            if not acquired:
+                print("Another Gradescope reminder process is already running; skipping.")
+                raise SystemExit(0)
+            raise SystemExit(run(dry_run=not args.send))
+    except GradescopeAuthenticationBackoff as exc:
+        print(f"AUTH BACKOFF: {exc}", file=sys.stderr)
+        raise SystemExit(0)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         if args.send:

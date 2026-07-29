@@ -7,10 +7,15 @@ import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from gradescopeapi.classes.connection import GSConnection
-
 from auth_check import create_account, secure_token_cache
-from reminder import load_config, localize, read_gradescope_password, send_message
+from reminder import (
+    PersistentGradescopeConnection,
+    load_config,
+    localize,
+    open_database,
+    run_lock,
+    send_message,
+)
 
 
 def main() -> int:
@@ -21,7 +26,8 @@ def main() -> int:
     if not account.is_authenticated:
         raise RuntimeError("Microsoft authentication is unavailable; run auth_check.py")
 
-    connection = GSConnection()
+    database = open_database()
+    connection = None
     lines = [
         "Gradescope reminder daily health check: OK",
         "",
@@ -33,11 +39,10 @@ def main() -> int:
         "Configured courses and next homework:",
     ]
     try:
-        settings = config["gradescope"]
-        connection.login(settings["email"], read_gradescope_password(settings))
+        connection = PersistentGradescopeConnection(config["gradescope"], database, now)
         for course in config["courses"]:
             pattern = re.compile(course["assignment_pattern"])
-            assignments = connection.account.get_assignments(str(course["id"]))
+            assignments = connection.get_assignments(str(course["id"]))
             upcoming = [
                 item for item in assignments
                 if item.due_date is not None
@@ -60,11 +65,9 @@ def main() -> int:
         lines.append("")
         lines.append(f"Failure: {exc}")
     finally:
-        if connection.logged_in:
-            try:
-                connection.logout()
-            except Exception:
-                pass
+        if connection is not None:
+            connection.save()
+        database.close()
 
     subject = lines[0]
     send_message(account, config["delivery"]["summary_email"], subject, "\n".join(lines) + "\n")
@@ -74,4 +77,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    with run_lock() as acquired:
+        if not acquired:
+            print("Another Gradescope process is already running; skipping health check.")
+            raise SystemExit(0)
+        raise SystemExit(main())
