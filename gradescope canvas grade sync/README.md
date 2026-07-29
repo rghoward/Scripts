@@ -2,6 +2,8 @@
 
 Version 1.1 reorganizes the tool around the grading workflow: the connected course collapses into a compact summary, selection reveals a sticky batch-action bar, common filters are one-click chips, row-level secondary actions live under **More**, and history opens as a drawer. The underlying publish, post, regrade, roster-sync, and verification behavior is unchanged.
 
+Version 1.2 adds persistent Canvas-check history, workflow states, remembered session filters and selections, Select shown, verified status refresh, Canvas-post previews, last-post tracking with changed-after-post warnings, and retry controls for failed publish/post actions.
+
 This Tampermonkey userscript adds a **Canvas grade sync** launcher to the top navigation of both Gradescope course assignment dashboards and individual assignment pages. The launcher opens the reconciliation tool in a modal window. It extends the page; it does not replace or hide Gradescope.
 
 The modal header identifies the active Gradescope course by code, name, and semester so the course context remains visible while the underlying page is covered.
