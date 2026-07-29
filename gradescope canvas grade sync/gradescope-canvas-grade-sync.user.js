@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gradescope + Canvas Grade Sync Inspector
 // @namespace    https://www.gradescope.com/
-// @version      1.4.1
+// @version      1.4.2
 // @description  Reconciles Gradescope assignments and scores with Canvas and surfaces safe publish/post actions.
 // @author       Ronnie Howard
 // @match        https://www.gradescope.com/courses/*
@@ -20,7 +20,7 @@
   'use strict';
 
   const CANVAS = 'https://gatech.instructure.com';
-  const BRIDGE_QUEUE='gcsi-canvas-bridge-queue',BRIDGE_RESULT='gcsi-canvas-bridge-result';
+  const BRIDGE_QUEUE='gcsi-canvas-bridge-queue-v2',BRIDGE_RESULT='gcsi-canvas-bridge-result-v2';
   if(location.hostname==='gatech.instructure.com'){startCanvasBridge();return;}
   const courseId = location.pathname.match(/^\/courses\/(\d+)/)?.[1];
   if (!courseId || document.querySelector('#gcsi-panel')) return;
