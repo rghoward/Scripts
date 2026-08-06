@@ -6,8 +6,10 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.hardware.display.DisplayManager
 import android.os.Bundle
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
 import android.view.Display
 import android.view.Gravity
 import android.view.ViewGroup
@@ -166,7 +168,20 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             section = label(64f, INK, true).apply { setPadding(0, px(28), 0, px(30)) }
             body = label(42f, INK).apply {
                 gravity = Gravity.CENTER_VERTICAL
-                setLineSpacing(px(12).toFloat(), 1.12f)
+                includeFontPadding = false
+                setLineSpacing(px(4).toFloat(), 1.08f)
+                maxLines = Int.MAX_VALUE
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    // The weighted body has an exact measured height. Android
+                    // can therefore choose the largest text size that fits all
+                    // of its lines instead of relying on a character estimate.
+                    setAutoSizeTextTypeUniformWithConfiguration(
+                        12,
+                        74,
+                        1,
+                        TypedValue.COMPLEX_UNIT_SP,
+                    )
+                }
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     0,
@@ -196,7 +211,9 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                 sectionTitle.length <= 25 -> 62f
                 else -> 50f
             }
-            body.textSize = bodyTextSize(sectionBody)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                body.textSize = bodyTextSize(sectionBody)
+            }
         }
 
         /** Uses the available display real estate for short cards while
