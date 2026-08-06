@@ -48,7 +48,10 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
 
     override fun onDestroy() {
         mainHandler.removeCallbacksAndMessages(null)
-        presentation?.dismiss()
+        val previous = presentation
+        presentation = null
+        shownBody = null
+        previous?.dismiss()
         displayManager.unregisterDisplayListener(this)
         super.onDestroy()
     }
@@ -74,11 +77,12 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                 }
             }
             "hide" -> {
-                presentation?.dismiss()
+                val previous = presentation
                 presentation = null
                 shownTitle = null
                 shownSection = null
                 shownBody = null
+                previous?.dismiss()
                 setExternalDisplayAwake(false)
                 result.success(null)
             }
@@ -93,8 +97,20 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
     private fun showPresentation(display: Display): Boolean {
         try {
             if (presentation?.display?.displayId != display.displayId) {
-                presentation?.dismiss()
-                presentation = WorkoutPresentation(this, display)
+                val previous = presentation
+                presentation = null
+                previous?.dismiss()
+                val next = WorkoutPresentation(this, display)
+                next.setOnDismissListener {
+                    if (presentation !== next) return@setOnDismissListener
+                    // Android can dismiss a Presentation while keeping the HDMI
+                    // display connected. Restore the last selected card instead
+                    // of leaving a black but connected external screen.
+                    presentation = null
+                    setExternalDisplayAwake(false)
+                    restorePresentation()
+                }
+                presentation = next
             }
             if (presentation?.isShowing != true) presentation?.show()
             presentation?.update(shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty())
@@ -128,8 +144,9 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
 
     override fun onDisplayRemoved(displayId: Int) {
         if (presentation?.display?.displayId == displayId) {
-            presentation?.dismiss()
+            val previous = presentation
             presentation = null
+            previous?.dismiss()
             setExternalDisplayAwake(false)
         }
         notifyAvailability()
@@ -155,8 +172,14 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
         mainHandler.postDelayed({
             restoreQueued = false
             val display = presentationDisplay() ?: return@postDelayed
-            presentation?.dismiss()
+            if (presentation?.display?.displayId == display.displayId &&
+                presentation?.isShowing == true) {
+                presentation?.refresh(shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty())
+                return@postDelayed
+            }
+            val previous = presentation
             presentation = null
+            previous?.dismiss()
             showPresentation(display)
         }, 350)
     }
