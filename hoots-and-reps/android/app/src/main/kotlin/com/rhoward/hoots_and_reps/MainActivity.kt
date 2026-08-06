@@ -79,6 +79,7 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                 shownTitle = null
                 shownSection = null
                 shownBody = null
+                setExternalDisplayAwake(false)
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -97,6 +98,7 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             }
             if (presentation?.isShowing != true) presentation?.show()
             presentation?.update(shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty())
+            setExternalDisplayAwake(true)
             return true
         } catch (_: WindowManager.InvalidDisplayException) {
             // HDMI can disappear between discovery and show(). The display
@@ -111,6 +113,14 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
         channel?.invokeMethod("displayChanged", mapOf("available" to (presentationDisplay() != null)))
     }
 
+    private fun setExternalDisplayAwake(awake: Boolean) {
+        if (awake) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
     override fun onDisplayAdded(displayId: Int) {
         notifyAvailability()
         restorePresentation()
@@ -120,19 +130,25 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
         if (presentation?.display?.displayId == displayId) {
             presentation?.dismiss()
             presentation = null
+            setExternalDisplayAwake(false)
         }
         notifyAvailability()
     }
 
     override fun onDisplayChanged(displayId: Int) {
         notifyAvailability()
-        if (presentationDisplay()?.displayId == displayId) restorePresentation()
+        if (presentationDisplay()?.displayId != displayId || shownBody == null) return
+        if (presentation?.isShowing == true) {
+            // Display-change callbacks also arrive for benign brightness and
+            // refresh-rate changes. Redraw in place; dismissing here can leave
+            // a real HDMI surface black even though the cable remains present.
+            presentation?.refresh(shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty())
+        } else {
+            restorePresentation()
+        }
     }
 
-    /** Recreate the Presentation after an HDMI mode change or reconnect.
-     * A Presentation can remain technically "showing" while its surface is
-     * invalidated by the display stack; rebuilding it avoids a black board.
-     */
+    /** Recreate only after a true add/reconnect or an unexpected dismissal. */
     private fun restorePresentation() {
         if (shownBody == null || restoreQueued) return
         restoreQueued = true
@@ -212,6 +228,14 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             body.text = sectionBody
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 body.textSize = bodyTextSize(sectionBody)
+            }
+        }
+
+        fun refresh(workoutTitle: String, sectionTitle: String, sectionBody: String) {
+            update(workoutTitle, sectionTitle, sectionBody)
+            window?.decorView?.apply {
+                requestLayout()
+                invalidate()
             }
         }
 
