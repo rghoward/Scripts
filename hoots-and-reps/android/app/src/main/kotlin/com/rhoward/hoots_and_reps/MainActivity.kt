@@ -162,10 +162,14 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             val root = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setBackgroundColor(PAPER)
-                setPadding(px(84), px(64), px(84), px(64))
+                setPadding(px(64), px(42), px(64), px(42))
             }
-            workout = label(28f, EMBER, true).apply { letterSpacing = .08f }
-            section = label(64f, INK, true).apply { setPadding(0, px(28), 0, px(30)) }
+            workout = label(18f, EMBER, true).apply { letterSpacing = .08f }
+            section = label(38f, INK, true).apply {
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                setPadding(0, px(12), 0, px(14))
+            }
             body = label(42f, INK).apply {
                 gravity = Gravity.CENTER_VERTICAL
                 includeFontPadding = false
@@ -188,11 +192,11 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                     1f,
                 )
             }
-            val footer = label(17f, MUTED, true).apply {
+            val footer = label(12f, MUTED, true).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 text = "HOOTS & REPS  •  CONTROLLED FROM YOUR DEVICE"
                 letterSpacing = .06f
-                setPadding(0, px(28), 0, 0)
+                setPadding(0, px(12), 0, 0)
             }
             root.addView(workout)
             root.addView(section)
@@ -206,11 +210,6 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             workout.text = workoutTitle.uppercase()
             section.text = sectionTitle
             body.text = sectionBody
-            section.textSize = when {
-                sectionTitle.length <= 14 -> 72f
-                sectionTitle.length <= 25 -> 62f
-                else -> 50f
-            }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 body.textSize = bodyTextSize(sectionBody)
             }
