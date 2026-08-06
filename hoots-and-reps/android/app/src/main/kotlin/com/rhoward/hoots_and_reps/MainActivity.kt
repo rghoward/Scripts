@@ -223,8 +223,8 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                     // can therefore choose the largest text size that fits all
                     // of its lines instead of relying on a character estimate.
                     setAutoSizeTextTypeUniformWithConfiguration(
-                        12,
-                        74,
+                        14,
+                        180,
                         1,
                         TypedValue.COMPLEX_UNIT_SP,
                     )
@@ -253,7 +253,17 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             workout.text = workoutTitle.uppercase()
             section.text = sectionTitle
             body.text = sectionBody
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Let short cards become genuinely readable at a distance,
+                // while content-heavy cards retain a sensible ceiling before
+                // Android performs its exact width/height fit calculation.
+                body.setAutoSizeTextTypeUniformWithConfiguration(
+                    14,
+                    bodyTextSize(sectionBody).toInt(),
+                    1,
+                    TypedValue.COMPLEX_UNIT_SP,
+                )
+            } else {
                 body.textSize = bodyTextSize(sectionBody)
             }
         }
@@ -273,12 +283,13 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                 maxOf(1, (line.trim().length + 37) / 38)
             }
             return when {
-                visibleLines <= 3 -> 66f
-                visibleLines <= 5 -> 56f
-                visibleLines <= 8 -> 46f
-                visibleLines <= 12 -> 37f
-                visibleLines <= 18 -> 30f
-                else -> 24f
+                visibleLines <= 2 -> 180f
+                visibleLines <= 4 -> 160f
+                visibleLines <= 7 -> 136f
+                visibleLines <= 11 -> 110f
+                visibleLines <= 16 -> 86f
+                visibleLines <= 24 -> 68f
+                else -> 52f
             }
         }
     }
