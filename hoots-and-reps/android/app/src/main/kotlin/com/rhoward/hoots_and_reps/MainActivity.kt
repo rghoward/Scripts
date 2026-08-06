@@ -6,9 +6,12 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.hardware.display.DisplayManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Display
 import android.view.Gravity
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
 import io.flutter.embedding.android.FlutterActivity
@@ -32,6 +35,8 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
     private var shownTitle: String? = null
     private var shownSection: String? = null
     private var shownBody: String? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var restoreQueued = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +45,7 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
     }
 
     override fun onDestroy() {
+        mainHandler.removeCallbacksAndMessages(null)
         presentation?.dismiss()
         displayManager.unregisterDisplayListener(this)
         super.onDestroy()
@@ -62,13 +68,15 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
                 if (display == null) {
                     result.success(false)
                 } else {
-                    showPresentation(display)
-                    result.success(true)
+                    result.success(showPresentation(display))
                 }
             }
             "hide" -> {
                 presentation?.dismiss()
                 presentation = null
+                shownTitle = null
+                shownSection = null
+                shownBody = null
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -79,13 +87,22 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
         .getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
         .firstOrNull()
 
-    private fun showPresentation(display: Display) {
-        if (presentation?.display?.displayId != display.displayId) {
-            presentation?.dismiss()
-            presentation = WorkoutPresentation(this, display)
+    private fun showPresentation(display: Display): Boolean {
+        try {
+            if (presentation?.display?.displayId != display.displayId) {
+                presentation?.dismiss()
+                presentation = WorkoutPresentation(this, display)
+            }
+            if (presentation?.isShowing != true) presentation?.show()
+            presentation?.update(shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty())
+            return true
+        } catch (_: WindowManager.InvalidDisplayException) {
+            // HDMI can disappear between discovery and show(). The display
+            // listener will retry once Android reports the replacement display.
+            presentation = null
+            notifyAvailability()
+            return false
         }
-        if (presentation?.isShowing != true) presentation?.show()
-        presentation?.update(shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty())
     }
 
     private fun notifyAvailability() {
@@ -94,6 +111,7 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
 
     override fun onDisplayAdded(displayId: Int) {
         notifyAvailability()
+        restorePresentation()
     }
 
     override fun onDisplayRemoved(displayId: Int) {
@@ -106,6 +124,23 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
 
     override fun onDisplayChanged(displayId: Int) {
         notifyAvailability()
+        if (presentationDisplay()?.displayId == displayId) restorePresentation()
+    }
+
+    /** Recreate the Presentation after an HDMI mode change or reconnect.
+     * A Presentation can remain technically "showing" while its surface is
+     * invalidated by the display stack; rebuilding it avoids a black board.
+     */
+    private fun restorePresentation() {
+        if (shownBody == null || restoreQueued) return
+        restoreQueued = true
+        mainHandler.postDelayed({
+            restoreQueued = false
+            val display = presentationDisplay() ?: return@postDelayed
+            presentation?.dismiss()
+            presentation = null
+            showPresentation(display)
+        }, 350)
     }
 
     private class WorkoutPresentation(context: Context, display: Display) : Presentation(context, display) {
@@ -125,19 +160,20 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             val root = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setBackgroundColor(PAPER)
-                setPadding(px(72), px(56), px(72), px(56))
+                setPadding(px(84), px(64), px(84), px(64))
             }
-            workout = label(18f, EMBER, true).apply { letterSpacing = .08f }
-            section = label(44f, INK, true).apply { setPadding(0, px(24), 0, px(28)) }
-            body = label(29f, INK).apply {
-                setLineSpacing(px(10).toFloat(), 1.15f)
+            workout = label(28f, EMBER, true).apply { letterSpacing = .08f }
+            section = label(64f, INK, true).apply { setPadding(0, px(28), 0, px(30)) }
+            body = label(42f, INK).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                setLineSpacing(px(12).toFloat(), 1.12f)
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     0,
                     1f,
                 )
             }
-            val footer = label(15f, MUTED, true).apply {
+            val footer = label(17f, MUTED, true).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 text = "HOOTS & REPS  •  CONTROLLED FROM YOUR DEVICE"
                 letterSpacing = .06f
@@ -155,6 +191,28 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
             workout.text = workoutTitle.uppercase()
             section.text = sectionTitle
             body.text = sectionBody
+            section.textSize = when {
+                sectionTitle.length <= 14 -> 72f
+                sectionTitle.length <= 25 -> 62f
+                else -> 50f
+            }
+            body.textSize = bodyTextSize(sectionBody)
+        }
+
+        /** Uses the available display real estate for short cards while
+         * keeping dense conditioning instructions comfortably readable. */
+        private fun bodyTextSize(text: String): Float {
+            val visibleLines = text.lines().sumOf { line ->
+                maxOf(1, (line.trim().length + 37) / 38)
+            }
+            return when {
+                visibleLines <= 3 -> 66f
+                visibleLines <= 5 -> 56f
+                visibleLines <= 8 -> 46f
+                visibleLines <= 12 -> 37f
+                visibleLines <= 18 -> 30f
+                else -> 24f
+            }
         }
     }
 }

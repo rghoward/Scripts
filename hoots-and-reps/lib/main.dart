@@ -4626,6 +4626,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
   }
 
+  Future<void> _hideExternalDisplay() async {
+    await ExternalWorkoutDisplay.hide();
+    if (!mounted) return;
+    setState(() => _projectedSectionKey = null);
+  }
+
   Future<void> _chooseDisplayBoardSection(
     WorkoutDay workout,
     List<WorkoutSection> sections,
@@ -4698,22 +4704,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
     WorkoutDay workout,
     List<WorkoutSection> sections,
   ) {
-    WorkoutSection? active;
-    for (var i = 0; i < sections.length; i++) {
-      if (_projectedSectionKey == _key(workout, i)) {
-        active = sections[i];
-        break;
-      }
-    }
-    final activeTitle = active == null ? null : _sectionHeading(active.title);
+    final isShowing = _projectedSectionKey != null;
     return Tooltip(
-      message: activeTitle == null
+      message: !isShowing
           ? 'Choose what to show on the display board'
-          : 'Display board: $activeTitle. Tap to change.',
+          : 'Stop showing on the display board',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _chooseDisplayBoardSection(workout, sections),
+          onTap: () => isShowing
+              ? _hideExternalDisplay()
+              : _chooseDisplayBoardSection(workout, sections),
           borderRadius: BorderRadius.circular(15),
           child: Ink(
             width: 48,
@@ -4728,7 +4729,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
               border: Border.all(color: cyan.withOpacity(.8)),
               boxShadow: [
                 BoxShadow(
-                  color: cyan.withOpacity(active == null ? .12 : .28),
+                  color: cyan.withOpacity(isShowing ? .28 : .12),
                   blurRadius: 14,
                   spreadRadius: 1,
                 ),
@@ -4738,7 +4739,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
               alignment: Alignment.center,
               children: [
                 const Icon(Icons.tv_rounded, color: cyan, size: 23),
-                if (active != null)
+                if (isShowing)
                   const Positioned(
                     right: 7,
                     top: 6,
@@ -4785,9 +4786,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
         children: [
           ExpansionTile(
             initiallyExpanded: index == 0 && !completed,
-            onExpansionChanged: (expanded) {
-              if (expanded) _showOnExternalDisplay(workout, section, index);
-            },
             collapsedBackgroundColor: graphite,
             backgroundColor: graphite,
             shape: RoundedRectangleBorder(
@@ -4812,14 +4810,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (projected)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 3),
-                    child: Tooltip(
-                      message: 'Showing on the external display',
-                      child: Icon(Icons.tv_rounded, color: cyan, size: 15),
-                    ),
-                  ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
@@ -4857,6 +4847,20 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         Icons.swap_horiz,
                         color: substitutions.isEmpty ? muted : cyan,
                         size: 20,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: projected
+                          ? 'Showing on the external display'
+                          : 'Show this card on the external display',
+                      onPressed: _externalDisplayAvailable && !projected
+                          ? () =>
+                                _showOnExternalDisplay(workout, section, index)
+                          : null,
+                      icon: Icon(
+                        projected ? Icons.tv_rounded : Icons.tv_outlined,
+                        color: projected ? cyan : muted,
+                        size: 21,
                       ),
                     ),
                     InkWell(
