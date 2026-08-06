@@ -1,0 +1,95 @@
+package defpackage;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes3.dex */
+public final class vh1 {
+    public static final long A;
+    public static final long B;
+    public static final long C;
+    public static final long D;
+    public static final long E;
+    public static final long F;
+    public static final long G;
+    public static final long H;
+    public static final long I;
+    public static final long J;
+    public static final long K;
+    public static final long L;
+    public static final long a;
+    public static final long b;
+    public static final long c;
+    public static final long d;
+    public static final long e;
+    public static final long f;
+    public static final long g;
+    public static final long h;
+    public static final long i;
+    public static final long j;
+    public static final long k;
+    public static final long l;
+    public static final long m;
+    public static final long n;
+    public static final long o;
+    public static final long p;
+    public static final long q;
+    public static final long r;
+    public static final long s;
+    public static final long t;
+    public static final long u;
+    public static final long v;
+    public static final long w;
+    public static final long x;
+    public static final long y;
+    public static final long z;
+
+    static {
+        long j2 = ms7.p;
+        a = ms7.d;
+        b = ms7.l;
+        c = ms7.F;
+        d = ms7.r;
+        e = ms7.c;
+        f = ms7.f;
+        long j3 = ms7.H;
+        g = j3;
+        h = ms7.C;
+        long j4 = ms7.E;
+        i = j4;
+        j = ms7.K;
+        long j5 = ms7.O;
+        k = j5;
+        l = ms7.I;
+        long j6 = ms7.L;
+        m = j6;
+        n = ms7.R;
+        long j7 = ms7.V;
+        o = j7;
+        p = ms7.P;
+        long j8 = ms7.S;
+        q = j8;
+        r = ms7.z;
+        s = ms7.x;
+        long j9 = ms7.G;
+        t = j4;
+        u = j3;
+        v = j9;
+        w = ms7.g;
+        long j10 = ms7.N;
+        x = j10;
+        y = j6;
+        z = j5;
+        A = j10;
+        B = ms7.n;
+        C = ms7.j;
+        D = ms7.k;
+        E = ms7.m;
+        F = ms7.h;
+        G = ms7.o;
+        H = j2;
+        long j11 = ms7.U;
+        I = j11;
+        J = j8;
+        K = j7;
+        L = j11;
+    }
+}

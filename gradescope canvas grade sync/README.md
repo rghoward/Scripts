@@ -15,6 +15,12 @@ The modal header identifies the active Gradescope course by code, name, and seme
 3. Open a Gradescope course. The semester selector defaults to the semester detected in Gradescope, and the course selector shows only Canvas courses from that semester. Choose an older semester when needed; the final course pairing is remembered.
 4. Sign into Georgia Tech Canvas in another tab when prompted and approve the `gatech.instructure.com` connection.
 
+## Direct TSV/CSV uploads
+
+`canvas-score-uploader.user.js` is a separate Canvas-only Tampermonkey script for uploading a score column that does not originate in Gradescope. Open the target Canvas course and use **Upload scores**. Paste or upload a TSV/CSV file, select its ID and score columns, choose the Canvas assignment, review the ready/skipped matches, and confirm the upload.
+
+It defaults to matching `student_id` against Canvas SIS IDs. Select the source ID and numeric score columns before previewing; only rows marked **Ready** are written.
+
 ## Behavior
 
 - Discovers Gradescope assignments from the site’s rendered links and embedded React data.
@@ -25,23 +31,23 @@ The modal header identifies the active Gradescope course by code, name, and seme
 - `Test Student` is always excluded from both systems and never affects agreement counts or posting.
 - **Sync Gradescope roster** opens the Gradescope roster page, scrolls to the native sync control, and highlights it for the final click. Gradescope-only students are identified in agreement details with a roster-sync suggestion.
 - Treats checking as read-only. It never publishes or posts merely because the panel loaded.
-- On an individual assignment page, mirrors discoverable native **Publish Grades** and **Post Grades to Canvas** controls into the panel. Clicking one activates Gradescope’s original control/modal rather than constructing an undocumented write request.
-- From the course dashboard, each assignment has in-modal **Publish** and **Post** controls plus a selection checkbox. **Publish selected** and **Post selected to Canvas** run confirmed batches sequentially and report each assignment independently without navigating away.
-- Canvas posting uses the same asynchronous workflow as Gradescope's React control: start the embedded `postGradesPath` job and poll its `jobStatusPath` until Gradescope reports completion or failure.
-- Canvas assignments show an editable **Automatic/Manual** grade-posting policy selector. Changes use Canvas's assignment post-policy mutation through the signed-in helper tab and are recorded in history. Checked rows distinguish grades that are still hidden from grades visible to students, and **Hidden in Canvas** filters those assignments. Changing a policy or posting grades does not release grades that are already hidden.
+- On an individual assignment page, mirrors discoverable native **Publish Grades** controls into the panel. Canvas grade sync always uses the direct checked-score workflow rather than Gradescope’s posting job.
+- From the course dashboard, each assignment has in-modal **Publish** and **Sync to Canvas** controls plus a selection checkbox. **Sync selected to Canvas** writes the checked, uniquely matched Gradescope numeric scores directly to the mapped Canvas assignment; it does not use Gradescope’s Canvas-posting job. Blank scores are skipped unless **Treat Gradescope blank as Canvas 0** is enabled.
+- Direct Canvas sync uses Canvas’s authenticated submission API for each checked, uniquely matched score, with the normal Canvas course mapping and posting-policy safeguards.
+- Canvas assignments show an editable **Automatic/Manual** grade-posting policy selector. Changes use Canvas's assignment post-policy mutation through the signed-in helper tab and are recorded in history. Checked rows distinguish grades that are still hidden from grades visible to students, and **Hidden in Canvas** filters those assignments. Changing a policy or syncing grades does not release grades that are already hidden.
 - Assignment checks also inspect Gradescope's current publication control. Published rows say **Published** and offer a confirmed **Unpublish** action; bulk Publish skips assignments already published.
 - **Push timing** uses the Gradescope late deadline when present and the regular deadline otherwise. Rows show **Before deadline**, **Late window open**, **Ready to push**, or **No deadline**; **Select ready** selects mapped assignments whose effective cutoff has passed.
-- Gradescope versioned assignments are represented by one assignment-container row. Child versions are hidden from Canvas mapping, while checking, publication, and posting use the parent container's combined score and native action routes. The row identifies how many versions it contains.
+- Gradescope versioned assignments are represented by one assignment-container row. Child versions are hidden from Canvas mapping, while checking, publication, and direct Canvas sync use the parent container's combined score. The row identifies how many versions it contains.
 - **Publish/post history** retains the 100 most recent per-assignment outcomes for the Gradescope course, including timestamp, action, and error/success message, so batch progress is not lost when the next assignment begins.
 - The assignment toolbar supports name search and filters for agreement, attention needed, unchecked, ready/before-cutoff, mapped/unmapped, published/unpublished, and selected assignments. Filtering changes only visible rows; it does not clear selections or limit **Check all mapped grades**.
 - Publishing opens one in-modal preflight for all selected unpublished assignments. Each row can independently enable regrade requests and edit its deadline; **Regrades for all** and **Clear regrades** provide bulk setup. Untouched defaults are recalculated to exactly seven days after each assignment's actual successful publication time. The reviewed plan runs without per-assignment prompts, and publication/regrade outcomes are recorded separately in history.
 
 ## Safety and limitations
 
-Gradescope changes its page components periodically. The script intentionally refuses to manufacture publish/post requests when it cannot find Gradescope’s own native control. In that case, use the native control on the assignment page. Score comparison requires Gradescope’s instructor CSV export and a Canvas session with permission to read submissions.
+Gradescope changes its page components periodically. The script intentionally refuses to manufacture publication requests when it cannot find Gradescope’s own native control. Score comparison and direct Canvas sync require Gradescope’s instructor CSV export and a Canvas session with permission to read and update submissions.
 
 Excused, blank, and nonnumeric grades are reported separately rather than guessed. A green agreement result means all numeric scores that could be matched by email agree exactly; it does not alter Canvas posting policy or Gradescope visibility.
 
-The remembered **Treat Gradescope blank as Canvas 0** option makes blank/zero pairs equivalent during comparison. Before opening Gradescope's native **Post Grades to Canvas** action, the script confirms and writes zero to matched Canvas students whose Gradescope grades are blank. It does not affect **Publish Grades**.
+The remembered **Treat Gradescope blank as Canvas 0** option makes blank/zero pairs equivalent during comparison. During a direct Canvas sync, it writes zero for uniquely matched Gradescope blanks; otherwise blanks are skipped. It does not affect **Publish Grades**.
 
 Blank-to-zero writes use a short-lived background Canvas helper tab. The same userscript runs inside the selected Canvas course, performs the authorized writes with Canvas's normal same-origin session, returns only success/failure through Tampermonkey storage, and closes the helper tab. No Canvas password or security token crosses into Gradescope or is persisted.

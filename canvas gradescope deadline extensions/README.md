@@ -1,6 +1,6 @@
-# Canvas + Gradescope Student Deadline Extensions (Tampermonkey)
+# Canvas + Gradescope Deadline Manager (Tampermonkey)
 
-This dependency-free userscript adds a floating **Student deadlines** button to Georgia Tech Canvas course pages. The separate Python app remains unchanged.
+This dependency-free userscript adds a floating **Deadline manager** button to Georgia Tech Canvas course pages. The separate Python app remains unchanged.
 
 ## Install
 
@@ -13,17 +13,29 @@ This dependency-free userscript adds a floating **Student deadlines** button to 
 ## Use
 
 1. Open a Canvas course as an instructor.
-2. Click **Student deadlines** in the lower-right corner.
-3. Find students by typing any combination of name or email tokens. Click each matching student to add them as removable selections.
-4. Search assignments by title tokens and click results to add them to the selected queue. Enable **Show all assignments** when you want to browse the complete list.
-5. Shift dates, use shared dates, or edit dates in the selected queue manually.
-6. Preview, confirm, and apply.
+2. Click **Deadline manager** in the lower-right corner.
+3. Choose the **Assignment dates** tab to update class defaults or **Student extensions** to create student-specific exceptions.
+4. Choose students when creating extensions, then browse assignments in their Canvas assignment groups. Search across groups, filter by upcoming/past/undated/unmatched/selected, and select individual assignments or an entire group.
+5. Choose one clearly separated method: shift existing dates, use one shared date, or set dates individually in the selected-assignment table. Explicitly choose whether late windows shift, are removed, or end on a particular date.
+6. Use the live readiness summary to resolve missing information, open the in-app review, and apply the verified changes.
+
+Only the controls for the active date method are shown. Editing a **New due** or **New until** value in the table automatically activates **Set dates individually**, so Preview always uses the dates currently visible in the table rather than recalculating them with a previously selected shift.
+
+Calculated shift and shared dates appear in the selected-assignment table immediately. Individually entered dates are held in an in-memory draft so assignment selection, mapping changes, and late-arriving student data do not erase them. The active workflow, assignment filter, and opened assignment groups are remembered between openings; unconfirmed date values and notes are deliberately discarded when the manager closes. **Start over** clears the entire working draft without writing either system.
+
+The interface follows the same order as the task: affected students (when applicable), assignments, date behavior, review, and apply. The review appears inside the manager and lists requested dates and Canvas/Gradescope actions; no native browser confirmation is used for ordinary updates. Undo operations retain a separate confirmation because they reverse previously completed writes.
+
+Assignments without an existing due date are included and labeled **No due date**. Use **No due date** in the assignment filter to find them quickly. A shared date or individually entered date can create the missing deadline. Undated assignments cannot use **Shift existing dates**, because there is no starting date; the readiness summary explains this and directs the user to an appropriate method. Undo can restore the prior undated state.
+
+In the Assignment dates workflow, **Remove due dates** deliberately clears both class due and late dates. It is not offered for student extensions. Unpublished assignments and newly dated Canvas assignments without a Gradescope match are called out in both the readiness summary and final review. The time controls state the browser timezone used to interpret entered dates. Whole-day shifts preserve the local wall-clock time across daylight-saving transitions.
+
+See `TESTING.md` for the live Canvas/Gradescope regression checklist.
 
 Preflight reports the exact Canvas and Gradescope write counts, already-correct destinations, roster/mapping issues, and safety skips before Apply is enabled. During a batch, progress shows the current item and **Stop after current item** safely prevents remaining work from starting.
 
 Shared and manually entered dates use configurable **default due time** and **default late time** values in the browser's local timezone. Both initially use 11:59 PM, and your choices are remembered in Tampermonkey storage. Shift-by-days preserves the assignment's existing time. Existing Canvas overrides and Gradescope extensions can be overwritten; the preview identifies create versus overwrite actions.
 
-One plan can be applied to multiple selected students. Preview and results expand into separate student–assignment operations, and history is retained separately for each student. Exact current-deadline columns are shown with one selected student; with multiple selected students the table switches to a clear multi-student summary because their existing overrides may differ. Automatic Gradescope repair remains single-student.
+The two tabs are intentionally separate workflows. **Assignment dates** updates the actual assignment defaults once in Canvas and once in Gradescope; it does not create an override or extension for every student. Existing student exceptions remain in place and continue to supersede the class default. **Student extensions** changes only the selected students' exceptions and never changes assignment defaults. Switching tabs clears unconfirmed plans and student selection while preserving the selected assignments. History and undo cover both workflows. Exact current-deadline columns are shown with one selected student; with multiple selected students the table switches to a clear multi-student summary because their existing overrides may differ. Automatic Gradescope repair remains single-student and appears only in the student-extension workflow.
 
 The script uses the current Canvas browser session; it needs no Canvas access token. It creates or updates only per-student assignment overrides. Canvas **available until** is treated as the late deadline.
 

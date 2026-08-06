@@ -1,0 +1,41 @@
+product_id,product_name,category,subcategory,supplier,standard_cost,list_price
+PRD-001-S,Summit 2-Person Tent,Camping,Shelter,Northwind Supply,119.0,189.0
+PRD-001-T,Summit 2-Person Tent — Trail Edition,Camping,Shelter,Northwind Supply,140.42,223.02
+PRD-002-S,Alpine Sleeping Bag,Camping,Sleep,Northwind Supply,62.0,99.0
+PRD-002-T,Alpine Sleeping Bag — Trail Edition,Camping,Sleep,Northwind Supply,73.16,116.82
+PRD-003-S,Campfire Cook Set,Camping,Cooking,Emberworks,24.0,42.0
+PRD-003-T,Campfire Cook Set — Trail Edition,Camping,Cooking,Emberworks,28.32,49.56
+PRD-004-S,Beacon Headlamp,Camping,Lighting,Emberworks,13.0,25.0
+PRD-004-T,Beacon Headlamp — Trail Edition,Camping,Lighting,Emberworks,15.34,29.5
+PRD-005-S,RidgeLine Daypack,Hiking,Packs,Trailsmith Co.,31.0,55.0
+PRD-005-T,RidgeLine Daypack — Trail Edition,Hiking,Packs,Trailsmith Co.,36.58,64.9
+PRD-006-S,TrailCore Hiking Boots,Hiking,Footwear,Trailsmith Co.,68.0,119.0
+PRD-006-T,TrailCore Hiking Boots — Trail Edition,Hiking,Footwear,Trailsmith Co.,80.24,140.42
+PRD-007-S,Switchback Trekking Poles,Hiking,Poles,Trailsmith Co.,27.0,49.0
+PRD-007-T,Switchback Trekking Poles — Trail Edition,Hiking,Poles,Trailsmith Co.,31.86,57.82
+PRD-008-S,Contour Compass,Hiking,Navigation,Trailsmith Co.,9.0,18.0
+PRD-008-T,Contour Compass — Trail Edition,Hiking,Navigation,Trailsmith Co.,10.62,21.24
+PRD-009-S,Blue Ridge Rain Jacket,Apparel,Outerwear,Pine & Peak,48.0,89.0
+PRD-009-T,Blue Ridge Rain Jacket — Trail Edition,Apparel,Outerwear,Pine & Peak,56.64,105.02
+PRD-010-S,CloudPeak Fleece,Apparel,Fleece,Pine & Peak,32.0,59.0
+PRD-010-T,CloudPeak Fleece — Trail Edition,Apparel,Fleece,Pine & Peak,37.76,69.62
+PRD-011-S,Creekside Base Layer,Apparel,Base Layers,Pine & Peak,18.0,34.0
+PRD-011-T,Creekside Base Layer — Trail Edition,Apparel,Base Layers,Pine & Peak,21.24,40.12
+PRD-012-S,Overlook Trail Cap,Apparel,Headwear,Pine & Peak,10.0,22.0
+PRD-012-T,Overlook Trail Cap — Trail Edition,Apparel,Headwear,Pine & Peak,11.8,25.96
+PRD-013-S,RiverStone Water Bottle,Hydration,Bottles,ClearCurrent,8.0,16.0
+PRD-013-T,RiverStone Water Bottle — Trail Edition,Hydration,Bottles,ClearCurrent,9.44,18.88
+PRD-014-S,Springline Water Filter,Hydration,Filters,ClearCurrent,18.0,35.0
+PRD-014-T,Springline Water Filter — Trail Edition,Hydration,Filters,ClearCurrent,21.24,41.3
+PRD-015-S,Longhaul Hydration Pack,Hydration,Reservoirs,ClearCurrent,22.0,44.0
+PRD-015-T,Longhaul Hydration Pack — Trail Edition,Hydration,Reservoirs,ClearCurrent,25.96,51.92
+PRD-016-S,Trail Citrus Electrolytes,Hydration,Mixes,ClearCurrent,6.0,12.0
+PRD-016-T,Trail Citrus Electrolytes — Trail Edition,Hydration,Mixes,ClearCurrent,7.08,14.16
+PRD-017-S,Signal Whistle,Accessories,Safety,Ridgeworks,3.0,8.0
+PRD-017-T,Signal Whistle — Trail Edition,Accessories,Safety,Ridgeworks,3.54,9.44
+PRD-018-S,Pine Knot Multi-Tool,Accessories,Tools,Ridgeworks,14.0,29.0
+PRD-018-T,Pine Knot Multi-Tool — Trail Edition,Accessories,Tools,Ridgeworks,16.52,34.22
+PRD-019-S,Dry Creek Gear Pouch,Accessories,Storage,Ridgeworks,7.0,15.0
+PRD-019-T,Dry Creek Gear Pouch — Trail Edition,Accessories,Storage,Ridgeworks,8.26,17.7
+PRD-020-S,Lookout Camp Chair,Accessories,Comfort,Ridgeworks,29.0,54.0
+PRD-020-T,Lookout Camp Chair — Trail Edition,Accessories,Comfort,Ridgeworks,34.22,63.72

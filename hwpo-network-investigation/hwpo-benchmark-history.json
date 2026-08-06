@@ -1,0 +1,1641 @@
+{
+  "source_endpoint": "GET athlete/benchmarks/{id}/benchmark_values",
+  "benchmarks": [
+    {
+      "benchmark": {
+        "id": 86,
+        "name": "10km Row",
+        "code": "ROW_10K",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 2520,
+        "progress": null,
+        "difference": null
+      },
+      "entries": [
+        {
+          "id": 726197,
+          "media_count": null,
+          "date": "2022-12-28",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 2520,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 116,
+        "name": "10RM Strict Press",
+        "code": "10RM_STPRESS",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 95.0,
+        "progress": -17,
+        "difference": "loss"
+      },
+      "entries": [
+        {
+          "id": 1127721,
+          "media_count": null,
+          "date": "2022-11-14",
+          "progress": -17,
+          "difference": "loss",
+          "has_note": false,
+          "value": 95.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1109599,
+          "media_count": null,
+          "date": "2022-11-07",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 115.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 523244,
+          "media_count": null,
+          "date": "2022-10-01",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 115.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 84,
+        "name": "1km Row",
+        "code": "ROW_1K",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 210,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1208387,
+          "media_count": null,
+          "date": "2023-07-23",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 210,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 726196,
+          "media_count": null,
+          "date": "2022-12-28",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 210,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1136800,
+          "media_count": null,
+          "date": "2022-11-20",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 210,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 837837,
+          "media_count": null,
+          "date": "2022-10-01",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 210,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 521903,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 210,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 3,
+        "name": "1 Mile Run (100m splits)",
+        "code": "1MILE_RUN_100MSPLT",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 600,
+        "progress": null,
+        "difference": null
+      },
+      "entries": [
+        {
+          "id": 1560271,
+          "media_count": null,
+          "date": "2024-01-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 600,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 155,
+        "name": "1 Mile Run (400m splits)",
+        "code": "1_MILE_RUN",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 600,
+        "progress": null,
+        "difference": null
+      },
+      "entries": [
+        {
+          "id": 1125706,
+          "media_count": null,
+          "date": "2023-06-19",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 600,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 21,
+        "name": "1RM Back Squat",
+        "code": "1RM_BACKSQ",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 275.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1825441,
+          "media_count": null,
+          "date": "2024-07-01",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1646353,
+          "media_count": null,
+          "date": "2024-03-21",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1601114,
+          "media_count": null,
+          "date": "2024-02-22",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1587017,
+          "media_count": null,
+          "date": "2024-02-15",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1571774,
+          "media_count": null,
+          "date": "2024-02-08",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1223906,
+          "media_count": null,
+          "date": "2023-08-06",
+          "progress": 6,
+          "difference": "gain",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 931620,
+          "media_count": null,
+          "date": "2023-03-22",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 260.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 691657,
+          "media_count": null,
+          "date": "2022-12-07",
+          "progress": -2,
+          "difference": "loss",
+          "has_note": false,
+          "value": 260.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1125251,
+          "media_count": null,
+          "date": "2022-11-13",
+          "progress": 4,
+          "difference": "gain",
+          "has_note": false,
+          "value": 265.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 534063,
+          "media_count": null,
+          "date": "2022-10-05",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 255.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521902,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 255.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 27,
+        "name": "1RM Bench Press",
+        "code": "1RM_BPRESS",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 155.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1646354,
+          "media_count": null,
+          "date": "2024-03-21",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 155.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1601115,
+          "media_count": null,
+          "date": "2024-02-22",
+          "progress": 3,
+          "difference": "gain",
+          "has_note": false,
+          "value": 155.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1587018,
+          "media_count": null,
+          "date": "2024-02-15",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1571775,
+          "media_count": null,
+          "date": "2024-02-08",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 664966,
+          "media_count": null,
+          "date": "2022-11-12",
+          "progress": -3,
+          "difference": "loss",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1099376,
+          "media_count": null,
+          "date": "2022-11-06",
+          "progress": 7,
+          "difference": "gain",
+          "has_note": false,
+          "value": 155.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521896,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 145.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 46,
+        "name": "1RM Clean and Jerk (Full Clean)",
+        "code": "1RM_CLEAN_JERK",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 165.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1843583,
+          "media_count": null,
+          "date": "2024-07-13",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1602708,
+          "media_count": null,
+          "date": "2024-02-23",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1590170,
+          "media_count": null,
+          "date": "2024-02-16",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1571782,
+          "media_count": null,
+          "date": "2024-02-09",
+          "progress": 2,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1552699,
+          "media_count": null,
+          "date": "2024-01-26",
+          "progress": 12,
+          "difference": "gain",
+          "has_note": false,
+          "value": 162.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521901,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 145.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 45,
+        "name": "1RM Clean (Full)",
+        "code": "1RM_CLEAN",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 175.0,
+        "progress": null,
+        "difference": null
+      },
+      "entries": [
+        {
+          "id": 649072,
+          "media_count": null,
+          "date": "2022-11-27",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 175.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 47,
+        "name": "1RM Deadlift",
+        "code": "1RM_DEADLIFT",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 275.0,
+        "progress": -18,
+        "difference": "loss"
+      },
+      "entries": [
+        {
+          "id": 1843584,
+          "media_count": null,
+          "date": "2024-07-13",
+          "progress": -18,
+          "difference": "loss",
+          "has_note": false,
+          "value": 275.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1602709,
+          "media_count": null,
+          "date": "2024-02-23",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 335.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1599705,
+          "media_count": null,
+          "date": "2024-02-19",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 335.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1590171,
+          "media_count": null,
+          "date": "2024-02-16",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 335.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1571783,
+          "media_count": null,
+          "date": "2024-02-09",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 335.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1299061,
+          "media_count": null,
+          "date": "2023-09-11",
+          "progress": 3,
+          "difference": "gain",
+          "has_note": false,
+          "value": 335.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 553260,
+          "media_count": null,
+          "date": "2022-10-13",
+          "progress": 3,
+          "difference": "gain",
+          "has_note": false,
+          "value": 325.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 525708,
+          "media_count": null,
+          "date": "2022-10-06",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 315.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521897,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 315.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 53,
+        "name": "1RM Front Squat",
+        "code": "1RM_FRONTSQ",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 220.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1639254,
+          "media_count": null,
+          "date": "2024-03-17",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 220.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1628048,
+          "media_count": null,
+          "date": "2024-03-10",
+          "progress": 2,
+          "difference": "gain",
+          "has_note": false,
+          "value": 220.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1619378,
+          "media_count": null,
+          "date": "2024-03-03",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1607972,
+          "media_count": null,
+          "date": "2024-02-25",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1593034,
+          "media_count": null,
+          "date": "2024-02-18",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1580749,
+          "media_count": null,
+          "date": "2024-02-11",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1223907,
+          "media_count": null,
+          "date": "2023-08-06",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1125252,
+          "media_count": null,
+          "date": "2022-11-13",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 534064,
+          "media_count": null,
+          "date": "2022-10-05",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521899,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 215.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 71,
+        "name": "1RM Overhead Squat",
+        "code": "1RM_OHSQ",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 160.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1595535,
+          "media_count": null,
+          "date": "2024-02-20",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 160.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1587022,
+          "media_count": null,
+          "date": "2024-02-13",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 160.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1569360,
+          "media_count": null,
+          "date": "2024-02-06",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 160.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 612937,
+          "media_count": null,
+          "date": "2022-11-14",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 160.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 612956,
+          "media_count": null,
+          "date": "2022-10-31",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 160.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 578814,
+          "media_count": null,
+          "date": "2022-10-24",
+          "progress": 19,
+          "difference": "gain",
+          "has_note": false,
+          "value": 160.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 529306,
+          "media_count": null,
+          "date": "2022-10-10",
+          "progress": 8,
+          "difference": "gain",
+          "has_note": false,
+          "value": 135.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521898,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 99,
+        "name": "1RM Power Clean",
+        "code": "1RM_PCLEAN",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 205.0,
+        "progress": 5,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1639255,
+          "media_count": null,
+          "date": "2024-03-17",
+          "progress": 5,
+          "difference": "gain",
+          "has_note": false,
+          "value": 205.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 931621,
+          "media_count": null,
+          "date": "2023-03-22",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 195.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 268,
+        "name": "1RM Power Clean & Push Jerk",
+        "code": "1RM_PCLEAN_PJERK",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 165.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1619379,
+          "media_count": null,
+          "date": "2024-03-03",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1607973,
+          "media_count": null,
+          "date": "2024-02-25",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1593035,
+          "media_count": null,
+          "date": "2024-02-18",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1580750,
+          "media_count": null,
+          "date": "2024-02-11",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1068172,
+          "media_count": null,
+          "date": "2023-05-23",
+          "progress": 10,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 553261,
+          "media_count": null,
+          "date": "2022-10-13",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 525709,
+          "media_count": null,
+          "date": "2022-10-06",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 254,
+        "name": "1RM Power Snatch",
+        "code": "1RM_POWER_SNATCH",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 125.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 945137,
+          "media_count": null,
+          "date": "2023-03-27",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 534065,
+          "media_count": null,
+          "date": "2022-10-05",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 100,
+        "name": "1RM Push Jerk",
+        "code": "1RM_PJERK",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 180.0,
+        "progress": 9,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1243065,
+          "media_count": null,
+          "date": "2023-08-14",
+          "progress": 9,
+          "difference": "gain",
+          "has_note": false,
+          "value": 180.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 633107,
+          "media_count": null,
+          "date": "2022-11-13",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 76,
+        "name": "1RM Push Press",
+        "code": "1RM_PPRESS",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 150.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1068169,
+          "media_count": null,
+          "date": "2023-05-22",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1127720,
+          "media_count": null,
+          "date": "2022-11-14",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1109598,
+          "media_count": null,
+          "date": "2022-11-07",
+          "progress": 7,
+          "difference": "gain",
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 525243,
+          "media_count": null,
+          "date": "2022-10-02",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 140.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 523243,
+          "media_count": null,
+          "date": "2022-10-01",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 140.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 98,
+        "name": "1RM Snatch (Full)",
+        "code": "1RM_SNATCH",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 125.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1867514,
+          "media_count": null,
+          "date": "2024-07-29",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1642287,
+          "media_count": null,
+          "date": "2024-03-19",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1595534,
+          "media_count": null,
+          "date": "2024-02-20",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1587021,
+          "media_count": null,
+          "date": "2024-02-13",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1569359,
+          "media_count": null,
+          "date": "2024-02-06",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 612938,
+          "media_count": null,
+          "date": "2022-11-14",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 612957,
+          "media_count": null,
+          "date": "2022-10-31",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 578815,
+          "media_count": null,
+          "date": "2022-10-24",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 529307,
+          "media_count": null,
+          "date": "2022-10-10",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 521900,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 330,
+        "name": "1RM Split Jerk",
+        "code": "1RM_SPLIT_JERK",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 165.0,
+        "progress": 10,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1068170,
+          "media_count": null,
+          "date": "2023-05-22",
+          "progress": 10,
+          "difference": "gain",
+          "has_note": false,
+          "value": 165.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 697973,
+          "media_count": null,
+          "date": "2022-12-11",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 150.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 113,
+        "name": "1RM Strict Press ",
+        "code": "1RM_STPRESS",
+        "measure": "weight",
+        "symbol": "lb",
+        "units": "pound",
+        "last_value": 125.0,
+        "progress": 0,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 1642284,
+          "media_count": null,
+          "date": "2024-03-18",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1599704,
+          "media_count": null,
+          "date": "2024-02-19",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1583519,
+          "media_count": null,
+          "date": "2024-02-12",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1232052,
+          "media_count": null,
+          "date": "2023-08-09",
+          "progress": 9,
+          "difference": "gain",
+          "has_note": false,
+          "value": 125.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 1127724,
+          "media_count": null,
+          "date": "2023-06-20",
+          "progress": 5,
+          "difference": "gain",
+          "has_note": false,
+          "value": 115.0,
+          "symbol": "lb",
+          "units": "pound"
+        },
+        {
+          "id": 945136,
+          "media_count": null,
+          "date": "2023-03-27",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 110.0,
+          "symbol": "lb",
+          "units": "pound"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 83,
+        "name": "2km Row",
+        "code": "ROW_2K",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 544,
+        "progress": -6,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 2371211,
+          "media_count": null,
+          "date": "2025-05-20",
+          "progress": -6,
+          "difference": "gain",
+          "has_note": false,
+          "value": 544,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1732630,
+          "media_count": null,
+          "date": "2024-05-06",
+          "progress": 21,
+          "difference": "loss",
+          "has_note": false,
+          "value": 580,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1208389,
+          "media_count": null,
+          "date": "2023-07-30",
+          "progress": -7,
+          "difference": "gain",
+          "has_note": false,
+          "value": 480,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1208386,
+          "media_count": null,
+          "date": "2023-07-23",
+          "progress": 12,
+          "difference": "loss",
+          "has_note": false,
+          "value": 515,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 726195,
+          "media_count": null,
+          "date": "2022-12-28",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 460,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 523486,
+          "media_count": null,
+          "date": "2022-10-08",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 460,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 306,
+        "name": "400m Run",
+        "code": "400M_RUN",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 110,
+        "progress": null,
+        "difference": null
+      },
+      "entries": [
+        {
+          "id": 1125707,
+          "media_count": null,
+          "date": "2023-06-19",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 110,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 88,
+        "name": "500m Row",
+        "code": "ROW_500M",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 103,
+        "progress": null,
+        "difference": null
+      },
+      "entries": [
+        {
+          "id": 709212,
+          "media_count": null,
+          "date": "2022-12-15",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 103,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    },
+    {
+      "benchmark": {
+        "id": 85,
+        "name": "5km Row",
+        "code": "ROW_5K",
+        "measure": "time",
+        "symbol": "translation missing: en.api.score.s.label",
+        "units": "second",
+        "last_value": 1396,
+        "progress": -5,
+        "difference": "gain"
+      },
+      "entries": [
+        {
+          "id": 2385566,
+          "media_count": null,
+          "date": "2025-06-03",
+          "progress": -5,
+          "difference": "gain",
+          "has_note": false,
+          "value": 1396,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1738663,
+          "media_count": null,
+          "date": "2024-05-12",
+          "progress": 17,
+          "difference": "loss",
+          "has_note": false,
+          "value": 1475,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1208390,
+          "media_count": null,
+          "date": "2023-07-30",
+          "progress": 5,
+          "difference": "loss",
+          "has_note": false,
+          "value": 1260,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1208388,
+          "media_count": null,
+          "date": "2023-07-23",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 1197,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 694733,
+          "media_count": null,
+          "date": "2022-12-09",
+          "progress": -9,
+          "difference": "gain",
+          "has_note": true,
+          "value": 1197,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 1136801,
+          "media_count": null,
+          "date": "2022-11-20",
+          "progress": 0,
+          "difference": "gain",
+          "has_note": false,
+          "value": 1320,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 523487,
+          "media_count": null,
+          "date": "2022-10-08",
+          "progress": 10,
+          "difference": "loss",
+          "has_note": false,
+          "value": 1320,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 837838,
+          "media_count": null,
+          "date": "2022-10-01",
+          "progress": -9,
+          "difference": "gain",
+          "has_note": false,
+          "value": 1198,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        },
+        {
+          "id": 521904,
+          "media_count": null,
+          "date": "2022-09-30",
+          "progress": null,
+          "difference": null,
+          "has_note": false,
+          "value": 1320,
+          "symbol": "translation missing: en.api.score.s.label",
+          "units": "second"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+package defpackage;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes3.dex */
+public interface v02 extends h72.a {
+
+    /* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+    public static final class a implements h72.b<v02> {
+        public static final /* synthetic */ a t = new a();
+    }
+
+    a23 t(u02 u02Var);
+
+    void v(r02<?> r02Var);
+}

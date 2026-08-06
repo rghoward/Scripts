@@ -1,0 +1,82 @@
+{
+  "notice": "Schema-derived sanitized examples; not captured user data.",
+  "login_request": {
+    "method": "POST",
+    "url": "https://app.hwpo-training.com/mobile/api/v4/users/sign_in",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "form": {
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>",
+      "email": "<ACCOUNT_EMAIL>",
+      "password": "<ACCOUNT_PASSWORD>"
+    }
+  },
+  "login_response": {
+    "access_token": "<ACCESS_TOKEN>",
+    "token_type": "Bearer",
+    "current": {
+      "id": "<USER_ID>",
+      "email": "<ACCOUNT_EMAIL>",
+      "additional_fields": "<REDACTED_USER_OBJECT_FIELDS>"
+    }
+  },
+  "schedule_list_request": {
+    "method": "GET",
+    "url": "https://app.hwpo-training.com/mobile/api/v4/schedules?from=<UNIX_SECONDS>&to=<UNIX_SECONDS>",
+    "headers": {
+      "Authorization": "Bearer <ACCESS_TOKEN>",
+      "Accept": "application/json"
+    }
+  },
+  "schedule_list_response": {
+    "schedules": [
+      {
+        "id": "<SCHEDULE_ID>",
+        "color": "<COLOR>",
+        "plan": {
+          "id": "<PLAN_ID>",
+          "title": "<PLAN_TITLE>",
+          "plan_type": "<PLAN_TYPE>",
+          "cover_url": "<MEDIA_URL_OR_NULL>",
+          "plan_options": []
+        },
+        "day_number": "<DAY_NUMBER_OR_NULL>",
+        "date": "<UNIX_SECONDS>",
+        "sections": [
+          {
+            "id": "<SECTION_ID>",
+            "title": "<SECTION_TITLE>",
+            "kind": "section",
+            "position": 1,
+            "description": "<WORKOUT_DESCRIPTION>",
+            "has_performance": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "attachments": [],
+            "benchmarks": null,
+            "performance": null,
+            "plan_option_id": null,
+            "score": null,
+            "pre_wod": null,
+            "post_wod": null
+          }
+        ],
+        "can_navigate_back": true,
+        "can_navigate_forward": false
+      }
+    ],
+    "launch_dates": []
+  },
+  "schedule_detail_request": {
+    "method": "GET",
+    "url": "https://app.hwpo-training.com/mobile/api/v4/schedules/<SCHEDULE_ID>/",
+    "headers": {
+      "Authorization": "Bearer <ACCESS_TOKEN>"
+    }
+  },
+  "schedule_detail_response": {
+    "schedule": "<SCHEDULE_OBJECT_USING_THE_SCHEMA_ABOVE>"
+  }
+}

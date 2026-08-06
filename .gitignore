@@ -43,6 +43,7 @@ venv/
 *.aab
 *.aar
 local.properties
+**/.tmp.driveupload/
 
 # Xcode, CocoaPods, and generated iOS files
 DerivedData/

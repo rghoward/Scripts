@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "method": "historical benchmark reconstruction",
+  "source_archive_preserved": true,
+  "records_with_annotations": 698,
+  "sections_with_annotations": 775,
+  "annotation_count": 3073,
+  "confidence_counts": {
+    "high": 2925,
+    "explicit": 148
+  },
+  "review_status_counts": {
+    "verified": 3073
+  },
+  "warning": "Only structured annotations should be recalculated. Unannotated fixed loads remain literal source prescriptions.",
+  "source": "clean-data/hwpo-workouts-complete.json",
+  "benchmark_source": "hwpo-benchmark-history.json",
+  "output": "normalized-data/hwpo-workouts-with-loads.json"
+}

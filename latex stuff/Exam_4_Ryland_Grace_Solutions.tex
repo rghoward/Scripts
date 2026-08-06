@@ -1,0 +1,314 @@
+\documentclass[11pt,addpoints]{exam}
+\usepackage{amsfonts,amssymb,amsmath, amsthm, mathtools}
+\usepackage{graphicx}
+\usepackage{systeme}
+\usepackage{pgf,tikz,pgfplots}
+\pgfplotsset{compat=1.15}
+\usepgfplotslibrary{fillbetween}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usepackage{moresize}
+\usepackage{wasysym}
+\usepackage{multicol}
+\usepackage{enumitem}
+\renewcommand{\thechoice}{{\Large$\Circle$ \ }}
+\renewcommand{\choicelabel}{\thechoice}
+\newcommand{\versionmark}{$\heartsuit$}
+\renewcommand{\thepartno}{\roman{partno}}
+\pagestyle{headandfoot}
+\setlength\parindent{0pt}
+\usepackage{array}
+\usepackage{amssymb}
+\checkboxchar{$\Box$}
+
+\firstpageheader{CS 2050 - Exam 4 Ryland Grace\\ Spring 2026}{}{Name: \underline{\hspace{2.5in}}\\ GTID: \underline{\hspace{2.5in}}}
+\runningheader{CS 2050 - Exam 4 Ryland Grace}{Page \thepage\ of \numpages}{Name: \underline{\hspace{2 in}}}
+\runningheadrule
+\firstpagefooter{}{}{}
+\runningfooter{}{}{}
+\bracketedpoints
+\pointsinmargin
+
+\renewenvironment{solution}
+{\par\medskip\noindent\hrulefill\par\smallskip\noindent\textbf{Instructor Solution:}\enspace\ignorespaces}
+{\par\smallskip\noindent\hrulefill\par\medskip}
+
+\begin{document}
+
+\begin{center}
+\fbox{\fbox{\parbox{6in}{\centering
+No notes, calculators, or other aids are allowed. Read all directions carefully and write your answers in the space provided.\\
+Taking this exam signifies that you are aware of and acting in accordance with the Georgia Tech Academic Honor Code.\\ Do not separate any pages from the rest of your exam.
+}}}
+\end{center}
+\vspace{\baselineskip}
+\begin{center}
+    \vspace{30mm}
+    \HUGE{Version Ryland Grace}
+
+    \numpoints\ points
+\end{center}
+\newpage
+
+\textbf{For the following questions, completely fill in the bubble corresponding to your chosen answer.}
+
+\begin{questions}
+
+\question[2] Select the choice below to receive 2 free points.
+\begin{choices}
+    \CorrectChoice I want free points!
+\end{choices}
+\begin{solution}
+Select the only choice. This question awards 2 free points.
+\end{solution}
+
+\question[3] The Pigeonhole Principle states that if $n$ objects are placed into $m$ boxes and $m>n$, then at least one box must contain more than one object.
+\begin{multicols}{2}
+\begin{choices}
+    \choice True
+    \CorrectChoice False
+\end{choices}
+\end{multicols}
+\begin{solution}
+\textbf{False.} More objects than boxes, not more boxes than objects, forces a collision. For example, if $n=2$ objects are placed into $m=3$ boxes, the objects may be placed in two different boxes, so no box contains more than one object. The usual statement is: if $n>m$, then some box contains at least $\lceil n/m\rceil\ge 2$ objects.
+\end{solution}
+
+\question[3] For integers $n\ge 1$ and $1\le k\le n$, the inequality
+\[
+\binom{n}{k}\le n^k
+\]
+holds.
+\begin{multicols}{2}
+\begin{choices}
+    \CorrectChoice True
+    \choice False
+\end{choices}
+\end{multicols}
+\begin{solution}
+\textbf{True.} The value $\binom{n}{k}$ counts the $k$-element subsets of an $n$-element set. List the elements of each such subset in increasing order; this injects those subsets into the set of all ordered length-$k$ sequences from the $n$ elements. There are $n^k$ such sequences, so $\binom{n}{k}\le n^k$.
+\end{solution}
+
+\question[3] There are more length-five binary strings that begin with $0$ than length-six binary strings that contain exactly three $0$s.
+\begin{multicols}{2}
+\begin{choices}
+    \choice True
+    \CorrectChoice False
+\end{choices}
+\end{multicols}
+\begin{solution}
+\textbf{False.} Once the first bit of a length-five string is fixed as $0$, the other four bits are arbitrary, giving $2^4=16$ strings. A length-six string with exactly three $0$s is determined by the three positions occupied by the $0$s, giving $\binom{6}{3}=20$ strings. Since $16<20$, the first collection is not larger.
+\end{solution}
+
+\question[3] On the spacecraft \textit{Hail Mary}, a procedure consists of three successive tasks, $T_1,T_2,$ and $T_3$. For each $i$, task $T_i$ can be completed in exactly $n_i$ ways, regardless of the choices made for the other tasks. The procedure can therefore be completed in exactly $n_1n_2n_3$ ways.
+\begin{multicols}{2}
+\begin{choices}
+    \CorrectChoice True
+    \choice False
+\end{choices}
+\end{multicols}
+\begin{solution}
+\textbf{True.} By the Product Rule, each of the $n_1$ choices for $T_1$ can be paired with any of the $n_2$ choices for $T_2$ and any of the $n_3$ choices for $T_3$. Thus the number of ordered triples of task choices is $n_1n_2n_3$.
+\end{solution}
+
+\question[3] For integers $n\ge 0$ and $0\le k\le n$, the number of $k$-element subsets of $\{1,2,\ldots,n\}$ equals the number of $(n-k)$-element subsets.
+\begin{multicols}{2}
+\begin{choices}
+    \CorrectChoice True
+    \choice False
+\end{choices}
+\end{multicols}
+\begin{solution}
+\textbf{True.} Taking complements gives a bijection from the $k$-element subsets to the $(n-k)$-element subsets. Equivalently, $\binom{n}{k}=\binom{n}{n-k}$.
+\end{solution}
+
+\newpage
+
+\question[5] Dr. Grace has 10 black, 10 red, and 10 blue markers. He takes 10 markers to class, including at least two of each color. What is the largest number of markers of one color that he is guaranteed to have?
+\begin{choices}
+    \choice 2
+    \CorrectChoice 4
+    \choice 6
+    \choice 10
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: 4.} Distributing 10 selected markers among three colors, the Generalized Pigeonhole Principle guarantees at least $\lceil 10/3\rceil=4$ of one color. This bound is sharp because a selection with color counts $(4,3,3)$ satisfies the conditions and has no color represented more than four times.
+
+Option 2 is too small because 4 is always guaranteed. Option 6 is not guaranteed; $(4,3,3)$ is a counterexample. Option 10 is also not guaranteed and is incompatible with the requirement of at least two markers of each of the other colors. ``None of the above'' is incorrect because 4 is listed.
+\end{solution}
+
+\question[5] Grace assigns 25 indistinguishable tasks among 6 distinct Eridian engineers. In how many ways can he make the assignment if every engineer receives at least two tasks?
+\begin{choices}
+    \choice $\binom{25}{2}\binom{23}{2}\binom{21}{2}\cdots\binom{15}{2}$
+    \choice $\binom{30}{5}$
+    \choice $25^6$
+    \CorrectChoice $\binom{18}{5}$
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: $\binom{18}{5}$.} Let $x_i$ be the number of tasks assigned to engineer $i$. Set $y_i=x_i-2\ge0$. Then
+\[
+y_1+\cdots+y_6=25-12=13.
+\]
+Stars and bars gives $\binom{13+6-1}{6-1}=\binom{18}{5}=8568$ assignments.
+
+The product in the first option treats tasks as distinguishable and does not correctly finish the distribution. The second option, $\binom{30}{5}$, is the unrestricted stars-and-bars count for 25 tasks and 6 engineers, so it ignores the lower bounds. The expression $25^6$ counts functions in the wrong direction and also ignores indistinguishability and the lower bounds. ``None of the above'' is incorrect because $\binom{18}{5}$ is listed.
+\end{solution}
+
+\question[5] Dr. Ryland Grace's science exam has two versions, A and B. He must give one version to each of five distinct students receiving accommodations. If there are no restrictions on the assignments, in how many ways can he assign the versions?
+\begin{choices}
+    \choice 10
+    \choice 25
+    \CorrectChoice 32
+    \choice 60
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: 32.} Each of the five students independently receives either version A or version B, so the Product Rule gives $2^5=32$ assignments.
+
+The values 10, 25, and 60 do not arise from the Product Rule for five independent binary choices. In particular, 10 merely multiplies the numbers of students and versions, while 25 is $5^2$ rather than $2^5$. ``None of the above'' is incorrect because 32 is listed.
+\end{solution}
+
+\question[5] A four-member crew for the \textit{Hail Mary} is chosen from two scientists, three captains, and four engineers. If the crew must contain exactly one scientist and exactly one captain, how many crews are possible?
+\begin{choices}
+    \choice 24
+    \CorrectChoice 36
+    \choice 48
+    \choice 60
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: 36.} Choose one of the two scientists, one of the three captains, and two of the four engineers:
+\[
+\binom21\binom31\binom42=2\cdot3\cdot6=36.
+\]
+The values 24, 48, and 60 result from incorrect choices or from treating an unordered crew as though order mattered. ``None of the above'' is incorrect because 36 is listed.
+\end{solution}
+
+\newpage
+
+\question[5] Aboard the \textit{Hail Mary}, Grace places 6 of 13 distinct books on the top level of a bookshelf and the remaining 7 books on the lower level. If the order of the books on each level matters, how many arrangements are possible?
+\begin{choices}
+    \choice $P(7,7)P(6,6)$
+    \choice $\binom{13}{7}\cdot7\cdot6$
+    \CorrectChoice $P(13,7)P(6,6)$
+    \choice $\binom{13}{7}\binom{13}{6}$
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: $P(13,7)P(6,6)$.} Select and order the 7 lower-level books in $P(13,7)=13!/6!$ ways. Arrange the remaining 6 books on top in $P(6,6)=6!$ ways. The product is $13!=6{,}227{,}020{,}800$.
+
+The first option arranges two already selected groups but never chooses which books go on which level. The second chooses the lower-level books but uses $7\cdot6$ instead of $7!6!$ to order both levels. The fourth option chooses overlapping subsets and does not arrange either level. ``None of the above'' is incorrect because the third option is correct.
+\end{solution}
+
+\question[5] How many distinct arrangements of the letters in \textsc{CIENCIA} have all vowels consecutive and all consonants consecutive? For example, \textsc{NCCIIEA} is valid, whereas \textsc{IECNCIA} is not.
+\begin{choices}
+    \choice $P(7,3)$
+    \choice 36
+    \choice $2P(7,3)P(7,4)$
+    \CorrectChoice 72
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: 72.} The vowels are $I,I,E,A$, so they have $4!/2!=12$ distinct internal arrangements. The consonants are $C,C,N$, so they have $3!/2!=3$ internal arrangements. The vowel block and consonant block can occur in either order. Thus
+\[
+2\cdot\frac{4!}{2!}\cdot\frac{3!}{2!}=2\cdot12\cdot3=72.
+\]
+Here $P(7,3)=210$ ignores both the block restriction and repeated letters. The value 36 omits the two possible orders of the blocks. The third expression treats repeated letters as distinct and greatly overcounts. ``None of the above'' is incorrect because 72 is listed.
+\end{solution}
+
+\question[5] Two distinct engineers and three distinct scientists sit at a circular table to discuss the \textit{Hail Mary}'s launch plans. How many seatings are possible if the engineers may not sit next to each other? Two seatings are considered the same exactly when one is a rotation of the other.
+\begin{choices}
+    \choice 6
+    \CorrectChoice 12
+    \choice 24
+    \choice 120
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: 12.} There are $(5-1)!=24$ circular seatings of five distinct people. If the engineers sit together, treat them as one block; the block and three scientists have $(4-1)!=6$ circular orders, and the engineers have $2!$ internal orders. Hence there are $6\cdot2=12$ forbidden seatings and $24-12=12$ valid seatings.
+
+The value 6 omits a factor of 2 in one of the counts. The value 24 counts all circular seatings without excluding adjacent engineers. The value 120 counts linear seatings and also ignores the restriction. ``None of the above'' is incorrect because 12 is listed.
+\end{solution}
+
+\question[5] Grace has 15 identical ``I Love Earth'' pins to distribute among 4 distinct crewmates, one of whom is the captain. If every crewmate must receive at least 2 pins and the captain may receive at most 5 pins, how many distributions are possible?
+\begin{choices}
+    \choice $\binom{10}{3}$
+    \CorrectChoice $\binom{10}{3}-\binom{6}{3}$
+    \choice $\binom{18}{3}-\binom{12}{3}$
+    \choice $\binom{10}{3}-\binom{5}{3}$
+    \choice None of the above.
+\end{choices}
+\begin{solution}
+\textbf{Correct answer: $\binom{10}{3}-\binom{6}{3}$.} After first giving each crewmate 2 pins, let $y_1$ be the captain's additional pins and let $y_2,y_3,y_4$ be the others' additional pins. Then
+\[
+y_1+y_2+y_3+y_4=7,\qquad y_i\ge0,
+\]
+and the captain's upper bound is $y_1\le3$. There are $\binom{10}{3}$ unrestricted solutions. For the forbidden solutions with $y_1\ge4$, set $z_1=y_1-4$; then $z_1+y_2+y_3+y_4=3$, giving $\binom{6}{3}$ solutions. The answer is
+\[
+\binom{10}{3}-\binom{6}{3}=120-20=100.
+\]
+The first option ignores the captain's upper bound. The third uses incorrect stars-and-bars totals. The fourth subtracts $\binom53$, which corresponds to the wrong shifted sum. ``None of the above'' is incorrect because the second option is correct.
+\end{solution}
+
+\newpage
+For the following question, show \textbf{all} work using topics covered in lecture. Brute-force solutions receive no credit. Simplify the final result to a single integer and write it on the answer line. Leaving the answer in combinatorial notation may result in a point penalty.
+
+\question[12] Consider ordered sequences of length five whose entries belong to $\{-1,0,1\}$. How many such sequences have entries that sum to zero? \textbf{Show all work, simplify your answer to a single integer, and write it on the answer line below.}
+
+\begin{solution}
+For the sum to be zero, the number of $1$s must equal the number of $-1$s. Let this common number be $r$. Because the sequence has length five, $r\in\{0,1,2\}$. For a fixed $r$, the sequence contains $r$ entries equal to $1$, $r$ entries equal to $-1$, and $5-2r$ zeros. Therefore the number of sequences is
+\[
+\sum_{r=0}^{2}\frac{5!}{r!\,r!\,(5-2r)!}
+=1+\frac{5!}{1!1!3!}+\frac{5!}{2!2!1!}
+=1+20+30=\boxed{51}.
+\]
+\end{solution}
+
+Answer: \rule{4cm}{0.15mm} \hspace{1cm}
+
+\newpage
+\question[16] Aboard a United Nations ship at sea, 170 scientists are working on \textit{Project Hail Mary}. Prove that at least three scientists have birthdays that fall in the same month of the year and on the same day of the week (for example, both birthdays occur on a Monday in October).
+
+\begin{solution}
+Classify each scientist by the ordered pair consisting of the month in which the scientist's birthday occurs and the day of the week on which that birthday occurs in the year under consideration. There are $12\cdot7=84$ possible month--weekday pairs. Suppose, for contradiction, that no pair class contained three scientists. Then every class would contain at most two scientists, so there could be at most $2\cdot84=168$ scientists. This contradicts the stated total of 170. Therefore, by the Generalized Pigeonhole Principle, at least one month--weekday pair contains at least $\lceil170/84\rceil=3$ scientists. Hence at least three scientists' birthdays occur in the same month and on the same day of the week.
+\end{solution}
+
+\newpage
+\question[15] Let $n$ and $k$ be integers with $2\le k\le n$. Give a double-counting proof of the identity
+\[
+\binom{n}{2}=\binom{k}{2}+k(n-k)+\binom{n-k}{2}.
+\]
+
+\begin{solution}
+Let $S$ be an $n$-element set, and partition it into disjoint subsets $A$ and $B$ with $|A|=k$ and $|B|=n-k$. Count the two-element subsets of $S$ in two ways. Directly, there are $\binom{n}{2}$ such subsets. Alternatively, every two-element subset belongs to exactly one of three disjoint cases: both elements lie in $A$, one element lies in each of $A$ and $B$, or both elements lie in $B$. These cases contribute $\binom{k}{2}$, $\binom{k}{1}\binom{n-k}{1}=k(n-k)$, and $\binom{n-k}{2}$ subsets, respectively. Because the cases are mutually exclusive and exhaustive, the Sum Rule gives
+\[
+\binom{n}{2}=\binom{k}{2}+k(n-k)+\binom{n-k}{2},
+\]
+which proves the identity.
+\end{solution}
+
+\newpage
+\question \textbf{EXTRA CREDIT:} Art contest! Draw a picture of a CS 2050 TA and write the TA's name. Submissions will be judged on a scale from 1 to 3. You may not raise your hand to ask a TA anything about this question.
+
+\begin{solution}
+Answers will vary. Award 1--3 points according to the announced art-contest rubric, provided that the drawing depicts a CS 2050 TA and includes that TA's name.
+\end{solution}
+
+\newpage
+\textbf{Scratch Paper:} If you use this page for a solution, clearly indicate both here and on the original question page that the solution appears here.
+
+\newpage
+\section*{Instructor Audit Summary}
+
+\textbf{Corrected wording.} Grammar, punctuation, subject--verb agreement, and directions were standardized throughout. Counting objects were explicitly identified as distinct or indistinguishable where the intended method required it. The exam-version question now states that the five students are distinct. The circular-seating question now states that all five people are distinct and clarifies the rotation convention. The birthday proof specifies that weekday is evaluated in a fixed year. The Product Rule statement now explicitly says that the number of choices for each task does not depend on choices for the other tasks.
+
+\textbf{Incorrect answer keys found.} None. Every active answer indicated by a source comment was checked independently and is correct. The verified numerical answers are $4$, $8568$, $32$, $36$, $13!=6{,}227{,}020{,}800$, $72$, $12$, $100$, and $51$, as applicable.
+
+\textbf{Ambiguities.} The original Product Rule True/False statement did not explicitly rule out dependencies among task choices; without that assumption, the claimed product need not follow. The original birthday question did not specify a year, although the weekday of a calendar date changes from year to year. The intended pigeonhole argument works after fixing a year (or otherwise assigning one weekday to each birthday). The original extra-credit scoring is subjective because no detailed artistic rubric is supplied. These issues have been clarified where possible without changing the intended answers or difficulty.
+
+\textbf{Major mathematical issues.} No active question has multiple correct listed answers or lacks a correct listed answer. No numerical-answer error was found. The only material logical issue was the omitted independence condition in the original Product Rule statement; the revised wording supplies it.
+
+\end{questions}
+\end{document}

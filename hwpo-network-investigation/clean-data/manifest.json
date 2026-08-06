@@ -1,0 +1,60 @@
+{
+  "workout_count": 1142,
+  "duplicate_records_removed": 1688,
+  "source_files": [
+    "hwpo-all-remaining-days-checkpoint.json",
+    "hwpo-all-remaining-days.json",
+    "hwpo-flagship-1.0-days-286-299.json",
+    "hwpo-flagship-60-days-113-126-checkpoint.json",
+    "hwpo-flagship-60-days-113-126.json",
+    "hwpo-flagship-60-days-127-140-checkpoint.json",
+    "hwpo-flagship-60-days-127-140.json",
+    "hwpo-flagship-60-days-141-154-checkpoint.json",
+    "hwpo-flagship-60-days-141-154.json",
+    "hwpo-flagship-60-days-15-154-checkpoint.json",
+    "hwpo-flagship-60-days-15-154.json",
+    "hwpo-flagship-60-days-15-28-checkpoint.json",
+    "hwpo-flagship-60-days-15-28.json",
+    "hwpo-flagship-60-days-155-294-checkpoint.json",
+    "hwpo-flagship-60-days-155-294.json",
+    "hwpo-flagship-60-days-29-42-checkpoint.json",
+    "hwpo-flagship-60-days-29-42.json",
+    "hwpo-flagship-60-days-43-56-checkpoint.json",
+    "hwpo-flagship-60-days-43-56.json",
+    "hwpo-flagship-60-days-57-70-checkpoint.json",
+    "hwpo-flagship-60-days-57-70.json",
+    "hwpo-flagship-60-days-71-84-checkpoint.json",
+    "hwpo-flagship-60-days-71-84.json",
+    "hwpo-flagship-60-days-85-98-checkpoint.json",
+    "hwpo-flagship-60-days-85-98.json",
+    "hwpo-flagship-60-days-99-112-checkpoint.json",
+    "hwpo-flagship-60-days-99-112.json",
+    "hwpo-flagship-60-first-two-weeks.json"
+  ],
+  "plans": [
+    {
+      "plan_id": 73,
+      "plan_title": "FLAGSHIP 1.0",
+      "workout_count": 481,
+      "first_day": 1,
+      "last_day": 481,
+      "first_date": "2023-04-02",
+      "last_date": "2024-07-25",
+      "missing_days": [],
+      "continuous": true,
+      "output_file": "hwpo-flagship-1.0.json"
+    },
+    {
+      "plan_id": 77,
+      "plan_title": "60 1.0",
+      "workout_count": 661,
+      "first_day": 286,
+      "last_day": 946,
+      "first_date": "2024-10-05",
+      "last_date": "2026-07-27",
+      "missing_days": [],
+      "continuous": true,
+      "output_file": "hwpo-60-1.0.json"
+    }
+  ]
+}

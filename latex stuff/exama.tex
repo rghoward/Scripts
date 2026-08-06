@@ -1,0 +1,362 @@
+\documentclass[11pt,addpoints]{exam}
+\usepackage{amsfonts,amssymb,amsmath, amsthm, mathtools}
+\usepackage{graphicx}
+\usepackage{systeme}
+\usepackage{pgf,tikz,pgfplots}
+\pgfplotsset{compat=1.15}
+\usepgfplotslibrary{fillbetween}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usepackage{moresize}
+\usepackage{wasysym}
+\usepackage{multicol}
+\usepackage{enumitem}
+\renewcommand{\thechoice}{{\Large$\Circle$ \ }}
+\renewcommand{\choicelabel}{\thechoice}
+\newcommand{\versionmark}{$\heartsuit$}
+\renewcommand{\thepartno}{\roman{partno}}
+\pagestyle{headandfoot}
+\setlength\parindent{0pt}
+\usepackage{array}
+\usepackage{amssymb} % Required for the \Box symbol
+\checkboxchar{$\Box$}
+
+\firstpageheader{CS 2050 - Exam 4 Ryland Grace\\ Spring 2026}{}{Name: \underline{\hspace{2.5in}}\\ GTID: \underline{\hspace{2.5in}}}
+
+
+\runningheader{CS 2050 - Exam 4 Ryland Grace}{Page \thepage\ of \numpages}{Name: \underline{\hspace{2 in}}}
+\runningheadrule
+
+\firstpagefooter{}{}{}
+\runningfooter{}{}{}
+\bracketedpoints \pointsinmargin
+
+\begin{document}
+
+\begin{center}
+\fbox{\fbox{\parbox{6in}{\centering
+No notes, calculators, or other aids are allowed.  Read all directions carefully and write your answers in the space provided.\\
+Taking this exam signifies you are aware of and in accordance with the Academic Honor Code of Georgia.\\ Do not separate any pages from the rest of your exam.
+}}}
+\end{center}
+\vspace{\baselineskip}
+\begin{center}
+    \vspace{30mm}
+    \HUGE{Version Ryland Grace}
+
+
+    \numpoints\ points
+\end{center}
+\newpage
+\vspace{\baselineskip}
+
+\newpage
+
+\textbf{For the following questions, please completely fill in the bubble corresponding to your chosen answer.}
+
+\begin{questions} %------------------------------------------
+
+\question[2] By selecting the circle below, you will get 2 free points!
+    \begin{choices}
+        \choice I want free points!
+    \end{choices}
+
+\vspace{\stretch{1}}
+    
+%need replacement
+
+
+\vspace{\stretch{1}}
+
+\question[3] The Pigeonhole Principle states that if $n$ objects are placed into $m$ boxes and $m>n$, then at least one box must contain more than one object.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True 
+        \choice False %correct! we need more objects than boxes. 
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+
+\question[3] For every $1\leq k\leq n$, it holds
+\[
+{n\choose k}\leq n^k
+\]
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True %correct
+        \choice False 
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+\question[3] There are more binary strings of five bits starting with zero than strings of six bits with exactly three zeros.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True 
+        \choice False %correct 2^4 = 16 < {6\choose 3}=20 
+    \end{choices}
+\end{multicols}
+\question[3] On the spacecraft known as the \textit{Hail Mary}, a procedure is performed as a sequence of three tasks, $T_1, T_2$ and $T_3$ and each task $T_i$ can be done in exactly $n_i$ ways. The total number of ways to carry out the procedure is $n_1n_2n_3$. 
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True %correct!
+        \choice False  
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+\question[3] For $0\leq k\leq n$, the number of subsets of $\{1,2,\ldots, n\}$ with cardinality $k$ is equal to the number of subsets with cardinality $n-k$.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True %correct
+        \choice False 
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+\newpage
+
+\question[5] Dr. Grace has 10 black markers, 10 red markers, and 10 blue markers. He grabs 10 to go to class, making sure he has at least two of each color. Of the markers he grabbed, what is the largest number guaranteed to be of the same color?
+
+
+    \begin{choices}
+    \choice 2
+    \choice 4 %correct
+    \choice 6
+    \choice 10
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+
+
+
+\question[5] Grace wants to assign 25 indistinguishable tasks to 6 Eridian engineers.  In how many ways can the tasks be assigned such that each engineer does at least two tasks?
+
+
+    \begin{choices}
+    \choice ${25\choose 2}{23\choose 2}{21\choose 2}\ldots{15\choose 2}$
+    \choice ${30\choose 5}$
+    \choice $25^6$
+    \choice ${18\choose 5}$%correct
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+% \question[4] Eva Stratt has 6 black markers, 6 red markers, and 6 blue markers. She grabs 15 before going to her board meeting, making sure she has at least one of each color. Of the markers she grabbed, what is the largest number guaranteed to be blue?
+
+
+%     \begin{choices}
+%     \choice 1
+%     \choice 2 
+%     \choice 3 %correct
+%     \choice 13
+%     \choice None of the above.
+% \end{choices}
+
+
+% \vspace{\stretch{1}}
+\question[5] Dr. Ryland Grace's science exam has two versions, A and B. He needs five exams for students with accommodations. In how many ways can he distribute one exam to each student? There are no restrictions since students are going to be seated far from each other.
+
+
+    \begin{choices}
+    \choice 10
+    \choice 25
+    \choice 32 %correct
+    \choice 60
+    \choice None of the above.
+\end{choices}
+
+
+\vspace{\stretch{1}}
+
+\question[5] The \textit{Hail Mary}'s crew of four members is going to be chosen from two scientists, three captains and four engineers. The team must have exactly one scientist and exactly one captain. How many ways are there to choose the team?
+
+
+    \begin{choices}
+    \choice 24
+    \choice 36 %correct
+    \choice 48
+    \choice 60
+    \choice None of the above.
+\end{choices}
+
+
+\vspace{\stretch{1}}
+
+\newpage
+
+\question[5] Aboard the \textit{Hail Mary}, Grace has 13 books and a bookshelf with two levels. He places 6 books in the top level, and 7 in the lower level. In how many ways can the books be placed and arranged? All books are distinct, and the order in the bookshelf matters.
+
+\begin{choices}
+    \choice $P(7,7) P(6,6)$
+    \choice ${13\choose 7} \cdot 7 \cdot 6$ 
+    \choice $P(13,7) P(6,6)$%correct
+    \choice ${13\choose 7}{13\choose 6}$
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+
+\question[5]  How many arrangements of the word CIENCIA are there where the vowels are together and the consonants are together? For example, \textsc{NCCIIEA} is a valid arrangement but  \textsc{IECNCIA} is not.
+
+%3x12x2
+\begin{choices}
+    \choice $P(7,3)$
+    \choice $36$
+    \choice $2P(7,3)P(7,4)$
+    \choice $72$ %correct
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+
+
+\question[5] Two engineers and three scientists seat in a circular table to discuss the \textit{Hail Mary's} launch plans. In how many ways can they seat, if the engineers cannot sit next to each other? Two seatings are considered different if one cannot be obtained from the other by a rotation.
+
+
+%4! - 2*3! (Subtraction rule, two instructors together can seat in two ways)
+
+%2*3! (“Break” the table into a row at Ronnie’s seat. Brito cannot seat next to it or at the end, hence has two choices. For each, there are 3! Ways to seat the TAs).
+
+    \begin{choices}
+    \choice 6
+    \choice 12 %correct
+    \choice 24
+    \choice 120
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+% \question[4] Assume $A$ and $B$ are finite sets. Let $f: A\rightarrow B$ be an onto function such that every element $b\in B$ has exactly four pre-images. Which of the following rules we can use to conclude that $|A|=4|B|$?
+% \begin{choices}
+%     \choice Power Rule
+%     \choice Sum Rule
+%     \choice Subtraction Rule
+%     \choice Division Rule %correct
+%     \choice None of the above.
+% \end{choices}
+
+
+
+% \vspace{\stretch{1}}
+
+\question[5] Grace has 15 identical ``I Love Earth" pins to distribute among 4 crewmates (including one captain). If every crewmate must receive at least 2 pins, but the captain cannot receive more than 5 pins, how many ways can he distribute them?
+
+\begin{choices}
+    \choice $\binom{10}{3}$
+    \choice $\binom{10}{3} - \binom{6}{3}$ %correct: Stars and Bars with lower and upper bounds
+    \choice $\binom{18}{3} - \binom{12}{3}$
+    \choice $\binom{10}{3} - \binom{5}{3}$
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\newpage
+For the following question, you must show \textbf{all} work using topics covered in lecture. Brute force solutions will receive no credit. You must simplify your final result to a single integer and write your final numerical answer on the line provided below. Failure to do so, or leaving the answer in combinatorial notation, will result in a point penalty.
+
+\question[12]
+Consider ordered sequences of length five with entries $\{-1,0,1\}$. If we sum all of the entries together, how many sequences result in a sum of zero? \textbf{Simplify your final answer to a single integer and write it on the answer line below. You must show all work.}
+
+
+\vspace{\stretch{1}}
+Answer: \rule{4cm}{0.15mm} \hspace{1cm}
+
+%Ans: 1+20+30 = 51
+
+
+\newpage
+\question[16] Aboard the United Nations' ship at sea, there are 170 scientists working on \textit{Project Hail Mary}. Prove that there are at least three scientists whose birthdays are in the same month of the year AND on the same day of the week (e.g., Monday in October).
+
+\newpage
+
+
+
+ 
+\question[15] Let $n, k$ be integers such that $2\leq k\leq n$. Give a double counting proof for the identity
+    \[
+    \binom{n }{2} = \binom{k }{2} + k(n-k)+\binom{n-k}{2}
+    \]
+% \newpage
+
+% \textbf{Parth's Questions:}
+% \question[4] How many integers from 1 to 150, inclusive, are divisble by 2 and 5 but not both?\\
+
+% \begin{choices}
+%     \choice 105
+%     \choice 90
+%     \choice 75
+%     \choice 60
+%     \choice None of the above.
+% \end{choices}
+
+% \vspace{\stretch{1}}
+
+
+% \question[4] Brito is creating a 6-character password using lowercase English letters. How many passwords contain \textbf{at least one} vowel $\{a, e, i, o, u\}$?
+
+% \begin{choices}
+%     \choice $26^6 - 5^6$
+%     \choice $21^6$
+%     \choice $26^6 - 21^6$ %correct
+%     \choice $6 \times 26^5$
+%     \choice None of the above.
+% \end{choices}
+
+% \vspace{\stretch{1}}
+
+% \question[4] A robot needs to move from position $(0,0)$ to $(5,5)$ on a 2D grid. The robot can only move one unit Up or one unit Right at a time. How many paths are there if the robot \textbf{must} pass through the point $(2,3)$?
+
+% \begin{choices}
+%     \choice 10
+%     \choice 25
+%     \choice 100 %correct: binom(5,2) * binom(5,3) = 10 * 10
+%     \choice 252
+%     \choice None of the above.
+% \end{choices}
+
+% \vspace{\stretch{1}}
+
+% \question[4] Ronnie has 15 identical "I Love CS2050" pins to distribute among 4 TAs (including one Head TA). If every TA must receive at least 2 pins, but the Head TA cannot receive more than 5 pins, how many ways can he distribute them?
+
+% \begin{choices}
+%     \choice $\binom{10}{3}$
+%     \choice $\binom{10}{3} - \binom{6}{3}$ %correct: Stars and Bars with lower and upper bounds
+%     \choice $\binom{18}{3} - \binom{12}{3}$
+%     \choice $\binom{10}{3} - \binom{5}{3}$
+%     \choice None of the above.
+% \end{choices}
+
+% \vspace{\stretch{1}}
+
+
+\newpage
+
+% change pts as needed
+\question \textbf{EXTRA CREDIT:} 
+Art contest! Draw a picture of a 2050 TA (you must write their name)! Submission will be judged on a scale of 1-3. You may not raise your hand to ask a TA anything concerning this question.
+
+\newpage
+
+\textbf{Scratch Paper: If using this page to write a solution, clearly indicate on both this page and the original page that the solution is here.}\\
+
+\end{questions}
+
+\end{document}

@@ -1,0 +1,8 @@
+store_id,store_name,city,state,region,latitude,longitude
+STR-101,Peachtree Basecamp,Atlanta,GA,Southeast,33.749,-84.388
+STR-102,French Broad Outfitters,Asheville,NC,Southeast,35.5951,-82.5515
+STR-103,Queen City Trailhead,Charlotte,NC,Southeast,35.2271,-80.8431
+STR-104,Cumberland Camp,Nashville,TN,South Central,36.1627,-86.7816
+STR-105,Tennessee River Gear,Knoxville,TN,South Central,35.9606,-83.9207
+STR-106,James River Supply,Richmond,VA,Mid-Atlantic,37.5407,-77.436
+STR-107,Falls Lake Outfitters,Raleigh,NC,Mid-Atlantic,35.7796,-78.6382

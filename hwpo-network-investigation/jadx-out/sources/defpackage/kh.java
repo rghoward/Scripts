@@ -1,0 +1,12 @@
+package defpackage;
+
+import com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public final /* synthetic */ class kh implements Runnable {
+    @Override // java.lang.Runnable
+    public final void run() {
+        int i = AlarmManagerSchedulerBroadcastReceiver.a;
+    }
+}

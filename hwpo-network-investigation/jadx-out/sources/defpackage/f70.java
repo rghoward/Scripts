@@ -1,0 +1,11 @@
+package defpackage;
+
+import java.io.Serializable;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public interface f70 {
+    Serializable a(sn6 sn6Var, int i, u02 u02Var);
+
+    Serializable b(sn6 sn6Var, int i, u02 u02Var);
+}

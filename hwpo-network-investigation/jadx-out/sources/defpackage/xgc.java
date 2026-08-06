@@ -1,0 +1,13 @@
+package defpackage;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public final class xgc extends p1c implements h3c {
+    public xgc() {
+        throw null;
+    }
+
+    public final String n() {
+        return ((zgc) this.u).x();
+    }
+}

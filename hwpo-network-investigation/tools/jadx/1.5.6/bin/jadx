@@ -1,0 +1,2 @@
+#!/bin/bash
+JAVA_HOME="${JAVA_HOME:-@@HOMEBREW_JAVA@@}" exec "@@HOMEBREW_CELLAR@@/jadx/1.5.6/libexec/bin/jadx"  "$@"

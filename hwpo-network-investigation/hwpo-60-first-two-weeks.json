@@ -1,0 +1,11 @@
+{
+  "requested_range": {
+    "from": "2022-06-01",
+    "to": "2023-04-02"
+  },
+  "plan_filter": "case-insensitive title contains 60",
+  "detail_filter": "day_number 1 through 14 per distinct plan title; earliest 14 if day numbers are unavailable",
+  "schedule_count": 0,
+  "schedule_summaries": [],
+  "schedule_details": []
+}

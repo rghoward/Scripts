@@ -1,0 +1,19 @@
+package defpackage;
+
+import android.graphics.Shader;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public interface cs7 {
+    float a();
+
+    void b(float f);
+
+    long c();
+
+    void d(Shader shader);
+
+    Shader e();
+
+    void f(long j);
+}

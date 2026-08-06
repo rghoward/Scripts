@@ -19,10 +19,10 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/local-notifications"
 
 SPEC CHECKSUMS:
-  Capacitor: ff6bf01336ac353098378828aff465095a89e459
+  Capacitor: 6732cd599444d14e7ad5f4b1a3b9694f6e205572
   CapacitorCordova: e61ee8c40101b8cd011d0224261606a290c082cf
-  CapacitorLocalNotifications: 71124afe526ac00585314bff34651bd023f86e37
+  CapacitorLocalNotifications: f8ccb7e9c9056a23f415398e51825594e953af3a
 
 PODFILE CHECKSUM: 75305f79143d11655efae49cc27241e7f96f4e76
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

@@ -1,0 +1,51 @@
+package defpackage;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public final class hz0 implements ci4<jt1, Integer, g2b> {
+    public final /* synthetic */ go7 t;
+    public final /* synthetic */ ei4<oy8, jt1, Integer, g2b> u;
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public hz0(go7 go7Var, ei4<? super oy8, ? super jt1, ? super Integer, g2b> ei4Var) {
+        this.t = go7Var;
+        this.u = ei4Var;
+    }
+
+    @Override // defpackage.ci4
+    public final g2b invoke(jt1 jt1Var, Integer num) {
+        jt1 jt1Var2 = jt1Var;
+        int iIntValue = num.intValue();
+        if (jt1Var2.A(iIntValue & 1, (iIntValue & 3) != 2)) {
+            ox6 ox6VarH = eo7.h(ir9.a(zy0.c, zy0.d, ox6.a.t), this.t);
+            ny8 ny8VarA = ly8.a(c30.d, di.a.k, jt1Var2, 54);
+            int iD = jt1Var2.D();
+            kw7 kw7VarY = jt1Var2.y();
+            ox6 ox6VarC = it1.c(jt1Var2, ox6VarH);
+            bt1.c.getClass();
+            qr5.a aVar = bt1.a.b;
+            if (jt1Var2.s() == null) {
+                ml5.c();
+                throw null;
+            }
+            jt1Var2.q();
+            if (jt1Var2.l()) {
+                jt1Var2.k(aVar);
+            } else {
+                jt1Var2.z();
+            }
+            rd7.d(jt1Var2, bt1.a.f, ny8VarA);
+            rd7.d(jt1Var2, bt1.a.e, kw7VarY);
+            bt1.a.b bVar = bt1.a.g;
+            if (jt1Var2.l() || !xj5.a(jt1Var2.f(), Integer.valueOf(iD))) {
+                rh.b(iD, jt1Var2, iD, bVar);
+            }
+            rd7.d(jt1Var2, bt1.a.d, ox6VarC);
+            this.u.invoke(py8.a, jt1Var2, 6);
+            jt1Var2.I();
+        } else {
+            jt1Var2.u();
+        }
+        return g2b.a;
+    }
+}

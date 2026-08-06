@@ -1,0 +1,275 @@
+{
+  "source_endpoint": "GET athlete/benchmarks/with_value",
+  "items": [
+    {
+      "id": 86,
+      "name": "10km Row",
+      "code": "ROW_10K",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 2520,
+      "progress": null,
+      "difference": null
+    },
+    {
+      "id": 116,
+      "name": "10RM Strict Press",
+      "code": "10RM_STPRESS",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 95.0,
+      "progress": -17,
+      "difference": "loss"
+    },
+    {
+      "id": 84,
+      "name": "1km Row",
+      "code": "ROW_1K",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 210,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 3,
+      "name": "1 Mile Run (100m splits)",
+      "code": "1MILE_RUN_100MSPLT",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 600,
+      "progress": null,
+      "difference": null
+    },
+    {
+      "id": 155,
+      "name": "1 Mile Run (400m splits)",
+      "code": "1_MILE_RUN",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 600,
+      "progress": null,
+      "difference": null
+    },
+    {
+      "id": 21,
+      "name": "1RM Back Squat",
+      "code": "1RM_BACKSQ",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 275.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 27,
+      "name": "1RM Bench Press",
+      "code": "1RM_BPRESS",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 155.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 46,
+      "name": "1RM Clean and Jerk (Full Clean)",
+      "code": "1RM_CLEAN_JERK",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 165.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 45,
+      "name": "1RM Clean (Full)",
+      "code": "1RM_CLEAN",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 175.0,
+      "progress": null,
+      "difference": null
+    },
+    {
+      "id": 47,
+      "name": "1RM Deadlift",
+      "code": "1RM_DEADLIFT",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 275.0,
+      "progress": -18,
+      "difference": "loss"
+    },
+    {
+      "id": 53,
+      "name": "1RM Front Squat",
+      "code": "1RM_FRONTSQ",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 220.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 71,
+      "name": "1RM Overhead Squat",
+      "code": "1RM_OHSQ",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 160.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 99,
+      "name": "1RM Power Clean",
+      "code": "1RM_PCLEAN",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 205.0,
+      "progress": 5,
+      "difference": "gain"
+    },
+    {
+      "id": 268,
+      "name": "1RM Power Clean & Push Jerk",
+      "code": "1RM_PCLEAN_PJERK",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 165.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 254,
+      "name": "1RM Power Snatch",
+      "code": "1RM_POWER_SNATCH",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 125.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 100,
+      "name": "1RM Push Jerk",
+      "code": "1RM_PJERK",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 180.0,
+      "progress": 9,
+      "difference": "gain"
+    },
+    {
+      "id": 76,
+      "name": "1RM Push Press",
+      "code": "1RM_PPRESS",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 150.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 98,
+      "name": "1RM Snatch (Full)",
+      "code": "1RM_SNATCH",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 125.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 330,
+      "name": "1RM Split Jerk",
+      "code": "1RM_SPLIT_JERK",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 165.0,
+      "progress": 10,
+      "difference": "gain"
+    },
+    {
+      "id": 113,
+      "name": "1RM Strict Press ",
+      "code": "1RM_STPRESS",
+      "measure": "weight",
+      "symbol": "lb",
+      "units": "pound",
+      "last_value": 125.0,
+      "progress": 0,
+      "difference": "gain"
+    },
+    {
+      "id": 83,
+      "name": "2km Row",
+      "code": "ROW_2K",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 544,
+      "progress": -6,
+      "difference": "gain"
+    },
+    {
+      "id": 306,
+      "name": "400m Run",
+      "code": "400M_RUN",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 110,
+      "progress": null,
+      "difference": null
+    },
+    {
+      "id": 88,
+      "name": "500m Row",
+      "code": "ROW_500M",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 103,
+      "progress": null,
+      "difference": null
+    },
+    {
+      "id": 85,
+      "name": "5km Row",
+      "code": "ROW_5K",
+      "measure": "time",
+      "symbol": "translation missing: en.api.score.s.label",
+      "units": "second",
+      "last_value": 1396,
+      "progress": -5,
+      "difference": "gain"
+    }
+  ],
+  "pagination": {
+    "total_items": 24,
+    "total_pages": 1,
+    "current_page": 1,
+    "per_page": 100
+  }
+}

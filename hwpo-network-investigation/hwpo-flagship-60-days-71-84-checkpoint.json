@@ -1,0 +1,3858 @@
+{
+  "73:71": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 71,
+    "requested_date": "2023-06-11",
+    "response": {
+      "schedule": {
+        "id": 3364255,
+        "day_id": 3298,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686441600,
+        "day_number": 71,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10078,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 71</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 7179,
+              "type": "video",
+              "title": "Week 11 day 71 updated - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1657721505,
+              "file_size": "1.09 GB",
+              "file_size_raw": 1171035074,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/7179/Week_11_Day_71_Updated_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/7179/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7179/thumb_video_Week_11_Day_71_Updated_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7179/thumb_video_Week_11_Day_71_Updated_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29471,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=71&type=prewod&callback=hwpo://schedule?id=3364255&date=2023-06-11&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10079,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x <br />1:00 Row <br />15 Med Ball Hug Squat <br />10/10 Windmills<br />0:20 Hanging L-Sit</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10080,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Back Squat <br />EMOM 8<br />6 @ <span class='benchmark' data-id='21'>169.0lb</span><br />----<br />Front Squat <br />3x5 @ <span class='benchmark' data-id='53'>139.75lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10081,
+            "title": "cardio",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5K Row @ Consistent pace </body>",
+            "completed": true,
+            "has_feedback": true,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10082,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Rounds For Time: <br />5 D-Ball or Sandbag Clean <br />25 GHD Sit Ups </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10083,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Dumbbell Bench Press<br />5x10 <br />----<br />Barbell Bicep Curls <br />5x8<br />----<br />3x<br />20 V-ups<br />20 Candlestick Toe Touch<br />*Rest as needed between rounds.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10084,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 10<br />10 Burpee over Box 24/20 </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29472,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 9,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=71&type=postwod&callback=hwpo://schedule?id=3364255&date=2023-06-11&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:72": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 72,
+    "requested_date": "2023-06-12",
+    "response": {
+      "schedule": {
+        "id": 3375501,
+        "day_id": 3299,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686528000,
+        "day_number": 72,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10085,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 72</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 40123,
+              "type": "video",
+              "title": "Week 11 day 72",
+              "content_type": "video/mp4",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1681917387,
+              "file_size": "1.69 GB",
+              "file_size_raw": 1818169598,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/40123/Week_11_Day_72.mp4",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/40123/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/40123/thumb_video_Week_11_Day_72.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/40123/thumb_video_Week_11_Day_72.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29473,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=72&type=prewod&callback=hwpo://schedule?id=3375501&date=2023-06-12&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10086,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 Fan Bike <br />20/20 Lunges<br />10/10 Single Leg Romanian Deadlift <br />10/10 Seated Single Arm Dumbbell Strict Press </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10087,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Strict Press<br />5x2 @ 90% of 2RM<br />----<br />Split Jerk <br />1x3 @ <span class='benchmark' data-id='330'>112.2lb</span><br />1x3 @ <span class='benchmark' data-id='330'>125.4lb</span><br />1x3 @ <span class='benchmark' data-id='330'>135.3lb</span><br />1x2 @ <span class='benchmark' data-id='330'>146.85lb</span><br />1x2 @ <span class='benchmark' data-id='330'>117.15lb</span><br /></body>",
+            "completed": true,
+            "has_feedback": true,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10088,
+            "title": "cardio",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 10 <br />10/8 Cal Fan Bike HARD</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10089,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>10 Rounds For Time:<br />10/8 Cal Fan Bike <br />1 Round of \"Macho Man\" 205/155 <br />----<br />1 Round of \"Macho Man\" =<br />3 Power Clean <br />3 Front Squat <br />3 Jerk </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10090,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Band Assisted Strict Pull-Up <br />7x10 <br />----<br />Cable Tricep Pushdown + Banded Burnout <br />5x10 + Banded Burnout <br />----<br />Reverse Hyper Extension<br />3x15 <br />----<br />D-Ball or Sandbag Bear Hug Good Morning <br />3x15</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10091,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>60:00 - Zone 2 Spin Bike or Run </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29474,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 9,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=72&type=postwod&callback=hwpo://schedule?id=3375501&date=2023-06-12&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:73": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 73,
+    "requested_date": "2023-06-13",
+    "response": {
+      "schedule": {
+        "id": 3387139,
+        "day_id": 3300,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686614400,
+        "day_number": 73,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10092,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 73</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 7184,
+              "type": "video",
+              "title": "Week 11 day 73 updated - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1657722576,
+              "file_size": "1.26 GB",
+              "file_size_raw": 1350355060,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/7184/Week_11_Day_73_Updated_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/7184/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7184/thumb_video_Week_11_Day_73_Updated_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7184/thumb_video_Week_11_Day_73_Updated_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29475,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=73&type=prewod&callback=hwpo://schedule?id=3387139&date=2023-06-13&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10093,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 Ski Erg<br />10 Sots Press<br />10 Banded Good Morning<br />20 Candlestick Toe Touch</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10094,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3 Rounds: <br />8 Bar Muscle Up <br />100' Overhead Walking Lunge 75/55<br />+<br />Rest 3:00<br />+<br />3 Rounds: <br />7 Bar Muscle Up <br />100' Front Rack Walking Lunge 95/75<br />+<br />Rest 3:00<br />+<br />3 Rounds:<br />6 Bar Muscle Up <br />100' Back Rack Walking Lunge 115/95 <br /><br />For Time.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10095,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 10 <br />1 Squat Snatch @ <span class='benchmark' data-id='98'>103.75lb</span><br />----<br />Snatch Pull<br />3x3 @ <span class='benchmark' data-id='98'>128.75lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10096,
+            "title": "METCON 2",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Rounds For Time: <br />25/20 Cal Row<br />1 Legless Rope Climb <br />+<br />Rest 3:00<br />+<br />4 Rounds For Time: <br />20/16 Cal Row<br />1 Legless Rope Climb </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10097,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Banded Donkey Kick <br />4x20 <br />----<br />Single Arm Dumbbell Row <br />5x8/8 <br />----<br />3x<br />1:00 Front Plank <br />10/10 Landmine Twists<br />*Rest as needed between rounds.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10098,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Fan Bike <br />4x<br />4:00 On @ Threshold Pace <br />1:00 Rest <br />*Record average watts for each round.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29476,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 9,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=73&type=postwod&callback=hwpo://schedule?id=3387139&date=2023-06-13&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:74": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 74,
+    "requested_date": "2023-06-14",
+    "response": {
+      "schedule": {
+        "id": 3399054,
+        "day_id": 3301,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686700800,
+        "day_number": 74,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10099,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 74</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 7183,
+              "type": "video",
+              "title": "Week 11 day 74 updated - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1657722079,
+              "file_size": "568 MB",
+              "file_size_raw": 595459073,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/7183/Week_11_Day_74_Updated_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/7183/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7183/thumb_video_Week_11_Day_74_Updated_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7183/thumb_video_Week_11_Day_74_Updated_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29477,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=74&type=prewod&callback=hwpo://schedule?id=3399054&date=2023-06-14&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10100,
+            "title": "SPIN BIKE",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5:00 Easy Spin<br />+<br />4x<br />0:45 @ <span class='benchmark' data-id='444'>Add your Personal Record below</span><br />0:15 @ <span class='benchmark' data-id='444'>Add your Personal Record below</span>+<br />----<br />3x<br />6:00 @ <span class='benchmark' data-id='444'>Add your Personal Record below</span> <br />1000m Run (or Row) <br />*Rest 4-5 Minutes between rounds.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10101,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Plate Pinch Hold<br />3x 0:30/0:30 <br />----<br />Bar Dead Hang<br />Accumulate 3:00 with no grips.<br /></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29478,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=74&type=postwod&callback=hwpo://schedule?id=3399054&date=2023-06-14&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:75": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 75,
+    "requested_date": "2023-06-15",
+    "response": {
+      "schedule": {
+        "id": 3410562,
+        "day_id": 3302,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686787200,
+        "day_number": 75,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10102,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 75</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 40841,
+              "type": "video",
+              "title": "Week 11 day 75",
+              "content_type": "video/mp4",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1682086756,
+              "file_size": "1.26 GB",
+              "file_size_raw": 1353954525,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/40841/Week_11_Day_75.mp4",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/40841/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/40841/thumb_video_Week_11_Day_75.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/40841/thumb_video_Week_11_Day_75.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29479,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": true,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=75&type=prewod&callback=hwpo://schedule?id=3410562&date=2023-06-15&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10103,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 or 15/12 Cal Machine (Ski, Row, etc.)<br />0:30 Knee Tuck Hang <br />10 Box Jump Over 24/20\"<br />10 Rear Delt Fly </body>",
+            "completed": true,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10104,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Front Squat <br />5x5 @ <span class='benchmark' data-id='53'>150.5lb</span><br />----<br />Power Snatch <br />2x2 @ <span class='benchmark' data-id='254'>95.0lb</span><br />1x1 @ <span class='benchmark' data-id='254'>100.0lb</span><br />3x1 @ <span class='benchmark' data-id='254'>103.75lb</span><br />2x2 @ <span class='benchmark' data-id='254'>95.0lb</span><br /></body>",
+            "completed": true,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10105,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>AMRAP 4<br />21/16 Cal Row<br />21 Toes To Bar <br />21 Burpee to Bar<br />----<br />Rest 4:00<br />----<br />AMRAP 4<br />18/14 Cal Row<br />18 Toes To Bar <br />18 Burpee to Bar<br />----<br />Rest 4:00<br />----<br />AMRAP 4<br />15/12 Cal Row<br />15 Toes To Bar <br />15 Burpee to Bar<br />----<br />Rest 4:00<br />----<br />AMRAP 4<br />12/9 Cal Row<br />12 Toes To Bar <br />12 Burpee to Bar</body>",
+            "completed": true,
+            "has_feedback": true,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10106,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Band Assisted Strict Chest to Bar Pull Up <br />10x5<br />*Alternate grip direction and width.<br />----<br />Diamond Push-Up <br />6x12 <br />----<br />D-Ball or Sand Bag Bear Hug<br />Accumulate 5:00 100/70</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10107,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>60:00 - Zone 2 Spin Bike or Run </body>",
+            "completed": true,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29480,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": true,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=75&type=postwod&callback=hwpo://schedule?id=3410562&date=2023-06-15&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:76": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 76,
+    "requested_date": "2023-06-16",
+    "response": {
+      "schedule": {
+        "id": 3421795,
+        "day_id": 3303,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686873600,
+        "day_number": 76,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10108,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 76</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 7186,
+              "type": "video",
+              "title": "Week 11 day 76 updated - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": 0,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1657723666,
+              "file_size": "1.3 GB",
+              "file_size_raw": 1393171237,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/7186/Week_11_Day_76_Updated_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/7186/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7186/thumb_video_Week_11_Day_76_Updated_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7186/thumb_video_Week_11_Day_76_Updated_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29481,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=76&type=prewod&callback=hwpo://schedule?id=3421795&date=2023-06-16&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10109,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3:00 Spin Bike<br />+<br />3x<br />20 Band Pull Apart<br />10 Toe Up Romanian Deadlift <br />10/10 Banded Dead Bug</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10110,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Clean and Jerk <br />1x(1+1) @ <span class='benchmark' data-id='46'>105.85lb</span><br />1x(1+1) @ <span class='benchmark' data-id='46'>113.1lb</span><br />1x(1+1) @ <span class='benchmark' data-id='46'>121.8lb</span><br />1x(1+1) @ <span class='benchmark' data-id='46'>126.15lb</span><br />1x(1+1) @ <span class='benchmark' data-id='46'>129.05lb</span><br />2x(1+1) @<span class='benchmark' data-id='46'>105.85lb</span><br />----<br />Deadlift <br />1x8 @ <span class='benchmark' data-id='47'>178.75lb</span><br />1x5 @ <span class='benchmark' data-id='47'>221.0lb</span><br />1x4 @ <span class='benchmark' data-id='47'>247.0lb</span><br />1x3 @ <span class='benchmark' data-id='47'>269.75lb</span><br />1x1 @ <span class='benchmark' data-id='47'>289.25lb</span><br />1x10 @ <span class='benchmark' data-id='47'>162.5lb</span><br /><br />Please go off what is written here in the app. The triple should be <span class='benchmark' data-id='47'>269.75lb</span> followed by a single <span class='benchmark' data-id='47'>289.25lb</span>.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10111,
+            "title": "metcon",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 40<br />1) 16/12 Cal Row <br />2) 14/10 Cal Fan Bike <br />3) 12/9 Cal Ski <br />4) 15 Chest to Bar </body>",
+            "completed": true,
+            "has_feedback": true,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10112,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Prone Hamstring Curl <br />4x20/20 <br />----<br />Single Arm Seated Dumbbell Strict Press<br />5x8/8<br />----<br />3x<br />30 Weighted Russian Twists<br />Directly Into...<br />20 Slow Knee Tucks<br />*Rest as needed between rounds.</body>",
+            "completed": true,
+            "has_feedback": true,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 28505,
+            "title": "bonus",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time:<br />100 Kettlebell Swings 53/35</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29482,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=76&type=postwod&callback=hwpo://schedule?id=3421795&date=2023-06-16&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:77": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 77,
+    "requested_date": "2023-06-17",
+    "response": {
+      "schedule": {
+        "id": 3432867,
+        "day_id": 3304,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1686960000,
+        "day_number": 77,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10113,
+            "title": "REST DAY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29483,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=77&type=prewod&callback=hwpo://schedule?id=3432867&date=2023-06-17&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 29484,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=77&type=postwod&callback=hwpo://schedule?id=3432867&date=2023-06-17&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:78": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 78,
+    "requested_date": "2023-06-18",
+    "response": {
+      "schedule": {
+        "id": 3443855,
+        "day_id": 3305,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687046400,
+        "day_number": 78,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10114,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 78</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 7187,
+              "type": "video",
+              "title": "Week 12 day 78 updated - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1657723943,
+              "file_size": "1.29 GB",
+              "file_size_raw": 1381318191,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/7187/Week_12_Day_78_Updated_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/7187/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7187/thumb_video_Week_12_Day_78_Updated_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7187/thumb_video_Week_12_Day_78_Updated_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29485,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=78&type=prewod&callback=hwpo://schedule?id=3443855&date=2023-06-18&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10115,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x <br />1:00 Row <br />20 Cossack Squat (10/10)<br />20 Band Pull Apart<br />20 Russian Twist </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10116,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Back Squat <br />EMOM 8<br />7 @ <span class='benchmark' data-id='21'>169.0lb</span><br />----<br />Front Squat <br />3x5 @ <span class='benchmark' data-id='53'>139.75lb</span><br /><br /></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10117,
+            "title": "Cardio",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>9 x (1:40 Row / 0:20 Rest)<br />*Rest 2:00 After Round 5 <br /><br />*This is a pre-programmed workout in the Concept 2 rower.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10118,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Rounds: <br />10 Bench Press 205/145 (or <span class='benchmark' data-id='27'>91.5lb</span>)<br />100' Handstand Walk <br />3 Legless Rope Climb <br />*Rest 1:00 between rounds.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10119,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Strict Ring Dip w/ Pause At Top<br />5x8 <br />----<br />Alternating Dumbbell Bicep Curls <br />5x8/8<br />----<br />V-Ups<br />Accumulate 60 Reps </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10120,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>100 Pistols, For Time<br />*If this will take you over 6:00, then do air squats.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29486,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 9,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=78&type=postwod&callback=hwpo://schedule?id=3443855&date=2023-06-18&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:79": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 79,
+    "requested_date": "2023-06-19",
+    "response": {
+      "schedule": {
+        "id": 3454795,
+        "day_id": 3306,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687132800,
+        "day_number": 79,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10121,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 79</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 1161,
+              "type": "video",
+              "title": "Week 12 day 79 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1647648051,
+              "file_size": "490 MB",
+              "file_size_raw": 514215549,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/1161/Week_12_Day_79_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/1161/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1161/thumb_video_Week_12_Day_79_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1161/thumb_video_Week_12_Day_79_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29487,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=79&type=prewod&callback=hwpo://schedule?id=3454795&date=2023-06-19&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10122,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 Fan Bike <br />10/10 Single Arm Seated Dumbbell Press<br />1:00 Single Unders<br />8 Max Vert Box Jump</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10123,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Split Jerk <br />1x3 @ <span class='benchmark' data-id='330'>112.2lb</span><br />1x3 @ <span class='benchmark' data-id='330'>125.4lb</span><br />1x3 @ <span class='benchmark' data-id='330'>135.3lb</span><br />1x2 @ <span class='benchmark' data-id='330'>143.55lb</span><br />1x2 @ <span class='benchmark' data-id='330'>151.8lb</span><br />1x2 @ <span class='benchmark' data-id='330'>117.15lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10124,
+            "title": "SKill + cardio",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 1:15 Until Failure (or 7 Sets) <br />75 Double Under <br />7 Deficit Strict Handstand Push-Ups <br /><br />*Pick a depth that allows you to get at least 3 rounds. <br />----<br />Rest as needed between pieces... <br />----<br />4 Sets:<br />30 Cal Fan Bike<br />1:1 Work/Rest</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10125,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time: <br />30/24 - 24/21 - 18/15 Cal Fan Bike<br />15 - 12 - 9 Deadlift 315/225 (or <span class='benchmark' data-id='47'>195.0lb</span>)<br />10 - 8 - 6 Bar Muscle Up </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10126,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Band Assisted Strict Pull-Up <br />7x10 <br />----<br />Single Arm Overhead Tricep Extension (w/ Dumbbell)<br />4x12/12<br />----<br />GHD Back Extension <br />Accumulate 50 Reps </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10127,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>60:00 - Zone 2 Spin Bike or Run </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29488,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 9,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=79&type=postwod&callback=hwpo://schedule?id=3454795&date=2023-06-19&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:80": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 80,
+    "requested_date": "2023-06-20",
+    "response": {
+      "schedule": {
+        "id": 3466563,
+        "day_id": 3307,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687219200,
+        "day_number": 80,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10128,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 80</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 7188,
+              "type": "video",
+              "title": "Week 12 day 80 updated - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1657724387,
+              "file_size": "1.33 GB",
+              "file_size_raw": 1428787397,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/7188/Week_12_Day_80_Updated_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/7188/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7188/thumb_video_Week_12_Day_80_Updated_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/7188/thumb_video_Week_12_Day_80_Updated_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29489,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=80&type=prewod&callback=hwpo://schedule?id=3466563&date=2023-06-20&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10129,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 Ski Erg<br />10/10 Windmills<br />8 Strict Chin-up<br />10 Glute Bridge</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10130,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Sots Press <br />3x10 <br />----<br />Overhead Squat <br />1x5 @ <span class='benchmark' data-id='71'>96.0lb</span><br />1x5 @ <span class='benchmark' data-id='71'>104.0lb</span><br />1x3 @ <span class='benchmark' data-id='71'>112.0lb</span><br />1x2 @ <span class='benchmark' data-id='71'>120.0lb</span><br />1x2 @ <span class='benchmark' data-id='71'>128.0lb</span><br />1x2 @ <span class='benchmark' data-id='71'>136.0lb</span><br />1x1 @ <span class='benchmark' data-id='71'>144.0lb</span><br />2x1 @ <span class='benchmark' data-id='71'>152.0lb</span>+<br />1x3 @ <span class='benchmark' data-id='71'>96.0lb</span><br />----<br />Snatch <br />3x1 @ <span class='benchmark' data-id='98'>112.5lb</span><br />----<br />Snatch Pull From Knee Height <br />3x1 @ <span class='benchmark' data-id='98'>128.75lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10131,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time: <br />50 - 40 - 30 - 20 - 10 <br />Cal Row*<br />GHD Sit Up <br /><br />*For women, sub 42 - 32 - 22 - 16 - 8 Cal Row.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10132,
+            "title": "METCON 2",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>4 Rounds:<br />400/320m Row<br />4 Rope Climbs<br />For Time.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 17746,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Back Rack Reverse Lunge <br />4x10/10 <br />----<br />Pendlay Row<br />5x8<br />----<br />3x<br />1:00 Front Plank <br />20/20 Side Plank Hip Touches<br />*Rest as needed between rounds. </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29490,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=80&type=postwod&callback=hwpo://schedule?id=3466563&date=2023-06-20&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:81": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 81,
+    "requested_date": "2023-06-21",
+    "response": {
+      "schedule": {
+        "id": 3478569,
+        "day_id": 3308,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687305600,
+        "day_number": 81,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10133,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 81</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 1155,
+              "type": "video",
+              "title": "Week 12 day 81 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1647647689,
+              "file_size": "309 MB",
+              "file_size_raw": 324137426,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/1155/Week_12_Day_81_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/1155/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1155/thumb_video_Week_12_Day_81_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1155/thumb_video_Week_12_Day_81_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29491,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=81&type=prewod&callback=hwpo://schedule?id=3478569&date=2023-06-21&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10134,
+            "title": "SPIN BIKE",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5:00 Easy Spin<br />+<br />4x<br />1:00 @ 65%<br />0:30 Standing (Damper 10)<br />----<br />10x<br />30/22 Cal Standing (Damper 10)<br />1:00 Rest<br />*Goal is work done under 1:00</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10135,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Dumbbell Fish Hook Hold<br />3x1:00<br />----<br />Reverse Wrist Extension<br />3x20/20 (VERY LIGHT; i.e. 2-5 pounds)<br /></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29492,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=81&type=postwod&callback=hwpo://schedule?id=3478569&date=2023-06-21&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:82": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 82,
+    "requested_date": "2023-06-22",
+    "response": {
+      "schedule": {
+        "id": 3490118,
+        "day_id": 3309,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687392000,
+        "day_number": 82,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10136,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 82</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 1151,
+              "type": "video",
+              "title": "Week 12 day 82 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1647647307,
+              "file_size": "521 MB",
+              "file_size_raw": 546535271,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/1151/Week_12_Day_82_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/1151/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1151/thumb_video_Week_12_Day_82_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1151/thumb_video_Week_12_Day_82_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29493,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=82&type=prewod&callback=hwpo://schedule?id=3490118&date=2023-06-22&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10137,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 or 15/12 Cal Machine (Ski, Row, etc.)<br />20/20 Lunges<br />0:30 Knee Tuck Hang<br />10/10 Dumbbell Upright Row </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10138,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Front Squat<br />2x2 @ <span class='benchmark' data-id='53'>193.5lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10139,
+            "title": "Skill",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 16<br />Row 200/160m<br />Directly Into...<br />EMOM 10<br />6 Power Snatch Touch and Go 135/95 (40%)</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10140,
+            "title": "METCON",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time:<br />20 Chest to Bar<br />5-4-3-2-1 Squat Snatch<br />155-185-205-225-245 (60,68,70,75,83%)</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10141,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Band Assisted Strict Chest to Bar Pull Up <br />10x5<br />*Alternate grip direction and width.<br />----<br />Skull Crusher<br />5x10<br />----<br />D-Ball or Sand Bag Bear Hug<br />5x1:00 150/100</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10142,
+            "title": "BONUS",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 8,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>60:00 - Zone 2 Spin Bike or Run </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29494,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 9,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=82&type=postwod&callback=hwpo://schedule?id=3490118&date=2023-06-22&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:83": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 83,
+    "requested_date": "2023-06-23",
+    "response": {
+      "schedule": {
+        "id": 3501566,
+        "day_id": 3310,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687478400,
+        "day_number": 83,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10143,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 83</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 1152,
+              "type": "video",
+              "title": "Week 12 day 83 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1647647332,
+              "file_size": "572 MB",
+              "file_size_raw": 599694594,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/1152/Week_12_Day_83_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/1152/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1152/thumb_video_Week_12_Day_83_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/1152/thumb_video_Week_12_Day_83_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29495,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=83&type=prewod&callback=hwpo://schedule?id=3501566&date=2023-06-23&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 10144,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3:00 Spin Bike<br />+<br />3x<br />20 Air Squat<br />10/10 Heel Overs<br />8-10 Wide Grip Pull up or Ring Row </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10145,
+            "title": "STRENGTH",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Clean and Jerk<br />EMOM 10<br />1+1 @ <span class='benchmark' data-id='46'>121.8lb</span><br />----<br />Deadlift <br />1x10 @ <span class='benchmark' data-id='47'>162.5lb</span><br />1x8 @ <span class='benchmark' data-id='47'>178.75lb</span><br />1x6 @ <span class='benchmark' data-id='47'>208.0lb</span><br />1x5 @ <span class='benchmark' data-id='47'>227.5lb</span><br />1x4 @ <span class='benchmark' data-id='47'>243.75lb</span><br />4x3 @ <span class='benchmark' data-id='47'>260.0lb</span><br /></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10146,
+            "title": "metcon",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 40<br />1) 16/12 Cal Row <br />2) 15 Toes to Bar<br />3) 15/11 Cal Fan Bike <br />4) 6 D-Ball or Sandbag Cleans 150/100 </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 10147,
+            "title": "ACCESSORY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 37,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Toe-Up Romanian Deadlift  <br />3x15<br />----<br />Single Arm Seated Dumbbell Press<br />5x8/8<br />----<br />3x<br />30 Weighted Russian Twists<br />Directly Into...<br />20 Slow Knee Tucks<br />*Rest as needed between rounds.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29496,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 7,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=83&type=postwod&callback=hwpo://schedule?id=3501566&date=2023-06-23&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "73:84": {
+    "plan_id": 73,
+    "plan_title": "FLAGSHIP 1.0",
+    "requested_day_number": 84,
+    "requested_date": "2023-06-24",
+    "response": {
+      "schedule": {
+        "id": 3512996,
+        "day_id": 3311,
+        "plan": {
+          "id": 73,
+          "title": "FLAGSHIP 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 37,
+              "title": "FLAGSHIP 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+        },
+        "date": 1687564800,
+        "day_number": 84,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 10148,
+            "title": "REST DAY",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 1,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 29497,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=84&type=prewod&callback=hwpo://schedule?id=3512996&date=2023-06-24&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 29498,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 3,
+            "plan_option_id": 37,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=84&type=postwod&callback=hwpo://schedule?id=3512996&date=2023-06-24&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:356": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 356,
+    "requested_date": "2024-12-14",
+    "response": {
+      "schedule": {
+        "id": 8828521,
+        "day_id": 5324,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734134400,
+        "day_number": 356,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17188,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 356</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10775,
+              "type": "video",
+              "title": "Hwpo 60 week 51 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": 0,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560022,
+              "file_size": "698 MB",
+              "file_size_raw": 732245975,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10775/HWPO_60_WEEK_51_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10775/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10775/thumb_video_HWPO_60_WEEK_51_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10775/thumb_video_HWPO_60_WEEK_51_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31497,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=356&type=prewod&callback=hwpo://schedule?id=8828521&date=2024-12-14&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15651,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>2 Rounds:<br />10 Deadlift<br />10 Upright Row<br />5 Hang Power Clean<br />10 Front Squat<br />10 Strict Press<br />10 Good Morning<br />*All w/ Empty Barbell<br /></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15652,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Squat Clean<br />EMOM 6<br />1) 2 @ <span class='benchmark' data-id='45'>136.5lb</span><br />2) 1 @ <span class='benchmark' data-id='45'>147.0lb</span><br />3) 1 @ <span class='benchmark' data-id='45'>150.5lb</span>, <span class='benchmark' data-id='45'>154.0lb</span><br />----<br />Take 10:00 to Complete: <br />Deadlift<br />3x1 @ <span class='benchmark' data-id='47'>261.25lb</span> +</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15653,
+            "title": "METCON",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 8<br />1) 15/12 Cal Row<br />2) 50ft Handstand Walk <br />+<br />EMOM 8<br />1) 14/11 Cal Fan Bike<br />2) 16 GHD Sit-up<br />+<br />EMOM 8<br />1) 15/12 Cal Row<br />2) 50ft Handstand Walk <br />+<br />EMOM 8<br />1) 14/11 Cal Fan Bike<br />2) 16 GHD Sit-up</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31498,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=356&type=postwod&callback=hwpo://schedule?id=8828521&date=2024-12-14&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:357": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 357,
+    "requested_date": "2024-12-15",
+    "response": {
+      "schedule": {
+        "id": 8838354,
+        "day_id": 5325,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734220800,
+        "day_number": 357,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17189,
+            "title": "rest day",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Rest Day</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31499,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=357&type=prewod&callback=hwpo://schedule?id=8838354&date=2024-12-15&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 31500,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=357&type=postwod&callback=hwpo://schedule?id=8838354&date=2024-12-15&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:358": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 358,
+    "requested_date": "2024-12-16",
+    "response": {
+      "schedule": {
+        "id": 8848321,
+        "day_id": 5326,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734307200,
+        "day_number": 358,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17190,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 358</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10777,
+              "type": "video",
+              "title": "Hwpo 60 week 52 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560161,
+              "file_size": "595 MB",
+              "file_size_raw": 624350760,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/HWPO_60_WEEK_52_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31501,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=358&type=prewod&callback=hwpo://schedule?id=8848321&date=2024-12-16&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15655,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Minutes, For Quality:<br />12 Cal Row <br />10/10 Glute Bridge <br />20 Monster Walk <br />20 Band Pull Apart </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15656,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Front Squat<br />EMOM 8 <br />5 @ <span class='benchmark' data-id='53'>143.0lb</span><br />----<br />Every 1:30 x 7:30... (5 Sets)<br />Power Clean + Power Jerk<br />5x(2+1) @ <span class='benchmark' data-id='268'>132.0lb</span> - <span class='benchmark' data-id='268'>148.5lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15657,
+            "title": "metcon",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>8 x (1:00 On / 1:00 Off)<br />10/8 Cal Fan Bike +<br />Max Sandbag Bear Hug Carry (or Hold) For Remaining Time.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15658,
+            "title": "accessory",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x (10 Minute Cap) <br />10/10 Single Arm Dumbbell Row </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31502,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 7,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=358&type=postwod&callback=hwpo://schedule?id=8848321&date=2024-12-16&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:359": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 359,
+    "requested_date": "2024-12-17",
+    "response": {
+      "schedule": {
+        "id": 8858638,
+        "day_id": 5327,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734393600,
+        "day_number": 359,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17191,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 359</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10777,
+              "type": "video",
+              "title": "Hwpo 60 week 52 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560161,
+              "file_size": "595 MB",
+              "file_size_raw": 624350760,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/HWPO_60_WEEK_52_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31503,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=359&type=prewod&callback=hwpo://schedule?id=8858638&date=2024-12-17&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15659,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Minutes, For Quality:<br />12 Cal Ski Erg<br />10/10 Single Arm Kettlebell Press<br />20 Cossack Squats <br />20 Heel Overs</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15660,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 2:00 x 6:00... (3 Sets) <br />Bamboo Bar Strict Press <br />3x5 @ Heavy Weight<br />----<br />Every 3:00 x 9:00... (3 Sets) <br />3x<br />15 Reverse Hyper Extension<br />10 Weighted GHD Back Extension</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15661,
+            "title": "metcon",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>2/2/2/2 Minute On / 1 Minute Off<br />15 Deadlift 225/155 <br />15/12 Cal Bike <br />Max Rep Chest to Bar In Remaining Time<br />----<br />*Your score is the total number of chest-to-bar reps completed.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15662,
+            "title": "accessory",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x (10 Minute Cap) <br />10 Skull Crushers <br />8/8 Single Arm Dumbbell Press <br />0:30 Tuck Hang (or Hanging L-Sit Hold)</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31504,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 7,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=359&type=postwod&callback=hwpo://schedule?id=8858638&date=2024-12-17&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:360": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 360,
+    "requested_date": "2024-12-18",
+    "response": {
+      "schedule": {
+        "id": 8870247,
+        "day_id": 5328,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734480000,
+        "day_number": 360,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17192,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 360</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10777,
+              "type": "video",
+              "title": "Hwpo 60 week 52 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560161,
+              "file_size": "595 MB",
+              "file_size_raw": 624350760,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/HWPO_60_WEEK_52_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31505,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=360&type=prewod&callback=hwpo://schedule?id=8870247&date=2024-12-18&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15663,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Minutes, For Quality:<br />12 Cal Row<br />10 Sotts Press <br />10 Overhead Squat w/ Empty Bar<br />0:30 Hollow Hold</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15664,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Take 15:00 to Complete...  <br />Squat Snatch <br />1x3 @ <span class='benchmark' data-id='98'>87.5lb</span><br />1x3 @ <span class='benchmark' data-id='98'>93.75lb</span><br />1x1 @ <span class='benchmark' data-id='98'>96.25lb</span><br />1x1 @ <span class='benchmark' data-id='98'>100.0lb</span><br />1x1 @ <span class='benchmark' data-id='98'>102.5lb</span><br />1x1 @ <span class='benchmark' data-id='98'>108.75lb</span><br />1x1 @ <span class='benchmark' data-id='98'>116.25lb</span><br />1x1 @ <span class='benchmark' data-id='98'>118.75lb</span><br />1x1 @ <span class='benchmark' data-id='98'>125.0lb</span> +</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15665,
+            "title": "metcon",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3 Rounds For Time:<br />400m Run <br />10/7 Ring Muscle Up <br />40 Air Squats </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15666,
+            "title": "accessory",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x (10 Minute Cap) <br />15 Band Assisted Pull-up<br />20 Seated Hamstring Curl <br />10 Barbell Bicep Curl</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31506,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 7,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=360&type=postwod&callback=hwpo://schedule?id=8870247&date=2024-12-18&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:361": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 361,
+    "requested_date": "2024-12-19",
+    "response": {
+      "schedule": {
+        "id": 8881623,
+        "day_id": 5329,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734566400,
+        "day_number": 361,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17193,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 361</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10777,
+              "type": "video",
+              "title": "Hwpo 60 week 52 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560161,
+              "file_size": "595 MB",
+              "file_size_raw": 624350760,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/HWPO_60_WEEK_52_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31507,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=361&type=prewod&callback=hwpo://schedule?id=8881623&date=2024-12-19&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15668,
+            "title": "spin bike",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time: <br />50/40/30 Cal Spin Bike @ 85+ RPM <br />Rest 1:1 <br />4x20 Cal Spin Bike @ Damper 10/8<br />Rest 1:1 </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15667,
+            "title": "swim",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>20-24 Minute Swim*<br />*Every 150m, Complete 15 Push-ups.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15669,
+            "title": "accessory",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Accumulate 3:00 in a hanging L-sit hold.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31508,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=361&type=postwod&callback=hwpo://schedule?id=8881623&date=2024-12-19&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:362": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 362,
+    "requested_date": "2024-12-20",
+    "response": {
+      "schedule": {
+        "id": 8891782,
+        "day_id": 5330,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734652800,
+        "day_number": 362,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17194,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 362</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10777,
+              "type": "video",
+              "title": "Hwpo 60 week 52 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560161,
+              "file_size": "595 MB",
+              "file_size_raw": 624350760,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/HWPO_60_WEEK_52_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31509,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=362&type=prewod&callback=hwpo://schedule?id=8891782&date=2024-12-20&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15670,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Minutes, For Quality:<br />12 Cal Row <br />20 Jumping Lunges <br />15 Push Ups<br />0:20-0:30 Hollow Hold </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15671,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 2:00 x 12:00... (6 Sets) <br />Back Squat<br />1x5 @ <span class='benchmark' data-id='21'>165.0lb</span><br />1x3 @ <span class='benchmark' data-id='21'>192.5lb</span><br />1x2 @ <span class='benchmark' data-id='21'>220.0lb</span><br />1x1 @ <span class='benchmark' data-id='21'>247.5lb</span><br />1x1 @ <span class='benchmark' data-id='21'>261.25lb</span><br />1x1 @ <span class='benchmark' data-id='21'>280.5lb</span><br />---<br />Every 2:00 x 6:00... (3 Sets) <br />Bench Press<br />3x5 @ Moderate Weight</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15672,
+            "title": "metcon",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time:<br />500m Run <br />Directly Into...<br />6 Rounds of \"Mary\" <br />Directly Into...<br />500m Run <br />----<br />*1 Round of \"Mary\" =<br />5 Strict Handstand Push-ups + <br />10 Pistols + <br />15 Pull-ups </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15673,
+            "title": "accessory",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x (10 Minute Cap) <br />15 Plate Pinch Bench Press <br />15 Banded Face Pull <br />15 Diamond Push-up</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31510,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 7,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=362&type=postwod&callback=hwpo://schedule?id=8891782&date=2024-12-20&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:363": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 363,
+    "requested_date": "2024-12-21",
+    "response": {
+      "schedule": {
+        "id": 8901871,
+        "day_id": 5331,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734739200,
+        "day_number": 363,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17195,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 363</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 10777,
+              "type": "video",
+              "title": "Hwpo 60 week 52 - hd 720p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1662560161,
+              "file_size": "595 MB",
+              "file_size_raw": 624350760,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/HWPO_60_WEEK_52_-_HD_720p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/10777/thumb_video_HWPO_60_WEEK_52_-_HD_720p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31511,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=363&type=prewod&callback=hwpo://schedule?id=8901871&date=2024-12-21&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 15674,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Minutes, For Quality:<br />1:00 Fan Bike <br />20 Air Squat<br />20 Heel Overs<br />8 Wide Grip Pull-up</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15675,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Take 12:00 to Complete: <br />Split Jerk<br />1x3 @ <span class='benchmark' data-id='330'>112.2lb</span><br />1x3 @ <span class='benchmark' data-id='330'>125.4lb</span><br />1x3 @ <span class='benchmark' data-id='330'>135.3lb</span><br />1x1 @ <span class='benchmark' data-id='330'>143.55lb</span><br />1x1 @ <span class='benchmark' data-id='330'>151.8lb</span><br />1x1 @ <span class='benchmark' data-id='330'>156.75lb</span><br />1x1 @ <span class='benchmark' data-id='330'>165.0lb</span> +<br />----<br />Every 0:20 x 20 Rounds:<br />1 Deficit Deadlift @ <span class='benchmark' data-id='47'>187.0lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 15676,
+            "title": "METCON",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 28<br />1) 15/12 Cal Row <br />2) 8 Shoulder to Overhead 185/135 (or 60% of 1RM Power Jerk)<br />3) 14/11 Cal Ski Erg<br />4) Rest </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31512,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=363&type=postwod&callback=hwpo://schedule?id=8901871&date=2024-12-21&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:364": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 364,
+    "requested_date": "2024-12-22",
+    "response": {
+      "schedule": {
+        "id": 8912132,
+        "day_id": 5332,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734825600,
+        "day_number": 364,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 17196,
+            "title": "rest day",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Rest Day</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31513,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=364&type=prewod&callback=hwpo://schedule?id=8912132&date=2024-12-22&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 31514,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=364&type=postwod&callback=hwpo://schedule?id=8912132&date=2024-12-22&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:365": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 365,
+    "requested_date": "2024-12-23",
+    "response": {
+      "schedule": {
+        "id": 8922017,
+        "day_id": 7454,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734912000,
+        "day_number": 365,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 23059,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 365</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 15396,
+              "type": "video",
+              "title": "Hwpo 60 week 53 day 365 - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1668021352,
+              "file_size": "633 MB",
+              "file_size_raw": 663279045,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/15396/HWPO_60_WEEK_53_Day_365_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/15396/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15396/thumb_video_HWPO_60_WEEK_53_Day_365_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15396/thumb_video_HWPO_60_WEEK_53_Day_365_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31515,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=365&type=prewod&callback=hwpo://schedule?id=8922017&date=2024-12-23&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 23060,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>10 Minutes, For Quality:<br />15/12 Cal Row <br />10/10 Single Leg Glute Bridge <br />20 Band Pull Aparts <br />16 Starfish </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23061,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 1:30 x 18:00... (3 Sets)  <br />1) Back Squat x 6-8 @ <span class='benchmark' data-id='21'>178.75lb</span> <br />2) Front Plank x 0:40 <br />3) Bench Press x 10 @ <span class='benchmark' data-id='27'>97.65lb</span><br />4) Band Assisted Strict Pull Ups x Max Reps in 0:30</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23062,
+            "title": "Cardio",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>5 Rounds:<br />500m Row @ <span class='benchmark' data-id='83'>02:25</span>/500m<br />*Rest 0:20 Between Rounds.<br />+<br />Rest 2:00<br />+<br />500m Row @ sub-<span class='benchmark' data-id='83'>02:25</span>/500m</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31516,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=365&type=postwod&callback=hwpo://schedule?id=8922017&date=2024-12-23&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:366": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 366,
+    "requested_date": "2024-12-24",
+    "response": {
+      "schedule": {
+        "id": 8932858,
+        "day_id": 7455,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1734998400,
+        "day_number": 366,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 23063,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 366</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 15395,
+              "type": "video",
+              "title": "Hwpo 60 week 53 day 366 - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1668021324,
+              "file_size": "568 MB",
+              "file_size_raw": 595830048,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/15395/HWPO_60_WEEK_53_Day_366_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/15395/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15395/thumb_video_HWPO_60_WEEK_53_Day_366_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15395/thumb_video_HWPO_60_WEEK_53_Day_366_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31517,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=366&type=prewod&callback=hwpo://schedule?id=8932858&date=2024-12-24&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 23064,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>10 Minutes, For Quality:<br />15/12 Cal Fan Bike <br />10/10 Single Arm Dumbbell Press <br />15 Toes Up Romanian Deadlift <br />0:30 Hollow Hold </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23065,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 1:30 x 12:00... (8 Sets) <br />Power Clean + Power Jerk<br />1x(3+1) @ <span class='benchmark' data-id='268'>82.5lb</span><br />1x(3+1) @ <span class='benchmark' data-id='268'>99.0lb</span><br />1x(3+1) @ <span class='benchmark' data-id='268'>107.25lb</span><br />4x(3+1) @ <span class='benchmark' data-id='268'>115.5lb</span><br />1x(5+0) @ <span class='benchmark' data-id='268'>107.25lb</span> - Touch and Go<br />----<br />*The first three sets at 50%, 60%, and 65% are warm-up sets.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23066,
+            "title": "metcon",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>4 Rounds For Time:<br />25/20 Cal Fan Bike<br />10 Sandbag Clean 100/70<br />50ft Sandbag Bear Hug Walking Lunge 100/70<br />----<br />*Aim to hold a consistent pace on the fan bike and to be in constant movement on the sandbag/d-ball.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23067,
+            "title": "accessory",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>2x<br />20 Banded Good Mornings <br />15 GHD Back Extensions </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31518,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 7,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=366&type=postwod&callback=hwpo://schedule?id=8932858&date=2024-12-24&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:367": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 367,
+    "requested_date": "2024-12-25",
+    "response": {
+      "schedule": {
+        "id": 8943745,
+        "day_id": 7456,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1735084800,
+        "day_number": 367,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 23068,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 367</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 15398,
+              "type": "video",
+              "title": "Hwpo 60 week 53 day 367 - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1668021807,
+              "file_size": "637 MB",
+              "file_size_raw": 667462320,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/15398/HWPO_60_WEEK_53_Day_367_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/15398/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15398/thumb_video_HWPO_60_WEEK_53_Day_367_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15398/thumb_video_HWPO_60_WEEK_53_Day_367_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31519,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=367&type=prewod&callback=hwpo://schedule?id=8943745&date=2024-12-25&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 23069,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>10 Minutes, For Quality:<br />15/12 Cal Row <br />10 Sotts Press <br />50 Single Under<br />4-8 Strict Chin-up </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23070,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 1:30 x 18:00... (3 Sets)<br />1) Bent Over Barbell Row x 8-10 <br />2) Single Arm Dumbbell Strict Press x 8-10 <br />3) Dumbbell Reverse Curl x 12-15<br />4) Russian Twist x 30</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23071,
+            "title": "metcon",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3 Rounds For Time:<br />20/16 Cal Row<br />20 Muscle Snatch 75/55<br />+<br />Rest 3:00<br />+<br />3 Rounds For Time:<br />20/16 Cal Row<br />20 Toes to Bar</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31520,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=367&type=postwod&callback=hwpo://schedule?id=8943745&date=2024-12-25&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:368": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 368,
+    "requested_date": "2024-12-26",
+    "response": {
+      "schedule": {
+        "id": 8954406,
+        "day_id": 7457,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1735171200,
+        "day_number": 368,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 23072,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 368</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 15397,
+              "type": "video",
+              "title": "Hwpo 60 week 53 day 368 - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1668021706,
+              "file_size": "437 MB",
+              "file_size_raw": 458706588,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/15397/HWPO_60_WEEK_53_Day_368_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/15397/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15397/thumb_video_HWPO_60_WEEK_53_Day_368_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15397/thumb_video_HWPO_60_WEEK_53_Day_368_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31521,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=368&type=prewod&callback=hwpo://schedule?id=8954406&date=2024-12-26&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 23073,
+            "title": "Warmup",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />0:20/0:20 Copenhagen Plank <br />10/10 Monster Walk<br />15 Wide Stance Air Squat</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23074,
+            "title": "Spin Bike",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3x<br />1:00 @ Easy Pace<br />1:30 @ Predicted Pace<br />+<br />Rest as needed.<br />----<br />20:00 Spin Bike Max Wattage Test<br />*Hold 85+ RPM. Try to keep your wattage as consistent as possible throughout the entire 20 minutes.</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23075,
+            "title": "Swim",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Warm-up:<br />2x<br />100m Free<br />50m Kick<br />----<br />Main Set:<br />4x50m Free<br />0:30 Rest<br />+<br />8x25m Kick<br />0:15 Rest<br />+<br />200m Free, For Time.<br />1:00 Rest<br />100m Easy Swim<br />+<br />3 Rounds:<br />50m Kick<br />100m Free<br />*Rest 1:00 Between Rounds.<br />----<br />Cool Down:<br />100m Swim (Easy)</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31522,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=368&type=postwod&callback=hwpo://schedule?id=8954406&date=2024-12-26&type=postwod"
+          }
+        ]
+      }
+    }
+  },
+  "77:369": {
+    "plan_id": 77,
+    "plan_title": "60 1.0",
+    "requested_day_number": 369,
+    "requested_date": "2024-12-27",
+    "response": {
+      "schedule": {
+        "id": 8964545,
+        "day_id": 7458,
+        "plan": {
+          "id": 77,
+          "title": "60 1.0",
+          "plan_type": "membership",
+          "plan_options": [
+            {
+              "id": 40,
+              "title": "60 1.0",
+              "default": true
+            }
+          ],
+          "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/77/ME3k6PnxQ--jfJsgMI_mTw.png"
+        },
+        "date": 1735257600,
+        "day_number": 369,
+        "color": "#FF0000",
+        "can_navigate_forward": true,
+        "can_navigate_back": true,
+        "sections": [
+          {
+            "id": 23076,
+            "title": "DAILY VIDEO",
+            "type": "plain_text",
+            "kind": "tip",
+            "position": 1,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 369</body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": {
+              "id": 15399,
+              "type": "video",
+              "title": "Hwpo 60 week 53 day 369 - hd 1080p",
+              "content_type": "video/quicktime",
+              "position": null,
+              "video_id": null,
+              "video_subtitles": [],
+              "created_at": 1668021953,
+              "file_size": "333 MB",
+              "file_size_raw": 349009535,
+              "src": "https://cdn-app.hwpotraining.com/uploads/media/file/15399/HWPO_60_WEEK_53_Day_369_-_HD_1080p.mov",
+              "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/15399/video.m3u8",
+              "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15399/thumb_video_HWPO_60_WEEK_53_Day_369_-_HD_1080p.jpg",
+              "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/15399/thumb_video_HWPO_60_WEEK_53_Day_369_-_HD_1080p.jpg",
+              "is_remove": false
+            },
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31523,
+            "title": null,
+            "type": "plain_text",
+            "kind": "pre_wod",
+            "position": 2,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=369&type=prewod&callback=hwpo://schedule?id=8964545&date=2024-12-27&type=prewod",
+            "post_wod": null
+          },
+          {
+            "id": 23077,
+            "title": "WARMUP",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 3,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>10 Minutes, For Quality:<br />15/12 Cal Fan Bike <br />20 Cossack Squat <br />10 Snatch Grip Push Press <br />10/10 Pallof Press </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23078,
+            "title": "Strength",
+            "type": "plain_text",
+            "kind": "section",
+            "position": 4,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Every 1:30 x 6:00... (4 Sets) <br />Front Squat <br />1x5 @ <span class='benchmark' data-id='53'>132.0lb</span><br />1x5 @ <span class='benchmark' data-id='53'>154.0lb</span><br />1x5 @ <span class='benchmark' data-id='53'>154.0lb</span><br />1x5 @ <span class='benchmark' data-id='53'>154.0lb</span><br />----<br />Squat Snatch<br />EMOM 6 <br />2-3 Reps Starting @ <span class='benchmark' data-id='98'>62.5lb</span> and building to <span class='benchmark' data-id='98'>87.5lb</span> <br />+<br />EMOM 8<br />Minute 1) 1 @ <span class='benchmark' data-id='98'>91.25lb</span><br />Minute 2) 1 @ <span class='benchmark' data-id='98'>96.25lb</span><br />Minute 3) 1 @ <span class='benchmark' data-id='98'>100.0lb</span><br />Minute 4) 1 @ <span class='benchmark' data-id='98'>102.5lb</span></body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 23079,
+            "title": "metcon",
+            "type": "score",
+            "kind": "leaderboard",
+            "position": 5,
+            "plan_option_id": 40,
+            "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>AMRAP 12 <br />3 Hang Power Clean 115/75<br />3 Box Jump Over 24\"/20\"<br />3 Burpee to 6\" Target<br />6 Hang Power Clean<br />6 Box Jump Over<br />6 Burpee to 6\" Target<br />9 Hang Power Clean<br />9 Box Jump Over<br />9 Burpee to 6\" Target<br />...etc. until time runs out. <br />----<br />*At the start of each new round, the reps should increase by three reps for each movement. </body>",
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": null
+          },
+          {
+            "id": 31524,
+            "title": null,
+            "type": "plain_text",
+            "kind": "post_wod",
+            "position": 6,
+            "plan_option_id": 40,
+            "description": null,
+            "completed": false,
+            "has_feedback": false,
+            "attachment_for_tip": null,
+            "pre_wod": null,
+            "post_wod": "https://deeplink.gowod.app?progId=hwpo-60&day=369&type=postwod&callback=hwpo://schedule?id=8964545&date=2024-12-27&type=postwod"
+          }
+        ]
+      }
+    }
+  }
+}

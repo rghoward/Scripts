@@ -1,0 +1,154 @@
+{
+  "schedule": {
+    "id": 5942349,
+    "day_id": 3513,
+    "plan": {
+      "id": 73,
+      "title": "FLAGSHIP 1.0",
+      "plan_type": "membership",
+      "plan_options": [
+        {
+          "id": 37,
+          "title": "FLAGSHIP 1.0",
+          "default": true
+        }
+      ],
+      "cover_url": "https://cdn-app.hwpotraining.com/uploads/plan/file/73/gvGVchBsUk0KFiQar86lxg.png"
+    },
+    "date": 1705017600,
+    "day_number": 286,
+    "color": "#FF0000",
+    "can_navigate_forward": true,
+    "can_navigate_back": true,
+    "sections": [
+      {
+        "id": 11196,
+        "title": "DAILY VIDEO",
+        "type": "plain_text",
+        "kind": "tip",
+        "position": 1,
+        "plan_option_id": 37,
+        "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Day 286 </body>",
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": {
+          "id": 6354,
+          "type": "video",
+          "title": "Week 41 day 286 updated - hd 1080p",
+          "content_type": "video/quicktime",
+          "position": null,
+          "video_id": null,
+          "video_subtitles": [],
+          "created_at": 1656530954,
+          "file_size": "1.48 GB",
+          "file_size_raw": 1592113783,
+          "src": "https://cdn-app.hwpotraining.com/uploads/media/file/6354/Week_41_Day_286_Updated_-_HD_1080p.mov",
+          "stream_src": "https://cdn-app.hwpotraining.com/uploads/media/file/6354/video.m3u8",
+          "thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/6354/thumb_video_Week_41_Day_286_Updated_-_HD_1080p.jpg",
+          "medium_thumb": "https://cdn-app.hwpotraining.com/uploads/media/file/6354/thumb_video_Week_41_Day_286_Updated_-_HD_1080p.jpg",
+          "is_remove": false
+        },
+        "pre_wod": null,
+        "post_wod": null
+      },
+      {
+        "id": 29901,
+        "title": null,
+        "type": "plain_text",
+        "kind": "pre_wod",
+        "position": 2,
+        "plan_option_id": 37,
+        "description": null,
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=286&type=prewod&callback=hwpo://schedule?id=5942349&date=2024-01-12&type=prewod",
+        "post_wod": null
+      },
+      {
+        "id": 11197,
+        "title": "WARMUP",
+        "type": "plain_text",
+        "kind": "section",
+        "position": 3,
+        "plan_option_id": 37,
+        "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>3:00 Row <br />+<br />3x<br />20 Banded Good Morning (Feet Together)<br />10/10 Half Kneeling Bottoms Up Kettlebell Press<br />10/10 Weighted Russian Twist (Light) <br /></body>",
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": null,
+        "post_wod": null
+      },
+      {
+        "id": 11198,
+        "title": "STRENGTH",
+        "type": "plain_text",
+        "kind": "section",
+        "position": 4,
+        "plan_option_id": 37,
+        "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Squat Clean + Split Jerk:<br />3x(2+1) @ <span class='benchmark' data-id='46'>124.7lb</span><br />2x(1+1) @ <span class='benchmark' data-id='46'>129.05lb</span><br />----<br />Deadlift<br />1x5 @ <span class='benchmark' data-id='47'>251.25lb</span><br />1x5 @ <span class='benchmark' data-id='47'>268.0lb</span><br />1x5+ @ <span class='benchmark' data-id='47'>284.75lb</span><br />1x5 @ <span class='benchmark' data-id='47'>268.0lb</span><br />1 x Burnout Set @ <span class='benchmark' data-id='47'>217.75lb</span></body>",
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": null,
+        "post_wod": null
+      },
+      {
+        "id": 11199,
+        "title": "metcon",
+        "type": "plain_text",
+        "kind": "section",
+        "position": 5,
+        "plan_option_id": 37,
+        "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>EMOM 12 <br />1) 15/12 Cal Row <br />2) 10 Overhead Squat 115/75<br />+<br />EMOM 12 <br />1) 14/11 Cal Fan Bike <br />2) 100' Sandbag Carry  150/100 <br />+<br />EMOM 12 <br />1) 14/11 Cal Ski Erg<br />2) 15 Ring Dip </body>",
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": null,
+        "post_wod": null
+      },
+      {
+        "id": 11200,
+        "title": "ACCESSORY",
+        "type": "plain_text",
+        "kind": "section",
+        "position": 6,
+        "plan_option_id": 37,
+        "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>Plate Pinch Hold<br />3x0:30/0:30<br />-----<br />Dumbbell Wrist Curl <br />3x20 (Light)<br />----<br />Single Leg Dumbbell Romanian Deadlift <br />4x10/10<br />----<br />Duck Foot Weighted GHD Hip Extension <br />4x10</body>",
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": null,
+        "post_wod": null
+      },
+      {
+        "id": 11201,
+        "title": "BONUS",
+        "type": "plain_text",
+        "kind": "section",
+        "position": 7,
+        "plan_option_id": 37,
+        "description": "<style>body{  font-family: 'Proxima Nova';  font-size: 14px;  color: #0D0D0D;  line-height: 24px;  letter-spacing: 0.38px;}p {  margin: 0;}.benchmark {  color: #AF986C;  font-weight: 600;}</style><body>For Time:<br />50 Deadlift 225/155 (or 60% of 1RM)<br />----<br />*Use a weight that you know you can't go unbroken with but can still maintain proper technique. Take note of how you break these up and rest between sets.</body>",
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": null,
+        "post_wod": null
+      },
+      {
+        "id": 29902,
+        "title": null,
+        "type": "plain_text",
+        "kind": "post_wod",
+        "position": 8,
+        "plan_option_id": 37,
+        "description": null,
+        "completed": false,
+        "has_feedback": false,
+        "attachment_for_tip": null,
+        "pre_wod": null,
+        "post_wod": "https://deeplink.gowod.app?progId=hwpo-flagship&day=286&type=postwod&callback=hwpo://schedule?id=5942349&date=2024-01-12&type=postwod"
+      }
+    ]
+  }
+}

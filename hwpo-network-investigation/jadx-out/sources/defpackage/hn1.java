@@ -1,0 +1,14 @@
+package defpackage;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public final /* synthetic */ class hn1 implements oh4 {
+    public final /* synthetic */ long t;
+
+    @Override // defpackage.oh4
+    public final Object invoke(Object obj) {
+        gk1 gk1Var = (gk1) obj;
+        gk1Var.getClass();
+        return Boolean.valueOf(gk1Var.a == this.t);
+    }
+}

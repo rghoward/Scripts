@@ -1,0 +1,296 @@
+[
+  {
+    "schedule_id": 8154268,
+    "date": "2024-10-05",
+    "plan_title": "60 1.0",
+    "day_number": 286,
+    "section_count": 6
+  },
+  {
+    "schedule_id": 8154269,
+    "date": "2024-10-06",
+    "plan_title": "60 1.0",
+    "day_number": 287,
+    "section_count": 3
+  },
+  {
+    "schedule_id": 8154270,
+    "date": "2024-10-07",
+    "plan_title": "60 1.0",
+    "day_number": 288,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8154271,
+    "date": "2024-10-08",
+    "plan_title": "60 1.0",
+    "day_number": 289,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8154272,
+    "date": "2024-10-09",
+    "plan_title": "60 1.0",
+    "day_number": 290,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8154273,
+    "date": "2024-10-10",
+    "plan_title": "60 1.0",
+    "day_number": 291,
+    "section_count": 6
+  },
+  {
+    "schedule_id": 8154274,
+    "date": "2024-10-11",
+    "plan_title": "60 1.0",
+    "day_number": 292,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8154275,
+    "date": "2024-10-12",
+    "plan_title": "60 1.0",
+    "day_number": 293,
+    "section_count": 6
+  },
+  {
+    "schedule_id": 8161025,
+    "date": "2024-10-13",
+    "plan_title": "60 1.0",
+    "day_number": 294,
+    "section_count": 3
+  },
+  {
+    "schedule_id": 8171892,
+    "date": "2024-10-14",
+    "plan_title": "60 1.0",
+    "day_number": 295,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8183221,
+    "date": "2024-10-15",
+    "plan_title": "60 1.0",
+    "day_number": 296,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8194517,
+    "date": "2024-10-16",
+    "plan_title": "60 1.0",
+    "day_number": 297,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 8205667,
+    "date": "2024-10-17",
+    "plan_title": "60 1.0",
+    "day_number": 298,
+    "section_count": 6
+  },
+  {
+    "schedule_id": 8216519,
+    "date": "2024-10-18",
+    "plan_title": "60 1.0",
+    "day_number": 299,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 2643884,
+    "date": "2023-04-02",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 1,
+    "section_count": 9
+  },
+  {
+    "schedule_id": 2643885,
+    "date": "2023-04-03",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 2,
+    "section_count": 8
+  },
+  {
+    "schedule_id": 2643886,
+    "date": "2023-04-04",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 3,
+    "section_count": 8
+  },
+  {
+    "schedule_id": 2643887,
+    "date": "2023-04-05",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 4,
+    "section_count": 5
+  },
+  {
+    "schedule_id": 2643888,
+    "date": "2023-04-06",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 5,
+    "section_count": 8
+  },
+  {
+    "schedule_id": 2643889,
+    "date": "2023-04-07",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 6,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 2643890,
+    "date": "2023-04-08",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 7,
+    "section_count": 1
+  },
+  {
+    "schedule_id": 2646470,
+    "date": "2023-04-09",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 8,
+    "section_count": 9
+  },
+  {
+    "schedule_id": 2657173,
+    "date": "2023-04-10",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 9,
+    "section_count": 8
+  },
+  {
+    "schedule_id": 2668340,
+    "date": "2023-04-11",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 10,
+    "section_count": 8
+  },
+  {
+    "schedule_id": 2680483,
+    "date": "2023-04-12",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 11,
+    "section_count": 5
+  },
+  {
+    "schedule_id": 2691220,
+    "date": "2023-04-13",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 12,
+    "section_count": 8
+  },
+  {
+    "schedule_id": 2701796,
+    "date": "2023-04-14",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 13,
+    "section_count": 7
+  },
+  {
+    "schedule_id": 2712537,
+    "date": "2023-04-15",
+    "plan_title": "FLAGSHIP 1.0",
+    "day_number": 14,
+    "section_count": 3
+  },
+  {
+    "schedule_id": 9327280,
+    "date": "2024-05-06",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 17
+  },
+  {
+    "schedule_id": 9327284,
+    "date": "2024-05-07",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 15
+  },
+  {
+    "schedule_id": 9327285,
+    "date": "2024-05-08",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 16
+  },
+  {
+    "schedule_id": 9327289,
+    "date": "2024-05-09",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 12
+  },
+  {
+    "schedule_id": 9327286,
+    "date": "2024-05-10",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 16
+  },
+  {
+    "schedule_id": 9327287,
+    "date": "2024-05-11",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 14
+  },
+  {
+    "schedule_id": 9327288,
+    "date": "2024-05-12",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 2
+  },
+  {
+    "schedule_id": 9328238,
+    "date": "2024-05-13",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 16
+  },
+  {
+    "schedule_id": 9337281,
+    "date": "2024-05-14",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 15
+  },
+  {
+    "schedule_id": 9337282,
+    "date": "2024-05-15",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 15
+  },
+  {
+    "schedule_id": 9337312,
+    "date": "2024-05-16",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 12
+  },
+  {
+    "schedule_id": 9337313,
+    "date": "2024-05-17",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 15
+  },
+  {
+    "schedule_id": 9337322,
+    "date": "2024-05-18",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 14
+  },
+  {
+    "schedule_id": 9327659,
+    "date": "2024-05-19",
+    "plan_title": "FLAGSHIP 2.0",
+    "day_number": null,
+    "section_count": 2
+  }
+]

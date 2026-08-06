@@ -1,0 +1,3351 @@
+{
+  "method": "full movement taxonomy presence and section-role analysis",
+  "source": "normalized-data/hwpo-workouts-with-loads.json",
+  "source_text_exported": false,
+  "taxonomy_size": 88,
+  "taxonomy": {
+    "back_squat": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "front_squat": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat",
+        "front_rack",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "overhead_squat": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat",
+        "overhead",
+        "shoulder"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "air_squat": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "goblet_squat": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat",
+        "front_rack"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "wall_ball": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat",
+        "shoulder"
+      ],
+      "skill": "basic",
+      "impact": "moderate"
+    },
+    "thruster": {
+      "category": "squat",
+      "stress": [
+        "knee",
+        "squat",
+        "overhead",
+        "shoulder",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "pistol": {
+      "category": "unilateral_leg",
+      "stress": [
+        "knee",
+        "squat",
+        "balance"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "split_squat": {
+      "category": "unilateral_leg",
+      "stress": [
+        "knee",
+        "squat",
+        "unilateral"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "lunge": {
+      "category": "unilateral_leg",
+      "stress": [
+        "knee",
+        "squat",
+        "unilateral"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "step_up": {
+      "category": "unilateral_leg",
+      "stress": [
+        "knee",
+        "squat",
+        "unilateral"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "cossack_squat": {
+      "category": "mobility_strength",
+      "stress": [
+        "knee",
+        "adductor",
+        "mobility"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "deadlift": {
+      "category": "hinge",
+      "stress": [
+        "hinge",
+        "posterior_chain",
+        "grip",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "romanian_deadlift": {
+      "category": "hinge",
+      "stress": [
+        "hinge",
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "stiff_leg_deadlift": {
+      "category": "hinge",
+      "stress": [
+        "hinge",
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "good_morning": {
+      "category": "hinge",
+      "stress": [
+        "hinge",
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "kettlebell_swing": {
+      "category": "hinge",
+      "stress": [
+        "hinge",
+        "posterior_chain",
+        "grip",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "hip_bridge_thrust": {
+      "category": "hinge",
+      "stress": [
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "back_extension": {
+      "category": "hinge",
+      "stress": [
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "reverse_hyper": {
+      "category": "hinge",
+      "stress": [
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "hamstring_curl": {
+      "category": "hinge",
+      "stress": [
+        "posterior_chain"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "clean": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "front_rack",
+        "systemic"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "power_clean": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "front_rack",
+        "systemic"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "squat_clean": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "squat",
+        "front_rack",
+        "systemic"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "hang_clean": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "front_rack"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "clean_pull": {
+      "category": "olympic_derivative",
+      "stress": [
+        "hinge",
+        "posterior_chain",
+        "grip",
+        "systemic"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "snatch": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "overhead",
+        "shoulder",
+        "systemic"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "power_snatch": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "overhead",
+        "shoulder"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "squat_snatch": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "squat",
+        "overhead",
+        "shoulder",
+        "systemic"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "hang_snatch": {
+      "category": "olympic",
+      "stress": [
+        "hinge",
+        "knee",
+        "overhead",
+        "shoulder"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "muscle_snatch": {
+      "category": "olympic_derivative",
+      "stress": [
+        "hinge",
+        "overhead",
+        "shoulder"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "snatch_pull": {
+      "category": "olympic_derivative",
+      "stress": [
+        "hinge",
+        "posterior_chain",
+        "grip",
+        "systemic"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "jerk": {
+      "category": "olympic",
+      "stress": [
+        "knee",
+        "overhead",
+        "shoulder",
+        "front_rack",
+        "systemic"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "split_jerk": {
+      "category": "olympic",
+      "stress": [
+        "knee",
+        "overhead",
+        "shoulder",
+        "front_rack",
+        "unilateral"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "push_jerk": {
+      "category": "olympic",
+      "stress": [
+        "knee",
+        "overhead",
+        "shoulder",
+        "front_rack"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "bench_press": {
+      "category": "horizontal_push",
+      "stress": [
+        "horizontal_push",
+        "shoulder",
+        "triceps"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "dumbbell_bench": {
+      "category": "horizontal_push",
+      "stress": [
+        "horizontal_push",
+        "shoulder",
+        "triceps"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "push_up": {
+      "category": "horizontal_push",
+      "stress": [
+        "horizontal_push",
+        "shoulder",
+        "triceps"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "dip": {
+      "category": "vertical_push",
+      "stress": [
+        "vertical_push",
+        "shoulder",
+        "triceps"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "strict_press": {
+      "category": "vertical_push",
+      "stress": [
+        "vertical_push",
+        "overhead",
+        "shoulder",
+        "triceps"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "push_press": {
+      "category": "vertical_push",
+      "stress": [
+        "vertical_push",
+        "overhead",
+        "shoulder",
+        "triceps",
+        "knee"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "dumbbell_press": {
+      "category": "vertical_push",
+      "stress": [
+        "vertical_push",
+        "overhead",
+        "shoulder",
+        "triceps"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "handstand_push_up": {
+      "category": "inversion",
+      "stress": [
+        "vertical_push",
+        "overhead",
+        "shoulder",
+        "triceps",
+        "inversion"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "wall_walk": {
+      "category": "inversion",
+      "stress": [
+        "vertical_push",
+        "overhead",
+        "shoulder",
+        "inversion",
+        "core"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "handstand_walk": {
+      "category": "inversion",
+      "stress": [
+        "overhead",
+        "shoulder",
+        "inversion",
+        "core"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "pull_up": {
+      "category": "vertical_pull",
+      "stress": [
+        "vertical_pull",
+        "shoulder",
+        "grip"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "chest_to_bar": {
+      "category": "vertical_pull",
+      "stress": [
+        "vertical_pull",
+        "shoulder",
+        "grip"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "muscle_up": {
+      "category": "gymnastics_transition",
+      "stress": [
+        "vertical_pull",
+        "vertical_push",
+        "shoulder",
+        "grip",
+        "core"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "rope_climb": {
+      "category": "climb",
+      "stress": [
+        "vertical_pull",
+        "grip",
+        "core"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "ring_row": {
+      "category": "horizontal_pull",
+      "stress": [
+        "horizontal_pull",
+        "shoulder"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "barbell_row": {
+      "category": "horizontal_pull",
+      "stress": [
+        "horizontal_pull",
+        "hinge",
+        "grip"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "dumbbell_row": {
+      "category": "horizontal_pull",
+      "stress": [
+        "horizontal_pull",
+        "shoulder",
+        "grip"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "pulldown": {
+      "category": "vertical_pull",
+      "stress": [
+        "vertical_pull",
+        "shoulder"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "face_pull": {
+      "category": "shoulder_accessory",
+      "stress": [
+        "horizontal_pull",
+        "shoulder"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "curl": {
+      "category": "arm_accessory",
+      "stress": [
+        "elbow_flexor"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "triceps_extension": {
+      "category": "arm_accessory",
+      "stress": [
+        "triceps"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "toes_to_bar": {
+      "category": "hanging_core",
+      "stress": [
+        "core",
+        "grip",
+        "shoulder"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "knee_raise_tuck": {
+      "category": "hanging_core",
+      "stress": [
+        "core",
+        "grip"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "sit_up": {
+      "category": "core",
+      "stress": [
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "ghd_sit_up": {
+      "category": "core",
+      "stress": [
+        "core",
+        "hip_flexor"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "v_up": {
+      "category": "core",
+      "stress": [
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "plank": {
+      "category": "core",
+      "stress": [
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "hollow": {
+      "category": "core",
+      "stress": [
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "l_sit": {
+      "category": "core",
+      "stress": [
+        "core",
+        "shoulder"
+      ],
+      "skill": "advanced",
+      "impact": "low"
+    },
+    "flutter_kick": {
+      "category": "core",
+      "stress": [
+        "core",
+        "hip_flexor"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "russian_twist": {
+      "category": "core",
+      "stress": [
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "dead_bug": {
+      "category": "core",
+      "stress": [
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "rowing": {
+      "category": "cyclical",
+      "stress": [
+        "cyclical",
+        "hinge",
+        "horizontal_pull",
+        "grip"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "ski_erg": {
+      "category": "cyclical",
+      "stress": [
+        "cyclical",
+        "vertical_pull",
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "fan_bike": {
+      "category": "cyclical",
+      "stress": [
+        "cyclical",
+        "knee",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "spin_bike": {
+      "category": "cyclical",
+      "stress": [
+        "cyclical",
+        "knee"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "running": {
+      "category": "locomotion",
+      "stress": [
+        "cyclical",
+        "impact",
+        "knee"
+      ],
+      "skill": "basic",
+      "impact": "high"
+    },
+    "swimming": {
+      "category": "cyclical",
+      "stress": [
+        "cyclical",
+        "shoulder"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "double_under": {
+      "category": "jump_rope",
+      "stress": [
+        "impact",
+        "calf",
+        "coordination"
+      ],
+      "skill": "intermediate",
+      "impact": "high"
+    },
+    "single_under": {
+      "category": "jump_rope",
+      "stress": [
+        "impact",
+        "calf",
+        "coordination"
+      ],
+      "skill": "basic",
+      "impact": "moderate"
+    },
+    "box_jump": {
+      "category": "jump",
+      "stress": [
+        "impact",
+        "knee",
+        "power"
+      ],
+      "skill": "intermediate",
+      "impact": "high"
+    },
+    "broad_jump": {
+      "category": "jump",
+      "stress": [
+        "impact",
+        "knee",
+        "power"
+      ],
+      "skill": "intermediate",
+      "impact": "high"
+    },
+    "burpee": {
+      "category": "mixed_bodyweight",
+      "stress": [
+        "horizontal_push",
+        "impact",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "moderate"
+    },
+    "farmer_carry": {
+      "category": "carry",
+      "stress": [
+        "carry",
+        "grip",
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "suitcase_carry": {
+      "category": "carry",
+      "stress": [
+        "carry",
+        "grip",
+        "core",
+        "unilateral"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "front_rack_carry": {
+      "category": "carry",
+      "stress": [
+        "carry",
+        "front_rack",
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "overhead_carry": {
+      "category": "carry",
+      "stress": [
+        "carry",
+        "overhead",
+        "shoulder",
+        "core"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "bear_hug_carry": {
+      "category": "carry",
+      "stress": [
+        "carry",
+        "core",
+        "grip"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "sandbag": {
+      "category": "odd_object",
+      "stress": [
+        "odd_object",
+        "grip",
+        "core",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "sled_push_pull": {
+      "category": "sled",
+      "stress": [
+        "sled",
+        "knee",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    },
+    "turkish_get_up": {
+      "category": "mixed_strength",
+      "stress": [
+        "core",
+        "shoulder",
+        "overhead"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "devils_press": {
+      "category": "mixed_strength",
+      "stress": [
+        "hinge",
+        "horizontal_push",
+        "overhead",
+        "systemic"
+      ],
+      "skill": "intermediate",
+      "impact": "low"
+    },
+    "med_ball_slam": {
+      "category": "mixed_strength",
+      "stress": [
+        "hinge",
+        "core",
+        "shoulder",
+        "systemic"
+      ],
+      "skill": "basic",
+      "impact": "low"
+    }
+  },
+  "plans": {
+    "73": {
+      "workout_days": 481,
+      "movement_day_counts": {
+        "rowing": 298,
+        "fan_bike": 213,
+        "snatch": 178,
+        "clean": 169,
+        "curl": 149,
+        "jerk": 143,
+        "deadlift": 140,
+        "running": 133,
+        "front_squat": 124,
+        "spin_bike": 122,
+        "pull_up": 115,
+        "plank": 103,
+        "ski_erg": 101,
+        "back_squat": 98,
+        "power_clean": 95,
+        "burpee": 91,
+        "romanian_deadlift": 88,
+        "push_up": 86,
+        "box_jump": 85,
+        "power_snatch": 82,
+        "strict_press": 79,
+        "hollow": 77,
+        "bench_press": 75,
+        "overhead_squat": 73,
+        "lunge": 72,
+        "double_under": 71,
+        "sandbag": 69,
+        "split_jerk": 69,
+        "toes_to_bar": 67,
+        "knee_raise_tuck": 65,
+        "squat_snatch": 60,
+        "chest_to_bar": 59,
+        "squat_clean": 59,
+        "air_squat": 56,
+        "back_extension": 55,
+        "rope_climb": 53,
+        "v_up": 53,
+        "hip_bridge_thrust": 53,
+        "hamstring_curl": 51,
+        "dumbbell_press": 49,
+        "muscle_up": 49,
+        "russian_twist": 47,
+        "handstand_push_up": 47,
+        "sit_up": 46,
+        "swimming": 44,
+        "dumbbell_bench": 42,
+        "snatch_pull": 41,
+        "dip": 41,
+        "l_sit": 38,
+        "triceps_extension": 37,
+        "ghd_sit_up": 37,
+        "wall_ball": 36,
+        "pistol": 36,
+        "reverse_hyper": 35,
+        "thruster": 35,
+        "push_press": 34,
+        "cossack_squat": 34,
+        "good_morning": 34,
+        "hang_clean": 30,
+        "ring_row": 29,
+        "goblet_squat": 28,
+        "hang_snatch": 27,
+        "face_pull": 26,
+        "handstand_walk": 26,
+        "barbell_row": 25,
+        "single_under": 23,
+        "dumbbell_row": 21,
+        "bear_hug_carry": 20,
+        "flutter_kick": 18,
+        "split_squat": 17,
+        "suitcase_carry": 16,
+        "devils_press": 11,
+        "muscle_snatch": 8,
+        "dead_bug": 7,
+        "wall_walk": 7,
+        "kettlebell_swing": 7,
+        "stiff_leg_deadlift": 3,
+        "turkish_get_up": 3,
+        "broad_jump": 2,
+        "push_jerk": 2,
+        "front_rack_carry": 1
+      },
+      "movement_section_roles": {
+        "air_squat": {
+          "warmup": 31,
+          "conditioning": 20,
+          "bonus": 9
+        },
+        "back_extension": {
+          "accessory": 32,
+          "warmup": 20,
+          "strength": 4,
+          "bonus": 1
+        },
+        "back_squat": {
+          "strength": 97,
+          "conditioning": 1,
+          "warmup": 1
+        },
+        "barbell_row": {
+          "accessory": 22,
+          "warmup": 2,
+          "conditioning": 1
+        },
+        "bear_hug_carry": {
+          "accessory": 19,
+          "conditioning": 1
+        },
+        "bench_press": {
+          "strength": 50,
+          "accessory": 44,
+          "bonus": 5,
+          "conditioning": 4,
+          "skill": 3,
+          "warmup": 1
+        },
+        "box_jump": {
+          "warmup": 33,
+          "conditioning": 31,
+          "bonus": 16,
+          "strength": 13
+        },
+        "broad_jump": {
+          "warmup": 2
+        },
+        "burpee": {
+          "conditioning": 55,
+          "bonus": 33,
+          "warmup": 8
+        },
+        "chest_to_bar": {
+          "conditioning": 31,
+          "accessory": 17,
+          "bonus": 10,
+          "skill": 4
+        },
+        "clean": {
+          "strength": 116,
+          "conditioning": 77,
+          "bonus": 18,
+          "warmup": 10
+        },
+        "cossack_squat": {
+          "warmup": 34
+        },
+        "curl": {
+          "accessory": 125,
+          "warmup": 18,
+          "bonus": 15
+        },
+        "dead_bug": {
+          "warmup": 6,
+          "accessory": 1
+        },
+        "deadlift": {
+          "strength": 93,
+          "warmup": 89,
+          "accessory": 29,
+          "conditioning": 27,
+          "bonus": 12
+        },
+        "devils_press": {
+          "conditioning": 9,
+          "bonus": 2
+        },
+        "dip": {
+          "accessory": 11,
+          "bonus": 10,
+          "warmup": 9,
+          "conditioning": 8,
+          "skill": 3
+        },
+        "double_under": {
+          "conditioning": 55,
+          "bonus": 13,
+          "skill": 3,
+          "warmup": 1,
+          "strength": 1
+        },
+        "dumbbell_bench": {
+          "accessory": 33,
+          "bonus": 5,
+          "conditioning": 3,
+          "skill": 1
+        },
+        "dumbbell_press": {
+          "accessory": 29,
+          "warmup": 20
+        },
+        "dumbbell_row": {
+          "accessory": 21
+        },
+        "face_pull": {
+          "warmup": 22,
+          "accessory": 4
+        },
+        "fan_bike": {
+          "conditioning": 176,
+          "warmup": 96,
+          "bonus": 34,
+          "strength": 3,
+          "skill": 2
+        },
+        "flutter_kick": {
+          "accessory": 13,
+          "warmup": 5,
+          "bonus": 1
+        },
+        "front_rack_carry": {
+          "accessory": 1
+        },
+        "front_squat": {
+          "strength": 105,
+          "conditioning": 15,
+          "warmup": 9,
+          "bonus": 5
+        },
+        "ghd_sit_up": {
+          "conditioning": 30,
+          "bonus": 4,
+          "skill": 3
+        },
+        "goblet_squat": {
+          "warmup": 26,
+          "conditioning": 2
+        },
+        "good_morning": {
+          "warmup": 23,
+          "accessory": 11
+        },
+        "hamstring_curl": {
+          "accessory": 37,
+          "warmup": 12,
+          "bonus": 3
+        },
+        "handstand_push_up": {
+          "conditioning": 30,
+          "bonus": 14,
+          "skill": 4
+        },
+        "handstand_walk": {
+          "conditioning": 14,
+          "bonus": 10,
+          "skill": 3
+        },
+        "hang_clean": {
+          "conditioning": 12,
+          "warmup": 7,
+          "bonus": 7,
+          "strength": 6
+        },
+        "hang_snatch": {
+          "strength": 20,
+          "bonus": 3,
+          "conditioning": 3
+        },
+        "hip_bridge_thrust": {
+          "warmup": 35,
+          "accessory": 8,
+          "strength": 8,
+          "bonus": 2
+        },
+        "hollow": {
+          "accessory": 41,
+          "warmup": 39,
+          "bonus": 4
+        },
+        "jerk": {
+          "strength": 128,
+          "conditioning": 23,
+          "bonus": 6,
+          "warmup": 5
+        },
+        "kettlebell_swing": {
+          "bonus": 4,
+          "conditioning": 3
+        },
+        "knee_raise_tuck": {
+          "accessory": 38,
+          "warmup": 21,
+          "conditioning": 5,
+          "skill": 3
+        },
+        "l_sit": {
+          "warmup": 22,
+          "accessory": 17
+        },
+        "lunge": {
+          "warmup": 42,
+          "conditioning": 21,
+          "accessory": 12,
+          "bonus": 3
+        },
+        "muscle_snatch": {
+          "conditioning": 6,
+          "strength": 2
+        },
+        "muscle_up": {
+          "conditioning": 38,
+          "skill": 6,
+          "bonus": 5
+        },
+        "overhead_squat": {
+          "strength": 45,
+          "warmup": 26,
+          "conditioning": 14,
+          "bonus": 5
+        },
+        "pistol": {
+          "conditioning": 18,
+          "bonus": 16,
+          "skill": 3
+        },
+        "plank": {
+          "accessory": 80,
+          "warmup": 28
+        },
+        "power_clean": {
+          "strength": 66,
+          "conditioning": 27,
+          "bonus": 9,
+          "warmup": 6
+        },
+        "power_snatch": {
+          "strength": 69,
+          "conditioning": 12,
+          "bonus": 4,
+          "skill": 1
+        },
+        "pull_up": {
+          "accessory": 76,
+          "conditioning": 19,
+          "bonus": 15,
+          "warmup": 12,
+          "skill": 3
+        },
+        "push_jerk": {
+          "conditioning": 1,
+          "strength": 1
+        },
+        "push_press": {
+          "strength": 19,
+          "bonus": 6,
+          "conditioning": 5,
+          "warmup": 4
+        },
+        "push_up": {
+          "conditioning": 49,
+          "bonus": 16,
+          "warmup": 15,
+          "accessory": 12,
+          "skill": 4
+        },
+        "reverse_hyper": {
+          "accessory": 29,
+          "strength": 4,
+          "warmup": 2
+        },
+        "ring_row": {
+          "warmup": 28,
+          "conditioning": 1
+        },
+        "romanian_deadlift": {
+          "warmup": 69,
+          "accessory": 26,
+          "strength": 9,
+          "bonus": 3
+        },
+        "rope_climb": {
+          "conditioning": 38,
+          "bonus": 13,
+          "skill": 3
+        },
+        "rowing": {
+          "conditioning": 215,
+          "warmup": 206,
+          "accessory": 81,
+          "bonus": 16,
+          "skill": 4,
+          "strength": 3
+        },
+        "running": {
+          "bonus": 105,
+          "conditioning": 39
+        },
+        "russian_twist": {
+          "accessory": 33,
+          "warmup": 13,
+          "conditioning": 1
+        },
+        "sandbag": {
+          "conditioning": 42,
+          "accessory": 29,
+          "bonus": 2
+        },
+        "single_under": {
+          "warmup": 23
+        },
+        "sit_up": {
+          "conditioning": 32,
+          "bonus": 6,
+          "accessory": 5,
+          "skill": 3
+        },
+        "ski_erg": {
+          "warmup": 58,
+          "conditioning": 48,
+          "bonus": 3,
+          "skill": 1
+        },
+        "snatch": {
+          "strength": 151,
+          "conditioning": 43,
+          "bonus": 10,
+          "warmup": 5,
+          "skill": 1
+        },
+        "snatch_pull": {
+          "strength": 41
+        },
+        "spin_bike": {
+          "bonus": 93,
+          "warmup": 19,
+          "conditioning": 15
+        },
+        "split_jerk": {
+          "strength": 69,
+          "warmup": 1
+        },
+        "split_squat": {
+          "warmup": 8,
+          "strength": 8,
+          "accessory": 1
+        },
+        "squat_clean": {
+          "strength": 48,
+          "conditioning": 9,
+          "bonus": 3
+        },
+        "squat_snatch": {
+          "strength": 50,
+          "conditioning": 11,
+          "bonus": 1
+        },
+        "stiff_leg_deadlift": {
+          "accessory": 3
+        },
+        "strict_press": {
+          "strength": 52,
+          "accessory": 25,
+          "warmup": 18
+        },
+        "suitcase_carry": {
+          "accessory": 16
+        },
+        "swimming": {
+          "conditioning": 44
+        },
+        "thruster": {
+          "conditioning": 25,
+          "bonus": 10
+        },
+        "toes_to_bar": {
+          "conditioning": 35,
+          "bonus": 20,
+          "warmup": 8,
+          "skill": 3,
+          "accessory": 2
+        },
+        "triceps_extension": {
+          "accessory": 37
+        },
+        "turkish_get_up": {
+          "warmup": 3
+        },
+        "v_up": {
+          "accessory": 25,
+          "warmup": 22,
+          "conditioning": 7,
+          "skill": 1
+        },
+        "wall_ball": {
+          "conditioning": 31,
+          "bonus": 5
+        },
+        "wall_walk": {
+          "conditioning": 6,
+          "bonus": 1
+        }
+      },
+      "category_day_counts": {
+        "cyclical": 391,
+        "olympic": 296,
+        "squat": 285,
+        "core": 249,
+        "hinge": 220,
+        "arm_accessory": 183,
+        "vertical_pull": 143,
+        "horizontal_push": 141,
+        "vertical_push": 137,
+        "locomotion": 133,
+        "hanging_core": 120,
+        "unilateral_leg": 115,
+        "mixed_bodyweight": 91,
+        "jump": 85,
+        "jump_rope": 81,
+        "horizontal_pull": 72,
+        "odd_object": 69,
+        "inversion": 67,
+        "climb": 53,
+        "gymnastics_transition": 49,
+        "olympic_derivative": 48,
+        "carry": 37,
+        "mobility_strength": 34,
+        "shoulder_accessory": 26,
+        "mixed_strength": 13
+      },
+      "stress_day_counts": {
+        "cyclical": 391,
+        "shoulder": 387,
+        "knee": 367,
+        "grip": 347,
+        "hinge": 345,
+        "core": 345,
+        "systemic": 344,
+        "squat": 322,
+        "horizontal_pull": 308,
+        "overhead": 306,
+        "posterior_chain": 252,
+        "front_rack": 249,
+        "impact": 248,
+        "vertical_pull": 246,
+        "triceps": 236,
+        "horizontal_push": 211,
+        "vertical_push": 189,
+        "unilateral": 151,
+        "elbow_flexor": 149,
+        "power": 85,
+        "calf": 81,
+        "coordination": 81,
+        "odd_object": 69,
+        "inversion": 67,
+        "hip_flexor": 54,
+        "carry": 37,
+        "balance": 36,
+        "adductor": 34,
+        "mobility": 34
+      },
+      "skill_level_day_counts": {
+        "basic": 397,
+        "advanced": 331,
+        "intermediate": 283
+      },
+      "impact_level_day_counts": {
+        "low": 397,
+        "high": 217,
+        "moderate": 131
+      },
+      "top_conditioning_pairs": {
+        "fan_bike + rowing": 62,
+        "clean + fan_bike": 32,
+        "clean + rowing": 30,
+        "rowing + sit_up": 23,
+        "fan_bike + sandbag": 22,
+        "ghd_sit_up + rowing": 22,
+        "rowing + sandbag": 18,
+        "deadlift + fan_bike": 18,
+        "box_jump + burpee": 17,
+        "double_under + fan_bike": 17,
+        "rowing + snatch": 17,
+        "push_up + rowing": 17,
+        "rowing + ski_erg": 17,
+        "double_under + rowing": 16,
+        "clean + jerk": 16,
+        "rope_climb + rowing": 14,
+        "air_squat + push_up": 14,
+        "fan_bike + toes_to_bar": 14,
+        "fan_bike + push_up": 14,
+        "fan_bike + rope_climb": 13,
+        "fan_bike + power_clean": 13,
+        "rowing + toes_to_bar": 13,
+        "chest_to_bar + fan_bike": 13,
+        "fan_bike + jerk": 13,
+        "fan_bike + muscle_up": 13,
+        "box_jump + rowing": 12,
+        "burpee + fan_bike": 12,
+        "burpee + rowing": 12,
+        "burpee + clean": 12,
+        "handstand_push_up + rowing": 12,
+        "fan_bike + ghd_sit_up": 12,
+        "fan_bike + sit_up": 12,
+        "fan_bike + wall_ball": 12,
+        "chest_to_bar + rowing": 12,
+        "rowing + wall_ball": 11,
+        "pull_up + push_up": 11,
+        "fan_bike + handstand_push_up": 11,
+        "muscle_up + rowing": 11,
+        "fan_bike + snatch": 11,
+        "box_jump + fan_bike": 10,
+        "hang_clean + power_clean": 10,
+        "muscle_up + snatch": 10,
+        "jerk + power_clean": 10,
+        "box_jump + double_under": 9,
+        "push_up + ski_erg": 9,
+        "clean + double_under": 9,
+        "clean + ski_erg": 9,
+        "power_clean + rowing": 9,
+        "fan_bike + ski_erg": 9,
+        "fan_bike + thruster": 9
+      },
+      "tagged_section_percent": 93.3,
+      "tagged_sections": 1911,
+      "total_meaningful_sections": 2049,
+      "untagged_section_roles": {
+        "conditioning": 60,
+        "bonus": 29,
+        "accessory": 17,
+        "rest": 14,
+        "strength": 10,
+        "warmup": 7,
+        "other": 1
+      },
+      "blocks": {
+        "1": {
+          "rowing": 49,
+          "fan_bike": 37,
+          "spin_bike": 29,
+          "front_squat": 27,
+          "running": 27,
+          "pull_up": 27,
+          "sandbag": 24,
+          "snatch": 24,
+          "dumbbell_press": 23,
+          "clean": 22,
+          "back_squat": 21,
+          "curl": 20,
+          "strict_press": 19,
+          "knee_raise_tuck": 19,
+          "jerk": 18,
+          "lunge": 17,
+          "deadlift": 17,
+          "romanian_deadlift": 15,
+          "chest_to_bar": 14,
+          "plank": 13,
+          "bear_hug_carry": 13,
+          "box_jump": 13,
+          "russian_twist": 13,
+          "push_up": 13,
+          "v_up": 12,
+          "snatch_pull": 12,
+          "power_snatch": 12,
+          "double_under": 12,
+          "burpee": 12,
+          "ski_erg": 12,
+          "power_clean": 11,
+          "rope_climb": 10,
+          "triceps_extension": 10,
+          "overhead_squat": 10,
+          "air_squat": 10,
+          "reverse_hyper": 9,
+          "back_extension": 9,
+          "squat_snatch": 8,
+          "hamstring_curl": 8,
+          "bench_press": 7,
+          "hip_bridge_thrust": 7,
+          "toes_to_bar": 7,
+          "flutter_kick": 6,
+          "push_press": 6,
+          "dip": 6,
+          "sit_up": 6,
+          "ghd_sit_up": 6,
+          "hollow": 5,
+          "cossack_squat": 5,
+          "wall_ball": 5,
+          "l_sit": 5,
+          "handstand_push_up": 5,
+          "good_morning": 5,
+          "muscle_up": 5,
+          "face_pull": 4,
+          "barbell_row": 4,
+          "dumbbell_bench": 4,
+          "dumbbell_row": 4,
+          "single_under": 4,
+          "suitcase_carry": 3,
+          "stiff_leg_deadlift": 3,
+          "pistol": 3,
+          "hang_clean": 3,
+          "squat_clean": 3,
+          "handstand_walk": 3,
+          "dead_bug": 3,
+          "ring_row": 3,
+          "split_jerk": 3,
+          "goblet_squat": 2,
+          "devils_press": 1,
+          "muscle_snatch": 1,
+          "thruster": 1,
+          "split_squat": 1,
+          "wall_walk": 1,
+          "kettlebell_swing": 1
+        },
+        "2": {
+          "rowing": 53,
+          "clean": 40,
+          "snatch": 40,
+          "fan_bike": 37,
+          "deadlift": 30,
+          "curl": 27,
+          "jerk": 23,
+          "ski_erg": 23,
+          "plank": 20,
+          "box_jump": 20,
+          "power_clean": 19,
+          "overhead_squat": 17,
+          "pull_up": 16,
+          "spin_bike": 16,
+          "power_snatch": 16,
+          "hollow": 16,
+          "burpee": 15,
+          "sandbag": 15,
+          "push_up": 15,
+          "romanian_deadlift": 15,
+          "lunge": 14,
+          "front_squat": 14,
+          "squat_clean": 14,
+          "running": 12,
+          "hip_bridge_thrust": 12,
+          "back_squat": 12,
+          "rope_climb": 11,
+          "double_under": 11,
+          "v_up": 11,
+          "squat_snatch": 11,
+          "wall_ball": 11,
+          "split_jerk": 10,
+          "hamstring_curl": 10,
+          "hang_clean": 10,
+          "thruster": 10,
+          "toes_to_bar": 10,
+          "muscle_up": 9,
+          "chest_to_bar": 9,
+          "strict_press": 9,
+          "knee_raise_tuck": 9,
+          "handstand_push_up": 9,
+          "triceps_extension": 8,
+          "sit_up": 8,
+          "back_extension": 7,
+          "l_sit": 7,
+          "bench_press": 7,
+          "air_squat": 7,
+          "russian_twist": 6,
+          "ring_row": 6,
+          "barbell_row": 6,
+          "single_under": 6,
+          "ghd_sit_up": 6,
+          "goblet_squat": 5,
+          "reverse_hyper": 5,
+          "dip": 5,
+          "bear_hug_carry": 4,
+          "pistol": 4,
+          "good_morning": 4,
+          "cossack_squat": 4,
+          "dumbbell_bench": 3,
+          "dumbbell_press": 3,
+          "push_press": 3,
+          "handstand_walk": 3,
+          "face_pull": 2,
+          "dumbbell_row": 2,
+          "devils_press": 2,
+          "flutter_kick": 2,
+          "broad_jump": 1,
+          "muscle_snatch": 1,
+          "split_squat": 1,
+          "dead_bug": 1,
+          "push_jerk": 1,
+          "hang_snatch": 1
+        },
+        "3": {
+          "rowing": 54,
+          "fan_bike": 43,
+          "jerk": 32,
+          "running": 28,
+          "clean": 28,
+          "front_squat": 26,
+          "snatch": 26,
+          "back_squat": 23,
+          "curl": 23,
+          "deadlift": 21,
+          "pull_up": 21,
+          "plank": 20,
+          "burpee": 19,
+          "split_jerk": 18,
+          "spin_bike": 17,
+          "toes_to_bar": 16,
+          "double_under": 16,
+          "bench_press": 16,
+          "knee_raise_tuck": 15,
+          "hollow": 15,
+          "ski_erg": 15,
+          "power_clean": 15,
+          "romanian_deadlift": 15,
+          "lunge": 14,
+          "power_snatch": 14,
+          "box_jump": 14,
+          "muscle_up": 14,
+          "sit_up": 13,
+          "l_sit": 12,
+          "pistol": 12,
+          "sandbag": 12,
+          "dumbbell_bench": 12,
+          "push_up": 12,
+          "swimming": 11,
+          "chest_to_bar": 11,
+          "russian_twist": 10,
+          "ghd_sit_up": 9,
+          "push_press": 9,
+          "squat_snatch": 9,
+          "hip_bridge_thrust": 9,
+          "rope_climb": 9,
+          "squat_clean": 9,
+          "hamstring_curl": 9,
+          "handstand_push_up": 9,
+          "dip": 9,
+          "v_up": 8,
+          "back_extension": 8,
+          "ring_row": 7,
+          "reverse_hyper": 7,
+          "wall_ball": 6,
+          "dumbbell_press": 6,
+          "good_morning": 6,
+          "single_under": 6,
+          "overhead_squat": 6,
+          "flutter_kick": 5,
+          "hang_clean": 5,
+          "thruster": 5,
+          "strict_press": 5,
+          "barbell_row": 5,
+          "face_pull": 4,
+          "cossack_squat": 4,
+          "handstand_walk": 4,
+          "goblet_squat": 4,
+          "air_squat": 3,
+          "devils_press": 3,
+          "triceps_extension": 3,
+          "dead_bug": 3,
+          "kettlebell_swing": 2,
+          "bear_hug_carry": 2,
+          "split_squat": 2,
+          "hang_snatch": 2,
+          "suitcase_carry": 1,
+          "front_rack_carry": 1,
+          "muscle_snatch": 1,
+          "broad_jump": 1,
+          "push_jerk": 1
+        },
+        "4": {
+          "rowing": 55,
+          "fan_bike": 40,
+          "snatch": 33,
+          "clean": 29,
+          "ski_erg": 27,
+          "deadlift": 27,
+          "jerk": 26,
+          "curl": 26,
+          "push_up": 24,
+          "running": 24,
+          "pull_up": 21,
+          "front_squat": 18,
+          "burpee": 17,
+          "power_clean": 17,
+          "spin_bike": 17,
+          "hollow": 16,
+          "romanian_deadlift": 16,
+          "toes_to_bar": 16,
+          "power_snatch": 15,
+          "split_jerk": 15,
+          "overhead_squat": 15,
+          "hang_snatch": 15,
+          "plank": 15,
+          "air_squat": 14,
+          "strict_press": 14,
+          "back_extension": 14,
+          "lunge": 12,
+          "handstand_push_up": 12,
+          "swimming": 12,
+          "bench_press": 12,
+          "back_squat": 12,
+          "v_up": 11,
+          "hip_bridge_thrust": 11,
+          "dip": 11,
+          "double_under": 11,
+          "squat_clean": 11,
+          "knee_raise_tuck": 10,
+          "box_jump": 10,
+          "sit_up": 10,
+          "russian_twist": 9,
+          "muscle_up": 9,
+          "snatch_pull": 9,
+          "rope_climb": 9,
+          "ghd_sit_up": 9,
+          "squat_snatch": 8,
+          "face_pull": 8,
+          "chest_to_bar": 8,
+          "dumbbell_bench": 8,
+          "split_squat": 8,
+          "pistol": 8,
+          "hamstring_curl": 8,
+          "thruster": 8,
+          "ring_row": 7,
+          "cossack_squat": 7,
+          "sandbag": 6,
+          "reverse_hyper": 6,
+          "handstand_walk": 5,
+          "l_sit": 5,
+          "wall_ball": 4,
+          "good_morning": 4,
+          "goblet_squat": 4,
+          "muscle_snatch": 3,
+          "flutter_kick": 3,
+          "suitcase_carry": 3,
+          "dumbbell_row": 3,
+          "devils_press": 2,
+          "triceps_extension": 2,
+          "push_press": 2,
+          "single_under": 2,
+          "barbell_row": 1,
+          "kettlebell_swing": 1,
+          "hang_clean": 1,
+          "dumbbell_press": 1
+        },
+        "5": {
+          "rowing": 48,
+          "fan_bike": 33,
+          "curl": 32,
+          "clean": 28,
+          "snatch": 27,
+          "jerk": 26,
+          "running": 26,
+          "deadlift": 26,
+          "spin_bike": 24,
+          "front_squat": 23,
+          "plank": 20,
+          "strict_press": 20,
+          "bench_press": 20,
+          "back_squat": 20,
+          "power_clean": 17,
+          "romanian_deadlift": 16,
+          "pull_up": 16,
+          "power_snatch": 15,
+          "box_jump": 15,
+          "ski_erg": 15,
+          "overhead_squat": 15,
+          "hollow": 15,
+          "squat_snatch": 13,
+          "burpee": 12,
+          "push_up": 12,
+          "swimming": 12,
+          "double_under": 12,
+          "split_jerk": 12,
+          "squat_clean": 12,
+          "air_squat": 12,
+          "snatch_pull": 11,
+          "back_extension": 10,
+          "hamstring_curl": 10,
+          "chest_to_bar": 10,
+          "cossack_squat": 9,
+          "muscle_up": 9,
+          "lunge": 9,
+          "dumbbell_bench": 9,
+          "rope_climb": 9,
+          "good_morning": 9,
+          "push_press": 9,
+          "toes_to_bar": 9,
+          "dumbbell_press": 9,
+          "hip_bridge_thrust": 8,
+          "dumbbell_row": 8,
+          "knee_raise_tuck": 8,
+          "handstand_walk": 7,
+          "triceps_extension": 7,
+          "pistol": 7,
+          "sandbag": 7,
+          "l_sit": 7,
+          "v_up": 7,
+          "wall_ball": 7,
+          "hang_snatch": 7,
+          "ring_row": 6,
+          "thruster": 6,
+          "handstand_push_up": 6,
+          "suitcase_carry": 6,
+          "goblet_squat": 6,
+          "russian_twist": 5,
+          "barbell_row": 5,
+          "hang_clean": 5,
+          "sit_up": 5,
+          "reverse_hyper": 5,
+          "dip": 4,
+          "ghd_sit_up": 4,
+          "face_pull": 4,
+          "wall_walk": 4,
+          "split_squat": 3,
+          "single_under": 3,
+          "flutter_kick": 2,
+          "turkish_get_up": 2,
+          "bear_hug_carry": 1,
+          "muscle_snatch": 1,
+          "devils_press": 1,
+          "kettlebell_swing": 1
+        },
+        "6": {
+          "rowing": 39,
+          "snatch": 28,
+          "fan_bike": 23,
+          "clean": 22,
+          "curl": 21,
+          "spin_bike": 19,
+          "deadlift": 19,
+          "jerk": 18,
+          "front_squat": 16,
+          "burpee": 16,
+          "running": 16,
+          "power_clean": 16,
+          "plank": 15,
+          "pull_up": 14,
+          "bench_press": 13,
+          "box_jump": 13,
+          "strict_press": 12,
+          "split_jerk": 11,
+          "squat_snatch": 11,
+          "romanian_deadlift": 11,
+          "hollow": 10,
+          "back_squat": 10,
+          "overhead_squat": 10,
+          "air_squat": 10,
+          "power_snatch": 10,
+          "squat_clean": 10,
+          "push_up": 10,
+          "double_under": 9,
+          "snatch_pull": 9,
+          "swimming": 9,
+          "toes_to_bar": 9,
+          "ski_erg": 9,
+          "triceps_extension": 7,
+          "back_extension": 7,
+          "chest_to_bar": 7,
+          "goblet_squat": 7,
+          "dumbbell_press": 7,
+          "dip": 6,
+          "lunge": 6,
+          "good_morning": 6,
+          "hang_clean": 6,
+          "dumbbell_bench": 6,
+          "hamstring_curl": 6,
+          "hip_bridge_thrust": 6,
+          "handstand_push_up": 6,
+          "rope_climb": 5,
+          "cossack_squat": 5,
+          "push_press": 5,
+          "thruster": 5,
+          "sandbag": 5,
+          "knee_raise_tuck": 4,
+          "dumbbell_row": 4,
+          "handstand_walk": 4,
+          "sit_up": 4,
+          "russian_twist": 4,
+          "barbell_row": 4,
+          "face_pull": 4,
+          "v_up": 4,
+          "suitcase_carry": 3,
+          "ghd_sit_up": 3,
+          "wall_ball": 3,
+          "muscle_up": 3,
+          "reverse_hyper": 3,
+          "hang_snatch": 2,
+          "devils_press": 2,
+          "pistol": 2,
+          "split_squat": 2,
+          "l_sit": 2,
+          "single_under": 2,
+          "kettlebell_swing": 2,
+          "wall_walk": 2,
+          "turkish_get_up": 1,
+          "muscle_snatch": 1
+        }
+      }
+    },
+    "77": {
+      "workout_days": 661,
+      "movement_day_counts": {
+        "rowing": 360,
+        "fan_bike": 266,
+        "clean": 150,
+        "plank": 139,
+        "snatch": 115,
+        "jerk": 110,
+        "deadlift": 108,
+        "front_squat": 107,
+        "hollow": 101,
+        "swimming": 93,
+        "burpee": 89,
+        "pull_up": 88,
+        "lunge": 85,
+        "spin_bike": 85,
+        "power_clean": 84,
+        "ski_erg": 81,
+        "bench_press": 81,
+        "back_squat": 78,
+        "squat_snatch": 78,
+        "hip_bridge_thrust": 76,
+        "romanian_deadlift": 76,
+        "strict_press": 71,
+        "box_jump": 66,
+        "push_up": 65,
+        "v_up": 62,
+        "air_squat": 60,
+        "double_under": 56,
+        "cossack_squat": 56,
+        "split_jerk": 54,
+        "squat_clean": 54,
+        "curl": 53,
+        "knee_raise_tuck": 52,
+        "sandbag": 50,
+        "toes_to_bar": 49,
+        "good_morning": 42,
+        "running": 40,
+        "back_extension": 39,
+        "chest_to_bar": 39,
+        "push_press": 38,
+        "l_sit": 37,
+        "russian_twist": 35,
+        "sit_up": 35,
+        "goblet_squat": 35,
+        "ring_row": 34,
+        "muscle_up": 32,
+        "dumbbell_press": 32,
+        "single_under": 32,
+        "ghd_sit_up": 31,
+        "rope_climb": 31,
+        "hamstring_curl": 30,
+        "handstand_push_up": 30,
+        "wall_ball": 30,
+        "barbell_row": 27,
+        "reverse_hyper": 24,
+        "power_snatch": 22,
+        "face_pull": 21,
+        "thruster": 21,
+        "overhead_squat": 20,
+        "bear_hug_carry": 18,
+        "dip": 18,
+        "devils_press": 18,
+        "dumbbell_row": 16,
+        "hang_clean": 16,
+        "handstand_walk": 15,
+        "split_squat": 14,
+        "triceps_extension": 14,
+        "snatch_pull": 12,
+        "pistol": 11,
+        "wall_walk": 11,
+        "hang_snatch": 10,
+        "kettlebell_swing": 10,
+        "flutter_kick": 10,
+        "dumbbell_bench": 8,
+        "clean_pull": 8,
+        "step_up": 6,
+        "muscle_snatch": 5,
+        "push_jerk": 2,
+        "farmer_carry": 2,
+        "turkish_get_up": 1,
+        "suitcase_carry": 1
+      },
+      "movement_section_roles": {
+        "air_squat": {
+          "warmup": 41,
+          "conditioning": 19
+        },
+        "back_extension": {
+          "accessory": 24,
+          "warmup": 13,
+          "strength": 3
+        },
+        "back_squat": {
+          "strength": 78
+        },
+        "barbell_row": {
+          "accessory": 16,
+          "strength": 11
+        },
+        "bear_hug_carry": {
+          "conditioning": 10,
+          "accessory": 8
+        },
+        "bench_press": {
+          "strength": 79,
+          "accessory": 7,
+          "conditioning": 2
+        },
+        "box_jump": {
+          "conditioning": 43,
+          "warmup": 27
+        },
+        "burpee": {
+          "conditioning": 80,
+          "warmup": 9
+        },
+        "chest_to_bar": {
+          "conditioning": 30,
+          "accessory": 6,
+          "strength": 3
+        },
+        "clean": {
+          "strength": 100,
+          "conditioning": 67,
+          "warmup": 3
+        },
+        "clean_pull": {
+          "strength": 8
+        },
+        "cossack_squat": {
+          "warmup": 55,
+          "accessory": 1
+        },
+        "curl": {
+          "accessory": 24,
+          "warmup": 16,
+          "strength": 14
+        },
+        "deadlift": {
+          "strength": 66,
+          "warmup": 45,
+          "conditioning": 22,
+          "accessory": 7
+        },
+        "devils_press": {
+          "conditioning": 18
+        },
+        "dip": {
+          "conditioning": 8,
+          "warmup": 7,
+          "accessory": 4
+        },
+        "double_under": {
+          "conditioning": 55,
+          "strength": 1
+        },
+        "dumbbell_bench": {
+          "accessory": 5,
+          "conditioning": 2,
+          "strength": 1
+        },
+        "dumbbell_press": {
+          "warmup": 24,
+          "accessory": 5,
+          "strength": 5
+        },
+        "dumbbell_row": {
+          "strength": 11,
+          "accessory": 5
+        },
+        "face_pull": {
+          "warmup": 20,
+          "accessory": 1
+        },
+        "fan_bike": {
+          "conditioning": 169,
+          "warmup": 160,
+          "strength": 1
+        },
+        "farmer_carry": {
+          "conditioning": 1,
+          "accessory": 1
+        },
+        "flutter_kick": {
+          "accessory": 6,
+          "warmup": 3,
+          "strength": 1
+        },
+        "front_squat": {
+          "strength": 92,
+          "conditioning": 17,
+          "warmup": 9
+        },
+        "ghd_sit_up": {
+          "conditioning": 31
+        },
+        "goblet_squat": {
+          "warmup": 30,
+          "conditioning": 5
+        },
+        "good_morning": {
+          "warmup": 29,
+          "accessory": 11,
+          "strength": 2
+        },
+        "hamstring_curl": {
+          "warmup": 15,
+          "accessory": 13,
+          "strength": 2
+        },
+        "handstand_push_up": {
+          "conditioning": 30
+        },
+        "handstand_walk": {
+          "conditioning": 15
+        },
+        "hang_clean": {
+          "conditioning": 12,
+          "warmup": 3,
+          "strength": 2
+        },
+        "hang_snatch": {
+          "strength": 9,
+          "conditioning": 1
+        },
+        "hip_bridge_thrust": {
+          "warmup": 62,
+          "accessory": 11,
+          "strength": 6
+        },
+        "hollow": {
+          "warmup": 72,
+          "accessory": 27,
+          "strength": 5,
+          "conditioning": 1
+        },
+        "jerk": {
+          "strength": 95,
+          "conditioning": 22,
+          "warmup": 1
+        },
+        "kettlebell_swing": {
+          "conditioning": 10
+        },
+        "knee_raise_tuck": {
+          "accessory": 25,
+          "warmup": 24,
+          "conditioning": 4,
+          "strength": 2
+        },
+        "l_sit": {
+          "warmup": 20,
+          "accessory": 15,
+          "strength": 2
+        },
+        "lunge": {
+          "warmup": 57,
+          "conditioning": 31,
+          "strength": 2,
+          "accessory": 1
+        },
+        "muscle_snatch": {
+          "conditioning": 4,
+          "warmup": 1
+        },
+        "muscle_up": {
+          "conditioning": 32
+        },
+        "overhead_squat": {
+          "conditioning": 9,
+          "strength": 7,
+          "warmup": 6
+        },
+        "pistol": {
+          "conditioning": 11
+        },
+        "plank": {
+          "warmup": 79,
+          "accessory": 48,
+          "strength": 14,
+          "conditioning": 2
+        },
+        "power_clean": {
+          "strength": 62,
+          "conditioning": 25,
+          "warmup": 3
+        },
+        "power_snatch": {
+          "strength": 15,
+          "conditioning": 9
+        },
+        "pull_up": {
+          "conditioning": 37,
+          "accessory": 25,
+          "warmup": 16,
+          "strength": 16
+        },
+        "push_jerk": {
+          "strength": 2
+        },
+        "push_press": {
+          "strength": 22,
+          "conditioning": 13,
+          "warmup": 4
+        },
+        "push_up": {
+          "conditioning": 43,
+          "warmup": 17,
+          "accessory": 7,
+          "strength": 2
+        },
+        "reverse_hyper": {
+          "accessory": 21,
+          "strength": 3
+        },
+        "ring_row": {
+          "warmup": 25,
+          "accessory": 5,
+          "conditioning": 2,
+          "strength": 2
+        },
+        "romanian_deadlift": {
+          "warmup": 65,
+          "accessory": 9,
+          "strength": 9
+        },
+        "rope_climb": {
+          "conditioning": 31
+        },
+        "rowing": {
+          "warmup": 251,
+          "conditioning": 223,
+          "accessory": 32,
+          "strength": 23
+        },
+        "running": {
+          "conditioning": 40
+        },
+        "russian_twist": {
+          "warmup": 15,
+          "accessory": 15,
+          "strength": 5
+        },
+        "sandbag": {
+          "conditioning": 35,
+          "accessory": 16
+        },
+        "single_under": {
+          "warmup": 23,
+          "conditioning": 9
+        },
+        "sit_up": {
+          "conditioning": 32,
+          "warmup": 2,
+          "accessory": 1
+        },
+        "ski_erg": {
+          "conditioning": 53,
+          "warmup": 32
+        },
+        "snatch": {
+          "strength": 88,
+          "conditioning": 37,
+          "warmup": 5
+        },
+        "snatch_pull": {
+          "strength": 12
+        },
+        "spin_bike": {
+          "conditioning": 80,
+          "warmup": 5
+        },
+        "split_jerk": {
+          "strength": 54
+        },
+        "split_squat": {
+          "strength": 8,
+          "warmup": 5,
+          "accessory": 1
+        },
+        "squat_clean": {
+          "strength": 45,
+          "conditioning": 9
+        },
+        "squat_snatch": {
+          "strength": 72,
+          "conditioning": 7
+        },
+        "step_up": {
+          "conditioning": 4,
+          "warmup": 1,
+          "accessory": 1
+        },
+        "strict_press": {
+          "strength": 58,
+          "warmup": 26,
+          "accessory": 1
+        },
+        "suitcase_carry": {
+          "accessory": 1
+        },
+        "swimming": {
+          "conditioning": 93
+        },
+        "thruster": {
+          "conditioning": 21
+        },
+        "toes_to_bar": {
+          "conditioning": 44,
+          "warmup": 4,
+          "accessory": 1
+        },
+        "triceps_extension": {
+          "strength": 8,
+          "accessory": 6
+        },
+        "turkish_get_up": {
+          "warmup": 1
+        },
+        "v_up": {
+          "warmup": 45,
+          "accessory": 12,
+          "conditioning": 6
+        },
+        "wall_ball": {
+          "conditioning": 30
+        },
+        "wall_walk": {
+          "conditioning": 11
+        }
+      },
+      "category_day_counts": {
+        "cyclical": 552,
+        "core": 326,
+        "squat": 297,
+        "hinge": 280,
+        "olympic": 253,
+        "horizontal_push": 126,
+        "vertical_pull": 118,
+        "vertical_push": 115,
+        "unilateral_leg": 109,
+        "hanging_core": 95,
+        "mixed_bodyweight": 89,
+        "jump_rope": 77,
+        "horizontal_pull": 71,
+        "arm_accessory": 67,
+        "jump": 66,
+        "mobility_strength": 56,
+        "odd_object": 50,
+        "inversion": 48,
+        "locomotion": 40,
+        "gymnastics_transition": 32,
+        "climb": 31,
+        "olympic_derivative": 25,
+        "carry": 21,
+        "shoulder_accessory": 21,
+        "mixed_strength": 18
+      },
+      "stress_day_counts": {
+        "cyclical": 556,
+        "knee": 532,
+        "shoulder": 513,
+        "hinge": 447,
+        "systemic": 446,
+        "grip": 442,
+        "core": 426,
+        "squat": 377,
+        "horizontal_pull": 369,
+        "overhead": 323,
+        "posterior_chain": 282,
+        "front_rack": 236,
+        "triceps": 220,
+        "vertical_pull": 211,
+        "impact": 206,
+        "horizontal_push": 201,
+        "vertical_push": 175,
+        "unilateral": 147,
+        "coordination": 77,
+        "calf": 77,
+        "power": 66,
+        "adductor": 56,
+        "mobility": 56,
+        "elbow_flexor": 53,
+        "odd_object": 50,
+        "inversion": 48,
+        "hip_flexor": 41,
+        "carry": 21,
+        "balance": 11
+      },
+      "skill_level_day_counts": {
+        "basic": 565,
+        "advanced": 331,
+        "intermediate": 269
+      },
+      "impact_level_day_counts": {
+        "low": 565,
+        "high": 140,
+        "moderate": 137
+      },
+      "top_conditioning_pairs": {
+        "fan_bike + rowing": 70,
+        "clean + fan_bike": 30,
+        "clean + rowing": 27,
+        "box_jump + burpee": 24,
+        "fan_bike + sandbag": 23,
+        "fan_bike + toes_to_bar": 22,
+        "burpee + rowing": 22,
+        "burpee + fan_bike": 22,
+        "push_up + rowing": 20,
+        "burpee + pull_up": 19,
+        "rowing + toes_to_bar": 17,
+        "rowing + sit_up": 17,
+        "rowing + ski_erg": 16,
+        "ghd_sit_up + rowing": 16,
+        "rowing + wall_ball": 16,
+        "clean + jerk": 16,
+        "rowing + snatch": 16,
+        "rowing + sandbag": 15,
+        "box_jump + rowing": 15,
+        "chest_to_bar + rowing": 15,
+        "handstand_push_up + rowing": 14,
+        "pull_up + rowing": 14,
+        "double_under + rowing": 14,
+        "burpee + clean": 14,
+        "fan_bike + power_clean": 13,
+        "chest_to_bar + fan_bike": 13,
+        "fan_bike + muscle_up": 12,
+        "burpee + muscle_up": 12,
+        "rope_climb + rowing": 12,
+        "deadlift + fan_bike": 11,
+        "double_under + fan_bike": 11,
+        "power_clean + rowing": 11,
+        "clean + ski_erg": 11,
+        "air_squat + pull_up": 11,
+        "pull_up + push_up": 11,
+        "muscle_up + rowing": 11,
+        "fan_bike + rope_climb": 11,
+        "burpee + snatch": 11,
+        "bear_hug_carry + sandbag": 10,
+        "fan_bike + ski_erg": 10,
+        "fan_bike + jerk": 10,
+        "jerk + rowing": 10,
+        "air_squat + push_up": 10,
+        "push_up + ski_erg": 10,
+        "fan_bike + wall_ball": 10,
+        "double_under + ski_erg": 9,
+        "clean + toes_to_bar": 9,
+        "jerk + power_clean": 9,
+        "fan_bike + lunge": 9,
+        "fan_bike + pull_up": 9
+      },
+      "tagged_section_percent": 92.8,
+      "tagged_sections": 1847,
+      "total_meaningful_sections": 1990,
+      "untagged_section_roles": {
+        "rest": 95,
+        "conditioning": 18,
+        "warmup": 12,
+        "accessory": 9,
+        "strength": 8,
+        "other": 1
+      },
+      "blocks": {
+        "4": {
+          "rowing": 28,
+          "deadlift": 19,
+          "fan_bike": 18,
+          "ski_erg": 17,
+          "clean": 17,
+          "jerk": 16,
+          "curl": 11,
+          "romanian_deadlift": 11,
+          "pull_up": 11,
+          "power_clean": 10,
+          "hollow": 10,
+          "push_up": 9,
+          "snatch": 9,
+          "lunge": 8,
+          "front_squat": 8,
+          "running": 8,
+          "plank": 8,
+          "split_jerk": 7,
+          "squat_clean": 7,
+          "strict_press": 7,
+          "bench_press": 7,
+          "back_squat": 7,
+          "air_squat": 7,
+          "dip": 6,
+          "box_jump": 6,
+          "hip_bridge_thrust": 6,
+          "knee_raise_tuck": 6,
+          "overhead_squat": 6,
+          "swimming": 6,
+          "toes_to_bar": 6,
+          "squat_snatch": 6,
+          "russian_twist": 5,
+          "v_up": 5,
+          "split_squat": 5,
+          "cossack_squat": 5,
+          "burpee": 5,
+          "back_extension": 5,
+          "sit_up": 4,
+          "spin_bike": 4,
+          "l_sit": 4,
+          "barbell_row": 4,
+          "dumbbell_bench": 4,
+          "dumbbell_press": 4,
+          "ring_row": 4,
+          "good_morning": 3,
+          "double_under": 3,
+          "ghd_sit_up": 3,
+          "muscle_up": 3,
+          "hamstring_curl": 3,
+          "goblet_squat": 3,
+          "thruster": 3,
+          "triceps_extension": 3,
+          "pistol": 3,
+          "dumbbell_row": 3,
+          "sandbag": 2,
+          "face_pull": 2,
+          "hang_snatch": 2,
+          "handstand_push_up": 2,
+          "rope_climb": 2,
+          "single_under": 2,
+          "wall_ball": 2,
+          "reverse_hyper": 2,
+          "bear_hug_carry": 1,
+          "chest_to_bar": 1,
+          "devils_press": 1
+        },
+        "5": {
+          "rowing": 45,
+          "fan_bike": 29,
+          "deadlift": 27,
+          "clean": 20,
+          "snatch": 18,
+          "strict_press": 17,
+          "plank": 17,
+          "jerk": 16,
+          "power_clean": 16,
+          "curl": 15,
+          "front_squat": 14,
+          "ski_erg": 14,
+          "hollow": 13,
+          "romanian_deadlift": 12,
+          "swimming": 12,
+          "back_squat": 12,
+          "squat_snatch": 11,
+          "pull_up": 11,
+          "bench_press": 10,
+          "push_up": 10,
+          "back_extension": 10,
+          "cossack_squat": 9,
+          "box_jump": 9,
+          "lunge": 9,
+          "good_morning": 9,
+          "double_under": 9,
+          "air_squat": 9,
+          "spin_bike": 8,
+          "l_sit": 8,
+          "dumbbell_row": 8,
+          "burpee": 7,
+          "hip_bridge_thrust": 7,
+          "goblet_squat": 7,
+          "dumbbell_press": 7,
+          "v_up": 6,
+          "sandbag": 6,
+          "rope_climb": 6,
+          "running": 6,
+          "muscle_up": 6,
+          "wall_ball": 6,
+          "toes_to_bar": 6,
+          "power_snatch": 6,
+          "barbell_row": 5,
+          "split_jerk": 5,
+          "handstand_push_up": 5,
+          "squat_clean": 5,
+          "russian_twist": 5,
+          "push_press": 5,
+          "chest_to_bar": 5,
+          "ring_row": 4,
+          "hamstring_curl": 4,
+          "single_under": 4,
+          "thruster": 4,
+          "hang_clean": 4,
+          "face_pull": 4,
+          "handstand_walk": 3,
+          "triceps_extension": 3,
+          "bear_hug_carry": 3,
+          "overhead_squat": 3,
+          "dumbbell_bench": 3,
+          "split_squat": 3,
+          "sit_up": 3,
+          "ghd_sit_up": 3,
+          "wall_walk": 3,
+          "kettlebell_swing": 3,
+          "pistol": 2,
+          "dip": 2,
+          "reverse_hyper": 2,
+          "push_jerk": 1,
+          "snatch_pull": 1,
+          "muscle_snatch": 1,
+          "flutter_kick": 1,
+          "devils_press": 1
+        },
+        "6": {
+          "rowing": 46,
+          "fan_bike": 32,
+          "clean": 20,
+          "deadlift": 19,
+          "snatch": 19,
+          "burpee": 17,
+          "jerk": 16,
+          "plank": 16,
+          "hollow": 15,
+          "front_squat": 15,
+          "pull_up": 14,
+          "spin_bike": 13,
+          "squat_snatch": 13,
+          "bench_press": 12,
+          "back_squat": 12,
+          "romanian_deadlift": 12,
+          "swimming": 12,
+          "ski_erg": 12,
+          "power_clean": 11,
+          "box_jump": 10,
+          "air_squat": 9,
+          "split_jerk": 9,
+          "lunge": 8,
+          "cossack_squat": 8,
+          "hip_bridge_thrust": 8,
+          "reverse_hyper": 8,
+          "squat_clean": 8,
+          "curl": 8,
+          "chest_to_bar": 7,
+          "back_extension": 7,
+          "double_under": 7,
+          "good_morning": 7,
+          "toes_to_bar": 7,
+          "goblet_squat": 7,
+          "push_up": 7,
+          "snatch_pull": 7,
+          "knee_raise_tuck": 6,
+          "power_snatch": 6,
+          "hamstring_curl": 6,
+          "strict_press": 5,
+          "sit_up": 5,
+          "russian_twist": 5,
+          "thruster": 5,
+          "face_pull": 5,
+          "handstand_push_up": 5,
+          "single_under": 5,
+          "dumbbell_row": 4,
+          "handstand_walk": 4,
+          "ghd_sit_up": 4,
+          "v_up": 4,
+          "running": 4,
+          "l_sit": 4,
+          "hang_clean": 4,
+          "dip": 4,
+          "overhead_squat": 3,
+          "devils_press": 3,
+          "rope_climb": 3,
+          "muscle_up": 3,
+          "split_squat": 3,
+          "dumbbell_press": 3,
+          "sandbag": 3,
+          "push_press": 2,
+          "wall_ball": 2,
+          "kettlebell_swing": 2,
+          "pistol": 2,
+          "wall_walk": 2,
+          "flutter_kick": 2,
+          "turkish_get_up": 1,
+          "triceps_extension": 1,
+          "hang_snatch": 1,
+          "barbell_row": 1,
+          "farmer_carry": 1,
+          "step_up": 1,
+          "ring_row": 1
+        },
+        "7": {
+          "rowing": 46,
+          "fan_bike": 35,
+          "clean": 25,
+          "pull_up": 19,
+          "snatch": 17,
+          "power_clean": 17,
+          "plank": 16,
+          "jerk": 14,
+          "hip_bridge_thrust": 14,
+          "hollow": 14,
+          "front_squat": 13,
+          "bench_press": 13,
+          "deadlift": 13,
+          "squat_snatch": 12,
+          "burpee": 12,
+          "swimming": 12,
+          "back_squat": 12,
+          "split_jerk": 11,
+          "squat_clean": 11,
+          "lunge": 11,
+          "ski_erg": 9,
+          "box_jump": 9,
+          "spin_bike": 8,
+          "ring_row": 8,
+          "knee_raise_tuck": 8,
+          "romanian_deadlift": 8,
+          "v_up": 7,
+          "sandbag": 7,
+          "push_press": 7,
+          "muscle_up": 6,
+          "cossack_squat": 6,
+          "russian_twist": 6,
+          "sit_up": 5,
+          "wall_ball": 5,
+          "face_pull": 5,
+          "good_morning": 5,
+          "strict_press": 5,
+          "goblet_squat": 4,
+          "snatch_pull": 4,
+          "back_extension": 4,
+          "ghd_sit_up": 4,
+          "push_up": 4,
+          "air_squat": 4,
+          "toes_to_bar": 4,
+          "chest_to_bar": 4,
+          "hang_snatch": 4,
+          "double_under": 4,
+          "barbell_row": 4,
+          "power_snatch": 3,
+          "overhead_squat": 3,
+          "rope_climb": 3,
+          "single_under": 3,
+          "l_sit": 3,
+          "hang_clean": 3,
+          "bear_hug_carry": 3,
+          "devils_press": 3,
+          "dumbbell_press": 2,
+          "curl": 2,
+          "hamstring_curl": 2,
+          "muscle_snatch": 2,
+          "handstand_walk": 1,
+          "dip": 1,
+          "thruster": 1,
+          "handstand_push_up": 1,
+          "pistol": 1,
+          "flutter_kick": 1
+        },
+        "8": {
+          "rowing": 41,
+          "fan_bike": 38,
+          "plank": 22,
+          "clean": 15,
+          "snatch": 15,
+          "lunge": 15,
+          "front_squat": 15,
+          "hollow": 13,
+          "v_up": 13,
+          "bench_press": 13,
+          "swimming": 12,
+          "burpee": 9,
+          "squat_snatch": 9,
+          "hip_bridge_thrust": 9,
+          "spin_bike": 9,
+          "box_jump": 8,
+          "pull_up": 8,
+          "knee_raise_tuck": 8,
+          "strict_press": 8,
+          "push_up": 7,
+          "double_under": 7,
+          "cossack_squat": 6,
+          "push_press": 6,
+          "squat_clean": 6,
+          "air_squat": 6,
+          "l_sit": 6,
+          "jerk": 5,
+          "power_clean": 5,
+          "running": 5,
+          "sandbag": 5,
+          "toes_to_bar": 5,
+          "ski_erg": 5,
+          "good_morning": 5,
+          "back_squat": 4,
+          "back_extension": 4,
+          "deadlift": 4,
+          "rope_climb": 4,
+          "ring_row": 4,
+          "muscle_up": 4,
+          "sit_up": 4,
+          "ghd_sit_up": 4,
+          "reverse_hyper": 4,
+          "handstand_push_up": 3,
+          "hang_snatch": 3,
+          "russian_twist": 3,
+          "split_jerk": 3,
+          "goblet_squat": 3,
+          "dumbbell_press": 3,
+          "devils_press": 3,
+          "chest_to_bar": 3,
+          "handstand_walk": 2,
+          "pistol": 2,
+          "hang_clean": 2,
+          "romanian_deadlift": 2,
+          "bear_hug_carry": 2,
+          "flutter_kick": 2,
+          "single_under": 2,
+          "barbell_row": 2,
+          "wall_ball": 2,
+          "triceps_extension": 2,
+          "suitcase_carry": 1,
+          "dumbbell_bench": 1,
+          "wall_walk": 1,
+          "face_pull": 1,
+          "power_snatch": 1,
+          "kettlebell_swing": 1,
+          "farmer_carry": 1,
+          "overhead_squat": 1,
+          "thruster": 1,
+          "muscle_snatch": 1
+        },
+        "9": {
+          "rowing": 39,
+          "fan_bike": 30,
+          "spin_bike": 16,
+          "plank": 14,
+          "front_squat": 13,
+          "hip_bridge_thrust": 13,
+          "clean": 13,
+          "strict_press": 12,
+          "snatch": 12,
+          "swimming": 12,
+          "bench_press": 12,
+          "burpee": 12,
+          "lunge": 11,
+          "pull_up": 11,
+          "air_squat": 11,
+          "hollow": 10,
+          "push_up": 9,
+          "deadlift": 9,
+          "dumbbell_press": 8,
+          "squat_snatch": 8,
+          "sandbag": 8,
+          "ski_erg": 7,
+          "v_up": 7,
+          "double_under": 7,
+          "box_jump": 7,
+          "romanian_deadlift": 7,
+          "cossack_squat": 7,
+          "knee_raise_tuck": 6,
+          "single_under": 5,
+          "toes_to_bar": 5,
+          "jerk": 5,
+          "chest_to_bar": 5,
+          "push_press": 5,
+          "handstand_push_up": 4,
+          "reverse_hyper": 4,
+          "rope_climb": 4,
+          "back_squat": 4,
+          "split_jerk": 4,
+          "squat_clean": 4,
+          "wall_ball": 3,
+          "l_sit": 3,
+          "curl": 3,
+          "ring_row": 3,
+          "good_morning": 3,
+          "devils_press": 3,
+          "russian_twist": 3,
+          "overhead_squat": 2,
+          "dip": 2,
+          "sit_up": 2,
+          "ghd_sit_up": 2,
+          "step_up": 2,
+          "triceps_extension": 2,
+          "thruster": 2,
+          "back_extension": 2,
+          "power_clean": 2,
+          "bear_hug_carry": 2,
+          "barbell_row": 2,
+          "goblet_squat": 1,
+          "hang_clean": 1,
+          "running": 1,
+          "muscle_up": 1,
+          "hamstring_curl": 1,
+          "muscle_snatch": 1,
+          "face_pull": 1,
+          "handstand_walk": 1
+        },
+        "10": {
+          "rowing": 52,
+          "fan_bike": 37,
+          "plank": 20,
+          "clean": 19,
+          "jerk": 16,
+          "back_squat": 12,
+          "spin_bike": 12,
+          "swimming": 12,
+          "front_squat": 12,
+          "burpee": 12,
+          "lunge": 11,
+          "hip_bridge_thrust": 11,
+          "v_up": 10,
+          "strict_press": 10,
+          "bench_press": 10,
+          "double_under": 10,
+          "running": 9,
+          "sandbag": 9,
+          "knee_raise_tuck": 8,
+          "push_press": 8,
+          "split_jerk": 8,
+          "squat_clean": 8,
+          "push_up": 8,
+          "ski_erg": 8,
+          "chest_to_bar": 8,
+          "toes_to_bar": 7,
+          "pull_up": 7,
+          "air_squat": 7,
+          "power_clean": 7,
+          "hollow": 7,
+          "romanian_deadlift": 6,
+          "good_morning": 6,
+          "box_jump": 6,
+          "single_under": 6,
+          "ring_row": 5,
+          "handstand_push_up": 5,
+          "hamstring_curl": 5,
+          "curl": 5,
+          "goblet_squat": 5,
+          "snatch": 5,
+          "l_sit": 4,
+          "russian_twist": 4,
+          "dumbbell_press": 4,
+          "sit_up": 4,
+          "ghd_sit_up": 4,
+          "cossack_squat": 4,
+          "squat_snatch": 4,
+          "back_extension": 3,
+          "rope_climb": 3,
+          "muscle_up": 3,
+          "power_snatch": 3,
+          "barbell_row": 3,
+          "bear_hug_carry": 3,
+          "clean_pull": 3,
+          "face_pull": 2,
+          "wall_walk": 2,
+          "flutter_kick": 2,
+          "thruster": 2,
+          "split_squat": 2,
+          "wall_ball": 2,
+          "step_up": 2,
+          "deadlift": 2,
+          "dip": 2,
+          "reverse_hyper": 1,
+          "devils_press": 1,
+          "handstand_walk": 1,
+          "kettlebell_swing": 1,
+          "overhead_squat": 1
+        },
+        "11": {
+          "rowing": 51,
+          "fan_bike": 39,
+          "plank": 20,
+          "clean": 18,
+          "romanian_deadlift": 16,
+          "jerk": 16,
+          "snatch": 15,
+          "hollow": 14,
+          "front_squat": 13,
+          "power_clean": 13,
+          "squat_snatch": 12,
+          "spin_bike": 12,
+          "swimming": 12,
+          "back_squat": 12,
+          "lunge": 11,
+          "deadlift": 11,
+          "burpee": 10,
+          "push_up": 9,
+          "toes_to_bar": 9,
+          "curl": 9,
+          "hamstring_curl": 9,
+          "box_jump": 9,
+          "hip_bridge_thrust": 8,
+          "sandbag": 8,
+          "cossack_squat": 8,
+          "v_up": 7,
+          "air_squat": 7,
+          "double_under": 7,
+          "knee_raise_tuck": 7,
+          "barbell_row": 6,
+          "strict_press": 6,
+          "ski_erg": 6,
+          "pull_up": 5,
+          "muscle_up": 5,
+          "clean_pull": 5,
+          "wall_ball": 5,
+          "sit_up": 5,
+          "ring_row": 5,
+          "chest_to_bar": 5,
+          "squat_clean": 5,
+          "running": 4,
+          "single_under": 4,
+          "ghd_sit_up": 4,
+          "bench_press": 4,
+          "push_press": 4,
+          "goblet_squat": 4,
+          "rope_climb": 4,
+          "russian_twist": 4,
+          "good_morning": 4,
+          "split_jerk": 4,
+          "wall_walk": 3,
+          "handstand_push_up": 3,
+          "kettlebell_swing": 3,
+          "bear_hug_carry": 3,
+          "thruster": 3,
+          "reverse_hyper": 3,
+          "flutter_kick": 2,
+          "handstand_walk": 2,
+          "hang_clean": 2,
+          "l_sit": 2,
+          "back_extension": 2,
+          "devils_press": 2,
+          "power_snatch": 2,
+          "overhead_squat": 1,
+          "split_squat": 1,
+          "step_up": 1,
+          "face_pull": 1,
+          "dumbbell_row": 1,
+          "dip": 1,
+          "triceps_extension": 1,
+          "push_jerk": 1
+        },
+        "12": {
+          "rowing": 12,
+          "fan_bike": 8,
+          "jerk": 6,
+          "plank": 6,
+          "hollow": 5,
+          "burpee": 5,
+          "snatch": 5,
+          "front_squat": 4,
+          "deadlift": 4,
+          "cossack_squat": 3,
+          "back_squat": 3,
+          "split_jerk": 3,
+          "squat_snatch": 3,
+          "running": 3,
+          "v_up": 3,
+          "spin_bike": 3,
+          "swimming": 3,
+          "wall_ball": 3,
+          "knee_raise_tuck": 3,
+          "clean": 3,
+          "l_sit": 3,
+          "power_clean": 3,
+          "sit_up": 3,
+          "ski_erg": 3,
+          "ghd_sit_up": 3,
+          "double_under": 2,
+          "box_jump": 2,
+          "triceps_extension": 2,
+          "pull_up": 2,
+          "rope_climb": 2,
+          "push_up": 2,
+          "handstand_push_up": 2,
+          "romanian_deadlift": 2,
+          "sandbag": 2,
+          "back_extension": 2,
+          "push_press": 1,
+          "pistol": 1,
+          "power_snatch": 1,
+          "handstand_walk": 1,
+          "goblet_squat": 1,
+          "lunge": 1,
+          "single_under": 1,
+          "dumbbell_press": 1,
+          "devils_press": 1,
+          "strict_press": 1,
+          "chest_to_bar": 1,
+          "bear_hug_carry": 1,
+          "muscle_up": 1
+        }
+      }
+    }
+  },
+  "aligned_flagship_sixty": {
+    "aligned_days": 196,
+    "movement_source_counts": {
+      "rowing": 121,
+      "fan_bike": 78,
+      "snatch": 73,
+      "curl": 69,
+      "clean": 69,
+      "jerk": 61,
+      "deadlift": 61,
+      "running": 56,
+      "spin_bike": 51,
+      "front_squat": 50,
+      "power_clean": 43,
+      "pull_up": 43,
+      "plank": 43,
+      "ski_erg": 42,
+      "burpee": 41,
+      "strict_press": 40,
+      "bench_press": 40,
+      "romanian_deadlift": 37,
+      "back_squat": 37,
+      "box_jump": 36,
+      "overhead_squat": 34,
+      "push_up": 34,
+      "hollow": 34,
+      "power_snatch": 33,
+      "split_jerk": 30,
+      "squat_clean": 30,
+      "squat_snatch": 30,
+      "toes_to_bar": 29,
+      "air_squat": 29,
+      "swimming": 28,
+      "back_extension": 26,
+      "double_under": 26,
+      "lunge": 25,
+      "snatch_pull": 25,
+      "chest_to_bar": 22,
+      "hamstring_curl": 21,
+      "hip_bridge_thrust": 20,
+      "rope_climb": 19,
+      "knee_raise_tuck": 19,
+      "cossack_squat": 19,
+      "dumbbell_bench": 19,
+      "good_morning": 18,
+      "dip": 18,
+      "muscle_up": 18,
+      "handstand_push_up": 18,
+      "v_up": 17,
+      "thruster": 17,
+      "hang_snatch": 17,
+      "dumbbell_press": 17,
+      "goblet_squat": 16,
+      "push_press": 16,
+      "sandbag": 15,
+      "sit_up": 15,
+      "triceps_extension": 15,
+      "pistol": 15,
+      "dumbbell_row": 14,
+      "russian_twist": 13,
+      "l_sit": 13,
+      "handstand_walk": 13,
+      "ghd_sit_up": 12,
+      "face_pull": 12,
+      "wall_ball": 12,
+      "reverse_hyper": 12,
+      "suitcase_carry": 11,
+      "hang_clean": 11,
+      "split_squat": 10,
+      "ring_row": 9,
+      "barbell_row": 9,
+      "single_under": 7,
+      "wall_walk": 6,
+      "flutter_kick": 4,
+      "devils_press": 4,
+      "turkish_get_up": 3,
+      "kettlebell_swing": 3,
+      "muscle_snatch": 2,
+      "bear_hug_carry": 1
+    },
+    "movement_retention_percent": {
+      "rowing": 90.1,
+      "fan_bike": 83.3,
+      "snatch": 49.3,
+      "curl": 34.8,
+      "clean": 72.5,
+      "jerk": 67.2,
+      "deadlift": 86.9,
+      "running": 28.6,
+      "spin_bike": 15.7,
+      "front_squat": 66.0,
+      "power_clean": 79.1,
+      "pull_up": 44.2,
+      "plank": 60.5,
+      "ski_erg": 85.7,
+      "burpee": 53.7,
+      "strict_press": 35.0,
+      "bench_press": 65.0,
+      "romanian_deadlift": 73.0,
+      "back_squat": 75.7,
+      "box_jump": 55.6,
+      "overhead_squat": 35.3,
+      "push_up": 61.8,
+      "hollow": 73.5,
+      "power_snatch": 33.3,
+      "split_jerk": 56.7,
+      "squat_clean": 56.7,
+      "squat_snatch": 40.0,
+      "toes_to_bar": 55.2,
+      "air_squat": 65.5,
+      "swimming": 96.4,
+      "back_extension": 69.2,
+      "double_under": 69.2,
+      "lunge": 88.0,
+      "snatch_pull": 4.0,
+      "chest_to_bar": 36.4,
+      "hamstring_curl": 33.3,
+      "hip_bridge_thrust": 85.0,
+      "rope_climb": 47.4,
+      "knee_raise_tuck": 42.1,
+      "cossack_squat": 100.0,
+      "dumbbell_bench": 26.3,
+      "good_morning": 83.3,
+      "dip": 50.0,
+      "muscle_up": 55.6,
+      "handstand_push_up": 55.6,
+      "v_up": 70.6,
+      "thruster": 47.1,
+      "hang_snatch": 11.8,
+      "dumbbell_press": 29.4,
+      "goblet_squat": 93.8,
+      "push_press": 43.8,
+      "sandbag": 60.0,
+      "sit_up": 66.7,
+      "triceps_extension": 20.0,
+      "pistol": 33.3,
+      "dumbbell_row": 64.3,
+      "russian_twist": 61.5,
+      "l_sit": 76.9,
+      "handstand_walk": 46.2,
+      "ghd_sit_up": 75.0,
+      "face_pull": 83.3,
+      "wall_ball": 66.7,
+      "reverse_hyper": 58.3,
+      "suitcase_carry": 0.0,
+      "hang_clean": 54.5,
+      "split_squat": 90.0,
+      "ring_row": 33.3,
+      "barbell_row": 33.3,
+      "single_under": 100.0,
+      "wall_walk": 83.3,
+      "flutter_kick": 0.0,
+      "devils_press": 100.0,
+      "turkish_get_up": 33.3,
+      "kettlebell_swing": 66.7,
+      "muscle_snatch": 50.0,
+      "bear_hug_carry": 100.0
+    },
+    "category_retention_percent": {
+      "cyclical": 98.8,
+      "squat": 80.2,
+      "olympic": 75.9,
+      "core": 87.9,
+      "hinge": 93.5,
+      "arm_accessory": 32.9,
+      "horizontal_push": 64.6,
+      "vertical_push": 52.5,
+      "locomotion": 28.6,
+      "vertical_pull": 51.9,
+      "hanging_core": 50.0,
+      "unilateral_leg": 75.6,
+      "mixed_bodyweight": 53.7,
+      "jump": 55.6,
+      "inversion": 61.3,
+      "horizontal_pull": 67.7,
+      "jump_rope": 76.7,
+      "olympic_derivative": 7.7,
+      "climb": 47.4,
+      "mobility_strength": 100.0,
+      "gymnastics_transition": 55.6,
+      "odd_object": 60.0,
+      "shoulder_accessory": 83.3,
+      "carry": 8.3,
+      "mixed_strength": 66.7
+    }
+  }
+}

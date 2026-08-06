@@ -1,0 +1,604 @@
+\documentclass[11pt,addpoints]{exam}
+
+\usepackage[letterpaper,margin=0.72in,headheight=15pt,headsep=12pt,footskip=24pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{setspace}
+
+\definecolor{codegray}{gray}{0.96}
+\lstdefinestyle{python}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  backgroundcolor=\color{codegray},
+  breaklines=true,
+  tabsize=4,
+  xleftmargin=0.3em,
+  xrightmargin=0.3em,
+  aboveskip=0.6em,
+  belowskip=0.6em
+}
+\lstset{style=python}
+
+\pagestyle{headandfoot}
+\firstpageheader{Initials: \rule{0.8in}{0.4pt}}{}{Page \thepage\ / \numpages}
+\runningheader{Initials: \rule{0.8in}{0.4pt}}{}{Page \thepage\ / \numpages}
+\firstpagefooter{}{}{}
+\runningfooter{}{}{}
+
+\renewcommand{\choiceshook}{\setlength{\itemsep}{0.5em}}
+\renewcommand{\thechoice}{\Alph{choice}}
+\renewcommand{\choicelabel}{\large$\bigcirc$~\thechoice.}
+\pointsinrightmargin
+\boxedpoints
+\setlength{\rightpointsmargin}{1.1cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.25em}
+
+\newcommand{\answerlines}[1]{%
+  \par\vspace{0.3em}%
+  \foreach \n in {1,...,#1}{\noindent\rule{\linewidth}{0.35pt}\par\vspace{1.25em}}%
+}
+
+\newcommand{\answerbox}{%
+  \par\vspace{0.3em}%
+  \noindent\fbox{\parbox[t][1.25in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}%
+  \par
+}
+
+\usepackage{pgffor}
+
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries CS 1301 Exam 2 -- Version A}\\[0.25em]
+  {\large Summer Semester 2026}
+\end{center}
+
+\vspace{0.5em}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+Name (print clearly, including first and last name as on Buzzcard): & \rule{\linewidth}{0.4pt} \\[1.2em]
+Signature indicating you understand the Georgia Tech Honor Policy: & \rule{\linewidth}{0.4pt} \\[1.2em]
+GTID\# (903000000, etc.): & \rule{\linewidth}{0.4pt}
+\end{tabularx}
+
+\vspace{0.8em}
+\begin{itemize}[leftmargin=1.35em,itemsep=0.25em,topsep=0.25em]
+  \item \textbf{Integrity:} By taking this exam, you pledge that this is your work and that you have neither given nor received inappropriate help during the exam, in compliance with the Academic Honor Code of Georgia Tech. Do not sign or take this exam if you do not agree with the Honor Code.
+  \item Signing and/or taking this exam signifies that you are aware of and acting in accordance with the Academic Honor Code of Georgia Tech and the Georgia Tech Code of Conduct.
+  \item \textbf{Academic Misconduct:} Academic misconduct will not be tolerated. You must uphold the honor and integrity bestowed upon you by the Georgia Institute of Technology.
+  \begin{itemize}[leftmargin=1.4em,itemsep=0.15em,topsep=0.15em]
+    \item Keep your eyes on your own paper and do your best to prevent others from seeing your work.
+    \item Do not communicate with anyone other than a proctor for any reason, in any language, or in any manner.
+    \item Do not share anything during the exam, including pencils, paper, or erasers.
+    \item Follow all directions given by the proctor(s), and stop writing when told to stop.
+    \item Do not use notes, books, calculators, phones, laptops, or similar devices.
+    \item You may not leave the exam with your exam paper for any reason.
+  \end{itemize}
+  \item \textbf{Devices:} If a cell phone, smartwatch, laptop, or similar item goes off during the exam, you will lose 10 points. Turn all such devices off and put them away now. They may not be on your desk.
+  \item Extra paper is not allowed. If you exhaust the available space, speak with your instructor.
+  \item Pens, pencils, and erasers are allowed. Do not share them.
+  \item \textbf{All code must be in Python.}
+\end{itemize}
+
+\newpage
+\begin{questions}
+
+\question[20] \textbf{MULTIPLE CHOICE} (2 points each) For each question, select the best answer by filling in the corresponding circle.
+
+\begin{parts}
+\part Rosa is keeping a running record of stadium attendance across the tournament. After each match day, she runs a script that opens \texttt{attendance.csv} using \texttt{open("attendance.csv", "w")}, loops over that day's records, and writes one comma-separated line per stadium. The script reports no errors, and the rows for each match day look correct immediately after it runs. At the end of the third match day, however, only the third day's rows remain. What is the best fix?
+\begin{choices}
+  \choice Add a newline character to the end of each line, since otherwise every row is written to the same position and only the last remains visible.
+  \choice Open the file in append mode with \texttt{open("attendance.csv", "a")}, so each run adds rows instead of replacing existing contents.
+  \choice Read the existing rows into a list, reopen the file in \texttt{"w"} mode, and rewrite the old rows followed by the new ones.
+  \choice Make sure the file is closed after each run, since unwritten data is lost when the script ends.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\part Owen is writing a function to total a trip budget. The budget is stored as a list, but any entry may itself be a list of smaller costs, and those inner lists may contain still more lists, with no fixed nesting depth. Why is recursion a good fit?
+\begin{choices}
+  \choice Recursion avoids loops entirely, and nested lists cannot be solved with loops.
+  \choice Each nested list is the same kind of problem as the original list, so the function can call itself on list entries and stop at plain numbers.
+  \choice Recursion processes every entry in the outer list simultaneously, so depth does not affect the result.
+  \choice Recursion automatically flattens nested lists before totaling them.
+\end{choices}
+
+\vspace{\stretch{1}}
+\newpage
+
+\part Nadia is pulling match results from a sports API. Her code sends a request and immediately calls \texttt{.json()} on the response. Most matches work, but a few match IDs cause the program to crash on the \texttt{.json()} call. What is the best explanation and fix?
+\begin{choices}
+  \choice The response arrived too quickly, so she should pause before calling \texttt{.json()}.
+  \choice The JSON contains a field a dictionary cannot represent, so she should request fewer fields.
+  \choice Those IDs return a body that is not valid JSON; she should check the status code or handle the conversion with \texttt{try}/\texttt{except}.
+  \choice The endpoint returns a string instead of a dictionary, so she should call \texttt{str()} and parse it manually.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\part Priya stores merchandise prices as a list of \texttt{(code, price)} tuples and scans the whole list for every sale. The script is slow, and a duplicate product code is silently ignored. Which change best addresses both problems?
+\begin{choices}
+  \choice Sort the tuple list by code, allowing the search to stop early.
+  \choice Store prices in a dictionary mapping product codes to prices, enabling direct lookup and one value per code.
+  \choice Store codes and prices in parallel lists.
+  \choice Store \texttt{(code, price)} tuples in a set.
+\end{choices}
+
+\vspace{\stretch{1}}
+\newpage
+
+\part Jordan is writing a recursive function to count route stops:
+\begin{lstlisting}
+def countStops(route):
+    if ______________:
+        return 0
+    else:
+        return 1 + countStops(route[1:])
+\end{lstlisting}
+Jordan calls \texttt{countStops(["Paris", "Lyon", "Grenoble"])} and expects \texttt{3}. Which base case is correct?
+\begin{choices}
+  \choice \texttt{len(route) < 0}
+  \choice \texttt{route == []}
+  \choice \texttt{route[0] == ""}
+  \choice \texttt{len(route) == 1}
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\part What will this function return? Assume \texttt{random} has been imported as \texttt{r}.
+\begin{lstlisting}
+def mysteryFunc1(a):
+    b = {}
+    for i in range(a):
+        num = r.randrange(1, 6)
+        if str(num) not in b:
+            b[str(num)] = 1
+        else:
+            b[str(num)] += 1
+    return b
+
+print(mysteryFunc1(5))
+\end{lstlisting}
+\begin{choices}
+  \choice A dictionary whose keys are randomly generated integers represented as strings from 1 through 5, and whose values count their occurrences.
+  \choice A dictionary whose keys are the first \texttt{a} integers represented as strings and whose values are random integers from 1 through 5.
+  \choice A dictionary whose keys are randomly generated integers represented as strings from 1 through 6, and whose values count their occurrences.
+  \choice A dictionary whose keys are randomly generated integers from 1 through 6 and whose values count their occurrences.
+\end{choices}
+
+\vspace{\stretch{1}}
+\newpage
+
+\part How is \texttt{val} affected by placing the recursive call before the second \texttt{if} statement?
+\begin{lstlisting}
+def mysteryFunc2(n):
+    if n == 0:
+        return 0
+    val = mysteryFunc2(n - 1)
+    if n % 2 != 0:
+        val += 1
+    return val
+
+mysteryFunc2(5)
+\end{lstlisting}
+\begin{choices}
+  \choice The function starts by adding the value from the first call, where \texttt{n = 5}.
+  \choice The function starts by adding the value from the last call, where \texttt{n = 0}.
+  \choice The function starts by adding the value from the last non-base call, where \texttt{n = 1}.
+  \choice The function starts by adding the value from the call where \texttt{n = 3}.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\part What is the purpose of \texttt{mysteryFunc3}? Assume the input is a text file whose lines contain space-separated words.
+\begin{lstlisting}
+def mysteryFunc3(file):
+    infile = open(file)
+    lines = infile.readlines()
+    for i in range(len(lines)):
+        if i % 3 == 0:
+            print(lines.strip().split(" ")[-1])
+        else:
+            print(lines[i])
+
+mysteryFunc3("text.txt")
+\end{lstlisting}
+\begin{choices}
+  \choice The function results in an error.
+  \choice It prints a list for every third line and otherwise prints each line without its newline.
+  \choice It prints the last word in every third line and otherwise prints the entire line.
+  \choice It prints every word on every third line and otherwise prints the line as a string.
+\end{choices}
+
+\vspace{\stretch{1}}
+\newpage
+
+\part The following function should return a dictionary containing a list of classes and the total attempted credit hours, but the printed total is too small. Which line contains the logical error?
+\begin{lstlisting}[numbers=left,firstnumber=1]
+def creditLog(credit):
+    profile = {}
+    profile['classes'] = []
+    for item in credit:
+        profile['totalCredits'] = credit[item]
+        profile['classes'].append(item)
+    return profile
+
+print(creditLog({'CS1301': 3, 'MATH1554': 4})['totalCredits'])
+\end{lstlisting}
+\begin{choices}
+  \choice Line 4
+  \choice Line 5
+  \choice Line 6
+  \choice Line 7
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\part A student attempts to calculate \(n!\) recursively. Why does the function always return 0 for every nonnegative input?
+\begin{lstlisting}[numbers=left,firstnumber=1]
+def factorial(n):
+    if n == 0:
+        return 0
+    else:
+        return n * factorial(n - 1)
+
+print(factorial(3))
+\end{lstlisting}
+\begin{choices}
+  \choice The function fails to handle negative values.
+  \choice The base case should return 1 instead of 0.
+  \choice The recursion never approaches the base case.
+  \choice The base case should be \texttt{if n == 1:} instead of \texttt{if n == 0:}.
+\end{choices}
+\end{parts}
+
+\vspace{\stretch{1}}
+\newpage
+\question[20] \textbf{TRACING} (4 points each) For each question, write exactly what is printed to the Python shell. Do not include quotation marks around printed strings.
+
+\begin{parts}
+\part
+\begin{lstlisting}
+def makingFriends(friends):
+    for f, i in friends:
+        try:
+            g = friends[i][0]
+            if f == g:
+                print("Introducing me???")
+            else:
+                print(f"{f} knows {g}.")
+        except:
+            return "No such person"
+        finally:
+            print("Hi")
+
+print(makingFriends([("Peter", 3), ("Mike", 1), ("Paul", 9),
+                     ("Amy", 2)]))
+\end{lstlisting}
+\answerbox
+
+\vspace{\stretch{1}}
+
+\part
+\begin{lstlisting}
+def cpu_processing(n):
+    if n == 0:
+        print("Done!")
+        return
+    print(f"Starting task {n}")
+    cpu_processing(n - 1)
+    print(f"Finishing task {n}")
+
+cpu_processing(2)
+\end{lstlisting}
+\answerbox
+
+\vspace{\stretch{1}}
+\newpage
+
+\begin{samepage}
+\part
+\begin{lstlisting}
+def stadiums(aList):
+    bList = []
+    for one, two in enumerate(aList):
+        if one % 2 == 0:
+            print(two)
+        elif one % 3 == 0:
+            bList.append(one)
+        else:
+            print(one)
+    return bList
+
+print(stadiums(["ATL", "BOS", "NYC", "DAL"]))
+\end{lstlisting}
+\answerbox
+
+\vspace{\stretch{1}}
+
+\part
+\begin{lstlisting}
+def countRhymes(aList):
+    if not aList:
+        return 0
+    else:
+        name, word = aList[0]
+        if name[-3:] == word[-3:]:
+            print(f"{name} rhymes with {word}")
+            return 1 + countRhymes(aList[1:])
+        else:
+            print("Not a rhyme")
+            return countRhymes(aList[1:])
+
+print(countRhymes([("Sally", "rally"), ("Anna", "banana"),
+                   ("Mike", "bike"), ("Paul", "ball"),
+                   ("Ty", "sty")]))
+\end{lstlisting}
+\answerbox
+\end{samepage}
+\end{parts}
+
+\vspace{\stretch{1}}
+\newpage
+\question[8] \textbf{LONG ANSWER 1}
+
+Use the API data below. Assume there are additional records beyond those shown.
+\begin{lstlisting}
+star_players = [
+    {'Name': 'Christian Pulisic',
+     'Team': 'United States',
+     'Position': 'F',
+     'Age': 27},
+    {'Name': 'Kylian Mbappe',
+     'Team': 'France',
+     'Position': 'F',
+     'Age': 27},
+    {'Name': 'Vozinha',
+     'Team': 'Cabo Verde',
+     'Position': 'GK',
+     'Age': 40},
+    ...
+]
+\end{lstlisting}
+
+Write a code snippet (not a function) that creates a sorted list named \texttt{all\_star\_team}. The list should contain tuples of a player's name and team whenever either the length of the team name is even or the player's age is strictly less than 30.
+
+\par\vspace{0.5em}
+\noindent\fbox{\parbox[t][3.75in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+
+\newpage
+\question[12] \textbf{LONG ANSWER 2}
+
+Use the data in \texttt{logbook.csv}. Assume there are additional rows beyond those shown, but the file always has five columns.
+
+\begin{lstlisting}
+Pilot Name,Passengers,Start,Destination,Minutes
+Mark,180,Boston,Nashville,172
+Sloan,152,Atlanta,Mexico City,249
+Jane,170,San Francisco,Dallas,267
+...
+\end{lstlisting}
+
+\begin{parts}
+\part[4] For this part only assume the file contains only the rows shown above, what is printed by the following code?
+\begin{lstlisting}
+def parse_logbook():
+    infile = open("logbook.csv")
+    header = infile.readline().strip().split(",")
+    data = infile.readlines()
+    infile.close()
+    for line in range(len(data)):
+        piece = data[line].strip().split(",")
+        if line % 2 == 0 and int(piece[1]) % 6 == 0:
+            print(piece[3])
+        elif int(piece[4]) % 3 == 0:
+            print(piece[2])
+        else:
+            return piece[0]
+
+print(parse_logbook())
+\end{lstlisting}
+\par\vspace{0.5em}
+\noindent\fbox{\parbox[t][4in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+
+\newpage
+Use the data in \texttt{logbook.csv}. Assume there are additional rows beyond those shown, but the file always has five columns.
+
+\begin{lstlisting}
+Pilot Name,Passengers,Start,Destination,Minutes
+Mark,180,Boston,Nashville,172
+Sloan,152,Atlanta,Mexico City,249
+Jane,170,San Francisco,Dallas,267
+...
+\end{lstlisting}
+\part[8] Write a code snippet (not a function) that creates a dictionary of lists named \texttt{flights}. Each key should be a column header, and its value should be a list containing the values from that column. Convert the \texttt{Passengers} and \texttt{Minutes} values to integers.
+
+The resulting dictionary should have the following form:
+\begin{lstlisting}
+{
+    "Pilot Name": ["Mark", "Sloan", "Jane", ...],
+    "Passengers": [180, 152, 170, ...],
+    "Start": ["Boston", "Atlanta", "San Francisco", ...],
+    "Destination": ["Nashville", "Mexico City", "Dallas", ...],
+    "Minutes": [172, 249, 267, ...]
+}
+\end{lstlisting}
+\par\vspace{0.5em}
+\noindent\fbox{\parbox[t][5.5in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+\end{parts}
+
+\newpage
+\question[12] \textbf{CODING 1 -- \texttt{summerTrip}}
+
+Write a function named \texttt{summerTrip} with these parameters:
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+  \item \texttt{itinerary}: a list of tuples in the form \texttt{(state, location, cost)}, where \texttt{state} and \texttt{location} are strings and \texttt{cost} is a float;
+  \item \texttt{locationBudget}: a float.
+\end{itemize}
+
+Return a dictionary mapping each state that has at least one affordable location to a list containing:
+\begin{enumerate}[leftmargin=1.6em,itemsep=0.2em]
+  \item the total cost of that state's affordable locations, and
+  \item a tuple of those affordable location names, in their original order.
+\end{enumerate}
+
+A location is affordable when its cost is strictly less than \texttt{locationBudget}. States with no affordable locations should not appear.
+
+\textbf{Example}
+\begin{lstlisting}
+itinerary = [
+    ("WA", "Seattle", 100.0),
+    ("CA", "San Francisco", 200.0),
+    ("WA", "Tacoma", 130.0),
+    ("CA", "San Jose", 180.0),
+    ("WA", "Bellevue", 120.0),
+    ("OR", "Portland", 350.0)
+]
+
+summerTrip(itinerary, 200.0)
+\end{lstlisting}
+
+\textbf{Expected result}
+\begin{lstlisting}
+{"WA": [350.0, ("Seattle", "Tacoma", "Bellevue")],
+ "CA": [180.0, ("San Jose",)]}
+\end{lstlisting}
+
+\vfill
+\noindent\fbox{\parbox[t][4in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+\newpage
+\question[14] \textbf{CODING 2 -- \texttt{tripWeather}}
+
+Write a function named \texttt{tripWeather} that takes:
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+  \item \texttt{baseUrl}: a string containing the weather API's base URL; and
+  \item \texttt{cities}: a list of city-name strings.
+\end{itemize}
+
+For each city, request data from \texttt{baseUrl + city}. Return a dictionary mapping each city to its average temperature across the day.
+
+An endpoint such as \texttt{www.weatherapi.com/Atlanta} returns data in this form:
+\begin{lstlisting}
+{
+    "city": "Atlanta",
+    "state": "GA",
+    "date": "2016-07-21",
+    "temperatures": [80, 85, 88, 96, 100, 84],
+    "forecast": "thunderstorms"
+}
+\end{lstlisting}
+
+Some cities do not yet have an endpoint. Requests for those cities return a response that is not JSON. Such cities should not appear in the returned dictionary.
+
+\textbf{Example}
+\begin{lstlisting}
+tripWeather("https://www.weatherapi.com/", ["Seattle", "Tacoma", "Bellevue"])
+\end{lstlisting}
+
+\textbf{Expected result}
+\begin{lstlisting}
+{"Seattle": 72.5, "Bellevue": 83.0}
+\end{lstlisting}
+Tacoma is omitted because it does not exist in the API.
+\vfill
+\noindent\fbox{\parbox[t][4in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+
+
+\newpage
+\question[14] \textbf{CODING 3 -- \texttt{findCrashPads}}
+
+Write a function named \texttt{findCrashPads} with parameters \texttt{filename} (string), \texttt{cities} (list), and \texttt{crew} (integer).
+
+Return a list of tuples containing the name and phone number of each friend who:
+\begin{itemize}[leftmargin=1.4em,itemsep=0.2em]
+  \item lives in a city contained in \texttt{cities}, and
+  \item can accommodate at least \texttt{crew} people.
+\end{itemize}
+
+The result must be sorted alphabetically by the friend's name.
+
+\textbf{File contents: \texttt{myFriends.csv}}
+\begin{lstlisting}
+Friend,Accommodates,City,State,Phone
+Anna,3,Seattle,WA,206-123-4567
+Ben,5,Tacoma,WA,253-234-5678
+Harshith,2,Bellevue,WA,425-345-6789
+Diego,4,Portland,OR,503-456-7890
+Elena,6,Seattle,WA,206-567-8901
+Sonya,1,Tacoma,WA,253-678-9012
+Zhixian,4,Atlanta,GA,404-789-0123
+Henry,4,Bellevue,WA,425-890-1234
+\end{lstlisting}
+
+\textbf{Example}
+\begin{lstlisting}
+findCrashPads("myFriends.csv", ["Seattle", "Tacoma", "Bellevue"], 4)
+\end{lstlisting}
+
+\textbf{Expected result}
+\begin{lstlisting}
+[("Ben", "253-234-5678"),
+ ("Elena", "206-567-8901"),
+ ("Henry", "425-890-1234")]
+\end{lstlisting}
+
+\vfill
+\noindent\fbox{\parbox[t][4in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+
+\newpage
+\question[14] \textbf{RECURSIVE CODING 4 -- \texttt{payThePeople}}
+
+Write a recursive function named \texttt{payThePeople} that takes \texttt{charges}, a list of tuples formatted as \texttt{(charge, vendor)}, where \texttt{charge} is a float and \texttt{vendor} is a string.
+
+Return a dictionary mapping each vendor to the total amount that vendor should be paid. Leading and trailing whitespace in vendor names should be ignored.
+
+\textbf{You must use recursion. Code containing loops will receive no credit.}
+
+\textbf{Example}
+\begin{lstlisting}
+charges = [
+    (150.0, "Broritos Truck"),
+    (200.0, "Katie Cakes"),
+    (75.5, " Broritos Truck"),
+    (300.0, "Sound Systems")
+]
+
+payThePeople(charges)
+\end{lstlisting}
+
+\textbf{Expected result}
+\begin{lstlisting}
+{"Broritos Truck": 225.5,
+ "Katie Cakes": 200.0,
+ "Sound Systems": 300.0}
+\end{lstlisting}
+
+\vfill
+\noindent\fbox{\parbox[t][5in][t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{\strut}}
+\vfill
+
+\newpage
+\begin{center}
+\vspace*{3in}
+{\Large\bfseries Left intentionally blank}
+\end{center}
+
+\end{questions}
+\end{document}

@@ -1,0 +1,26 @@
+package defpackage;
+
+import android.os.RemoteException;
+import com.google.android.gms.common.api.Status;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public abstract class ewb {
+    public final int a;
+
+    public ewb(int i) {
+        this.a = i;
+    }
+
+    public static Status e(RemoteException remoteException) {
+        return new Status(19, remoteException.getClass().getSimpleName() + ": " + remoteException.getLocalizedMessage(), null, null);
+    }
+
+    public abstract void a(Status status);
+
+    public abstract void b(Exception exc);
+
+    public abstract void c(cub cubVar, boolean z);
+
+    public abstract void d(rub rubVar);
+}

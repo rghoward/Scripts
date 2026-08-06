@@ -1,0 +1,12 @@
+package defpackage;
+
+/* JADX INFO: compiled from: r8-map-id-5f1ea74b072460be821fa7f2514cf36d220f69463b6062bff833a45851f543a6 */
+/* JADX INFO: loaded from: classes.dex */
+public class k27<T> extends kb6<T> {
+    public void j(T t) {
+        kb6.a("setValue");
+        this.g++;
+        this.e = t;
+        c(null);
+    }
+}

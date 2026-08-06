@@ -1,0 +1,437 @@
+\documentclass[11pt,addpoints]{exam}
+\usepackage{amsfonts,amssymb,amsmath, amsthm, mathtools}
+\usepackage{graphicx}
+\usepackage{systeme}
+\usepackage{pgf,tikz,pgfplots}
+\pgfplotsset{compat=1.15}
+\usepgfplotslibrary{fillbetween}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usepackage{moresize}
+\usepackage{wasysym}
+\usepackage{multicol}
+\usepackage{enumitem}
+\renewcommand{\thechoice}{{\Large$\Circle$ \ }}
+\renewcommand{\choicelabel}{\thechoice}
+\newcommand{\versionmark}{$\heartsuit$}
+\renewcommand{\thepartno}{\roman{partno}}
+\pagestyle{headandfoot}
+\setlength\parindent{0pt}
+\usepackage{array}
+\usepackage{amssymb} % Required for the \Box symbol
+\checkboxchar{$\Box$}
+
+\firstpageheader{CS 2050 - Exam 4 Ryland Grace\\ Spring 2026}{}{Name: \underline{\hspace{2.5in}}\\ GTID: \underline{\hspace{2.5in}}}
+
+
+\runningheader{CS 2050 - Exam 4 Ryland Grace}{Page \thepage\ of \numpages}{Name: \underline{\hspace{2 in}}}
+\runningheadrule
+
+\firstpagefooter{}{}{}
+\runningfooter{}{}{}
+\bracketedpoints \pointsinmargin
+
+\begin{document}
+
+\begin{center}
+\fbox{\fbox{\parbox{6in}{\centering
+No notes, calculators, or other aids are allowed.  Read all directions carefully and write your answers in the space provided.\\
+Taking this exam signifies you are aware of and in accordance with the Academic Honor Code of Georgia.\\ Do not separate any pages from the rest of your exam.
+}}}
+\end{center}
+\vspace{\baselineskip}
+\begin{center}
+    \vspace{30mm}
+    \HUGE{Version Ryland Grace}
+
+
+    \numpoints\ points
+\end{center}
+\newpage
+\vspace{\baselineskip}
+
+\newpage
+
+\textbf{For the following questions, please completely fill in the bubble corresponding to your chosen answer.}
+
+\begin{questions} %------------------------------------------
+
+% Correct answer: False; a shift cipher has only 26 possible keys (or 25 nontrivial keys).
+
+\question[3] (new) Because a shift cipher has many possible keys, trying every possible key is not a practical method of breaking the cipher.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True
+        \choice False
+    \end{choices}
+\end{multicols}
+
+
+\vspace{\stretch{1}}
+
+
+
+
+% Correct answer: True
+
+\question[3] (new) For every integers $n\geq 0$ and $0\leq r\leq n$, it holds
+\[
+C(n,r)\leq 2^n
+\]
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True
+        \choice False
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+% Correct answer: False; the two counts are C(8,2)=28 and C(8,3)=56.
+
+\question[3] (new) The number of length-eight binary strings containing exactly two $1$s is equal to the number of three-element subsets of an eight-element set.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True
+        \choice False
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+
+% Correct answer: True; by the sum rule, there are $n_1+n_2+n_3$ choices.
+
+\question[3] (new) A student must choose exactly one elective from three categories. The first category contains $n_1$ courses, the second contains $n_2$ courses, and the third contains $n_3$ courses. The total number of possible choices is $n_1+n_2+n_3$.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True
+        \choice False
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+% Correct answer: True; complementing every bit is a bijection between the two sets of strings.
+
+\question[3] (new) For $0\leq r\leq n$, the number of length-$n$ binary strings containing exactly $r$ ones equals the number containing exactly $r$ zeros.
+
+\begin{multicols}{2}
+    \begin{choices}
+        \choice True
+        \choice False
+    \end{choices}
+\end{multicols}
+
+\vspace{\stretch{1}}
+
+\newpage
+
+% Correct answer: B; RSA uses the public key for encryption and the private key for decryption.
+
+\vspace{\stretch{1}}
+
+
+% Correct answer: D; knowing $n$ and $e$ is insufficient to compute the private key without factoring $n$.
+
+\question[5] (new) Which of the following statements about RSA is correct?
+
+\begin{choices}
+    \choice The security of RSA relies on keeping the modulus $n$ secret.
+    \choice Anyone who knows the public key can efficiently compute the private key.
+    \choice RSA is secure because multiplying large prime numbers is computationally difficult.
+    \choice Factoring the modulus $n$ would allow an attacker to compute the private key.
+    \choice None of the above.
+\end{choices}
+
+% Correct answer: A (5); by the Generalized Pigeonhole Principle, some category contains at least ceiling(37/8)=5 measurements.
+
+\question[5] (new) The \textit{Hail Mary} records 37 diagnostic measurements, each assigned to exactly one of 8 categories. What is the largest number of measurements guaranteed to belong to the same category?
+
+\begin{choices}
+    \choice 5
+    \choice 4
+    \choice 6
+    \choice 8
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+% Correct answer: E (C(14,3)); reserve 4 packets for the command module and 1 for each other module, then distribute the remaining 11 packets.
+
+\question[5] (new) Grace distributes 18 identical emergency food packets among four distinct ship modules. The command module must receive at least 4 packets, and each other module must receive at least 1 packet. How many distributions are possible?
+
+\begin{choices}
+    \choice $C(21,3)$
+    \choice $C(17,3)$
+    \choice $4^{18}$
+    \choice None of the above.
+    \choice $C(14,3)$
+\end{choices}
+
+\vspace{\stretch{1}}
+
+% Correct answer: B (120); use the Product Rule: 3(2)(4)(5)=120.
+
+\question[5] (new) A \textit{Hail Mary} diagnostic procedure has four stages. The stages can be completed in 3, 2, 4, and 5 ways, respectively, and the choice at one stage does not restrict the choices at the others. How many complete procedures are possible?
+
+\begin{choices}
+    \choice 14
+    \choice 120
+    \choice 60
+    \choice 625
+    \choice None of the above.
+\end{choices}
+
+
+\vspace{\stretch{1}}
+
+% Correct answer: C (180); choose two astrophysics reports, one medical report, and two engineering reports: C(4,2)C(3,1)C(5,2)=180.
+
+\question[5] (new) Grace selects 5 reports for a mission archive from 4 astrophysics reports, 5 engineering reports, and 3 medical reports. The archive must contain exactly 2 astrophysics reports and exactly 1 medical report. How many selections are possible?
+
+\begin{choices}
+    \choice 60
+    \choice 120
+    \choice 180
+    \choice 360
+    \choice None of the above.
+\end{choices}
+
+
+\vspace{\stretch{1}}
+
+\newpage
+
+% Correct answer: A (7!3!=30240); treat the three specified canisters as one block and arrange that block internally.
+
+\question[5] (new) Nine distinct sample canisters are arranged in a row aboard the \textit{Hail Mary}. Three specified canisters must appear consecutively, although they may appear in any order within their block. How many arrangements are possible?
+
+\begin{choices}
+    \choice $7!3!$
+    \choice $7!$
+    \choice $9!/3!$
+    \choice $9!-3!$
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+
+% Correct answer: C (180); treat the vowels I,E,E as one block, arrange the block and four consonants in 5!/2! ways, and arrange the vowels in 3!/2! ways.
+
+\question[5] (new) How many distinct arrangements of the word SCIENCE have all three vowels consecutive? The consonants are not required to be consecutive.
+
+\begin{choices}
+    \choice $60$
+    \choice $120$
+    \choice $180$
+    \choice $360$
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+
+% Correct answer: E (24); fix Grace's position, place Rocky in the unique opposite seat, and arrange the remaining four crew members in 4! ways.
+
+\question[5] (new) Grace, Rocky, and four other distinct crew members sit at a circular table with six evenly spaced seats. In how many rotationally distinct seatings do Grace and Rocky sit directly opposite each other?
+
+\begin{choices}
+    \choice 12
+    \choice 48
+    \choice 120
+    \choice None of the above.
+    \choice 24
+\end{choices}
+
+\vspace{\stretch{1}}
+
+% Correct answer: B (19); after giving each module 2 cells, count nonnegative solutions to y1+y2+y3=6 with yi at most 4: C(8,2)-3C(3,2)=19.
+
+\question[5] (new) Grace distributes 12 identical backup fuel cells among three distinct ship modules. Each module must receive at least 2 cells and at most 6 cells. How many distributions are possible?
+
+\begin{choices}
+    \choice 16
+    \choice 19
+    \choice 21
+    \choice 28
+    \choice None of the above.
+\end{choices}
+
+\vspace{\stretch{1}}
+
+\newpage
+\textbf{Instructions:} For the following question(s), you must show \textbf{all} of your work using methods covered in lecture. Brute-force solutions will receive \textbf{no credit}. The only exception is that you may use the brute-force method to find multiplicative inverses. All other parts of the problem must be solved using techniques taught in class.
+
+% Correct answer: $x \equiv 52 \pmod{77}$.
+
+\question[13] Solve the following system of congruences. Give the smallest nonnegative solution.
+
+\[
+x \equiv 3 \pmod{7}
+\]
+
+\[
+x \equiv 8 \pmod{11}
+\]
+
+Show all work using the Chinese Remainder Theorem.
+
+
+\newpage
+% Correct answer: There are 20 channels. Since 101=5(20)+1, the Generalized Pigeonhole Principle guarantees that some channel receives at least 6 transmissions.
+
+\question[13] (new) During a communications test, the \textit{Hail Mary} sends 101 transmissions through 20 available channels. Prove that at least one channel carries at least 6 transmissions.
+
+\newpage
+
+\question[14] The \textit{Hail Mary} carries 16 distinct scientific samples. Give a combinatorial proof of the identity
+\[
+\sum_{k=4}^{12}\binom{16}{k}
+=
+2^{16}-2\sum_{k=0}^{3}\binom{16}{k}.
+\]
+
+In your proof:
+\begin{enumerate}[label=\arabic*.]
+    \item Explain what the left-hand side counts and how it counts those objects.
+    \item Explain what the right-hand side counts and how it counts those objects.
+    \item Explain why the two sides count the same collection of objects.
+\end{enumerate}
+
+
+\newpage
+
+% change pts as needed
+\question \textbf{EXTRA CREDIT:}
+Design a mission patch for the \textit{Hail Mary} that includes both Earth and Rocky's home star, 40 Eridani. Submissions will be judged on a scale of 1--3. You may not raise your hand to ask a TA anything concerning this question.
+
+\newpage
+
+\textbf{Scratch Paper: If using this page to write a solution, clearly indicate on both this page and the original page that the solution is here.}
+
+% =====================================================================
+% INSTRUCTOR SOLUTIONS -- These comments do not appear in the PDF.
+% =====================================================================
+%
+% Question 1: False.
+% A shift cipher has 26 possible shifts, including the identity shift, so an
+% exhaustive key search is practical. Even if the identity is excluded, only
+% 25 nontrivial keys remain.
+%
+% Question 2: True.
+% C(n,r) counts the r-element subsets of an n-element set. The quantity 2^n
+% counts all subsets of that set. Since the r-element subsets form one part of
+% the collection of all subsets, C(n,r) <= 2^n.
+%
+% Question 3: False.
+% A length-eight binary string with exactly two 1s is uniquely determined by
+% the two positions occupied by its 1s, so there are C(8,2)=28 such strings.
+% There are C(8,3)=56 three-element subsets of an eight-element set. Since
+% 28 is not equal to 56, the statement is false.
+%
+% Question 4: True.
+% The three elective categories are disjoint alternatives, and the student
+% chooses exactly one course. By the Sum Rule, the total is n_1+n_2+n_3.
+%
+% Question 5: True.
+% Complement every bit in a string. This operation is a bijection from strings
+% with exactly r ones to strings with exactly r zeros, and applying it twice
+% returns the original string.
+%
+% Question 6: Correct choice D: factoring the modulus n would allow an attacker
+% to compute the private key.
+% If n=pq is factored, the attacker can compute phi(n)=(p-1)(q-1) and then find
+% the private exponent d satisfying ed congruent to 1 modulo phi(n). The modulus
+% n is part of the public key, so it is not secret. Efficiently deriving the
+% private key from the public key is precisely what RSA is intended to prevent.
+% Multiplication of large primes is efficient; reversing it by factoring n is
+% the computationally difficult operation.
+%
+% Question 7: Correct choice A: 5.
+% Place the 37 measurements into 8 category boxes. The Generalized Pigeonhole
+% Principle guarantees at least ceiling(37/8)=5 measurements in one category.
+% The bound is sharp because counts 5,5,5,5,5,4,4,4 total 37 and no category
+% contains more than 5 measurements.
+%
+% Question 8: Correct choice E: C(14,3)=364.
+% Reserve 4 packets for the command module and 1 packet for each of the other
+% three modules. This uses 7 packets and leaves 11. If y_i denotes additional
+% packets, then y_1+y_2+y_3+y_4=11 with every y_i nonnegative. Stars and bars
+% gives C(11+4-1,4-1)=C(14,3)=364.
+%
+% Question 9: Correct choice B: 120.
+% The four independent stages have 3, 2, 4, and 5 choices. By the Product Rule,
+% there are 3(2)(4)(5)=120 complete procedures.
+%
+% Question 10: Correct choice C: 180.
+% Choose 2 of the 4 astrophysics reports, 1 of the 3 medical reports, and the
+% remaining 2 reports from the 5 engineering reports. The Product Rule gives
+% C(4,2)C(3,1)C(5,2)=6(3)(10)=180.
+%
+% Question 11: Correct choice A: 7!3!=30,240.
+% Treat the three specified canisters as one block. The block and the other six
+% canisters form seven distinct objects, which can be ordered in 7! ways. The
+% three canisters inside the block can be ordered in 3! ways. Multiply.
+%
+% Question 12: Correct choice C: 180.
+% SCIENCE has vowels I,E,E and consonants S,C,N,C. Treat the three vowels as one
+% block. The vowel block and four consonants form five objects, with the letter
+% C repeated, so they have 5!/2!=60 arrangements. The vowels have 3!/2!=3
+% internal arrangements. Thus the total is (60)(3)=180.
+%
+% Question 13: Correct choice E: 24.
+% Fix Grace's seat to remove rotational symmetry. Rocky must occupy the unique
+% seat opposite Grace. The other four distinct crew members may then be placed
+% in the remaining seats in 4!=24 ways.
+%
+% Question 14: Correct choice B: 19.
+% First give 2 cells to every module. For the remaining 6 cells, solve
+% y_1+y_2+y_3=6 with 0<=y_i<=4. Without the upper bounds there are C(8,2)=28
+% solutions. If a particular y_i>=5, set z_i=y_i-5; the new sum is 1 and has
+% C(3,2)=3 solutions. There are three choices of the violating variable, and no
+% two variables can both be at least 5. Hence 28-3C(3,2)=28-9=19.
+%
+% Question 15: Correct answer: x congruent to 52 modulo 77; the smallest
+% nonnegative solution is 52.
+% Write x=3+7t. The second congruence gives 3+7t congruent to 8 modulo 11, so
+% 7t congruent to 5 modulo 11. Since 8 is the inverse of 7 modulo 11, multiply
+% by 8 to obtain t congruent to 40 congruent to 7 modulo 11. Therefore
+% x=3+7(7)=52. All solutions are x congruent to 52 modulo 7(11)=77.
+%
+% Question 16:
+% Regard the 20 channels as boxes and the 101 transmissions as objects. If every
+% channel carried at most 5 transmissions, at most 20(5)=100 transmissions could
+% be sent. This contradicts the total of 101. Therefore some channel carries at
+% least ceiling(101/20)=6 transmissions.
+%
+% Question 17:
+% Both sides count collections containing at least 4 and at most 12 of the 16
+% distinct samples. The left side counts directly by collection size. For each
+% k from 4 through 12, there are C(16,k) collections, and the Sum Rule gives the
+% left-hand side.
+% There are 2^16 collections of samples in total. The invalid collections have
+% sizes 0,1,2,3,13,14,15, or 16. The collections of sizes 0 through 3 contribute
+% sum from k=0 to 3 of C(16,k). Taking complements is a bijection from a
+% k-element collection to a (16-k)-element collection, so the collections of
+% sizes 13 through 16 contribute the same number. Subtracting both groups of
+% invalid collections gives the right-hand side. Both methods count exactly the
+% same valid collections, proving the identity. Their common value is
+% 2^16-2[C(16,0)+C(16,1)+C(16,2)+C(16,3)]
+% =65536-2(1+16+120+560)=64142.
+%
+% Question 18:
+% Answers vary. Award 1--3 points according to the announced art rubric if the
+% patch includes Earth and 40 Eridani.
+% =====================================================================
+
+\end{questions}
+
+\end{document}

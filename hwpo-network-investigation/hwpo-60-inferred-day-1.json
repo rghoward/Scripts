@@ -1,0 +1,16 @@
+{
+  "schedule": {
+    "id": -1,
+    "color": "#23a9fc",
+    "plan": {
+      "id": 77,
+      "title": "60 1.0",
+      "plan_type": "membership"
+    },
+    "can_navigate_forward": true,
+    "can_navigate_back": true,
+    "date": 1703462400,
+    "day_number": null,
+    "sections": []
+  }
+}
