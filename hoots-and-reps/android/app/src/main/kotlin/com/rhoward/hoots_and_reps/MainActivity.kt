@@ -191,6 +191,10 @@ class MainActivity : FlutterActivity(), DisplayManager.DisplayListener {
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
+            // The external monitor belongs to a separate Android power group.
+            // Keeping only the phone Activity awake does not prevent this
+            // Presentation's display group from timing out.
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             val density = context.resources.displayMetrics.density
             fun px(value: Int) = (value * density).toInt()
             fun label(size: Float, color: Int, bold: Boolean = false) = TextView(context).apply {
