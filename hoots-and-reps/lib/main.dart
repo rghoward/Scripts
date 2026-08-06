@@ -3806,13 +3806,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
           ),
           const SizedBox(height: 20),
           _variantTabs(workout),
-          if (_externalDisplayAvailable) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: _displayBoardControl(workout, sections),
-            ),
-          ],
           if (!completed && _workoutChanges(workout, sections).isNotEmpty) ...[
             const SizedBox(height: 16),
             _workoutChangesCard(workout, sections),
@@ -4632,134 +4625,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
     setState(() => _projectedSectionKey = null);
   }
 
-  Future<void> _chooseDisplayBoardSection(
-    WorkoutDay workout,
-    List<WorkoutSection> sections,
-  ) async {
-    final chosen = await showModalBottomSheet<int>(
-      context: context,
-      backgroundColor: card,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'DISPLAY BOARD',
-                style: TextStyle(
-                  color: ember,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Choose what the external screen shows. Opening a workout section also updates it.',
-                style: TextStyle(color: muted, height: 1.35),
-              ),
-              const SizedBox(height: 12),
-              for (var i = 0; i < sections.length; i++)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    _projectedSectionKey == _key(workout, i)
-                        ? Icons.tv
-                        : Icons.tv_outlined,
-                    color: _projectedSectionKey == _key(workout, i)
-                        ? cyan
-                        : muted,
-                  ),
-                  title: Text(
-                    _sectionHeading(sections[i].title),
-                    style: const TextStyle(
-                      color: ink,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  trailing: _projectedSectionKey == _key(workout, i)
-                      ? const Text(
-                          'ON SCREEN',
-                          style: TextStyle(
-                            color: cyan,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        )
-                      : const Icon(Icons.chevron_right, color: muted),
-                  onTap: () => Navigator.pop(context, i),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (chosen != null && mounted) {
-      await _showOnExternalDisplay(workout, sections[chosen], chosen);
-    }
-  }
-
-  Widget _displayBoardControl(
-    WorkoutDay workout,
-    List<WorkoutSection> sections,
-  ) {
-    final isShowing = _projectedSectionKey != null;
-    return Tooltip(
-      message: !isShowing
-          ? 'Choose what to show on the display board'
-          : 'Stop showing on the display board',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => isShowing
-              ? _hideExternalDisplay()
-              : _chooseDisplayBoardSection(workout, sections),
-          borderRadius: BorderRadius.circular(15),
-          child: Ink(
-            width: 48,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xff102d40), Color(0xff1b1034)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: cyan.withOpacity(.8)),
-              boxShadow: [
-                BoxShadow(
-                  color: cyan.withOpacity(isShowing ? .28 : .12),
-                  blurRadius: 14,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const Icon(Icons.tv_rounded, color: cyan, size: 23),
-                if (isShowing)
-                  const Positioned(
-                    right: 7,
-                    top: 6,
-                    child: Text(
-                      '✦',
-                      style: TextStyle(
-                        color: ember,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _sectionCard(WorkoutDay workout, WorkoutSection section, int index) {
     final completed = _sectionState[_key(workout, index)] == true;
     final projected = _projectedSectionKey == _key(workout, index);
@@ -4851,12 +4716,14 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                     IconButton(
                       tooltip: projected
-                          ? 'Showing on the external display'
+                          ? 'Stop showing on the external display'
                           : 'Show this card on the external display',
-                      onPressed: _externalDisplayAvailable && !projected
-                          ? () =>
-                                _showOnExternalDisplay(workout, section, index)
-                          : null,
+                      onPressed: !_externalDisplayAvailable
+                          ? null
+                          : projected
+                          ? _hideExternalDisplay
+                          : () =>
+                                _showOnExternalDisplay(workout, section, index),
                       icon: Icon(
                         projected ? Icons.tv_rounded : Icons.tv_outlined,
                         color: projected ? cyan : muted,
