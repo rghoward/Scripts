@@ -86,9 +86,9 @@ void main() {
   const encoder = JsonEncoder.withIndent('  ');
   final output = File('assets/data/published_program_snapshot_v1.json');
   final snapshot = {
-    'snapshot_id': 'forged_phase_2026_07_27_v4',
-    'version': 4,
-    'published_at': '2026-08-04T00:00:00.000Z',
+    'snapshot_id': 'forged_phase_2026_07_27_v6',
+    'version': 6,
+    'published_at': '2026-08-06T00:00:00.000Z',
     'workouts': workouts,
   };
   _validatePublishedWorkouts(workouts);
@@ -124,43 +124,43 @@ Map<String, Object?>? _benchmark(int week, int index) {
       'rowShortPower',
       'row_short_power_v1',
       week == 10,
-      'The Twin Trials of Velocity',
+      'The Twin Trials of Velocity${week == 10 ? ' Reforged' : ''}',
     ),
     (1, 3) || (10, 3) => (
       'rowTwoThousand',
       'row_2000_capacity_v1',
       week == 10,
-      'The Long Oar of the Void',
+      'The Voidward Vigil${week == 10 ? ' Reforged' : ''}',
     ),
     (2, 0) || (11, 0) => (
       'gymnasticsScreen',
       'gymnastics_capacity_v1',
       week == 11,
-      'The Four Seals of Bodyweight',
+      'The Four Astral Seals${week == 11 ? ' Reforged' : ''}',
     ),
     (2, 1) || (11, 1) => (
       'runFourHundred',
       'run_400_speed_v1',
       week == 11,
-      'The Comet-Lap Trial',
+      'The Comet Circuit${week == 11 ? ' Reforged' : ''}',
     ),
     (3, 1) || (11, 3) => (
       'skiSevenFifty',
       'ski_750_capacity_v1',
       week == 11,
-      'The Frozen Star Trial',
+      'The Frozen Star Trial${week == 11 ? ' Reforged' : ''}',
     ),
     (4, 0) || (12, 0) => (
       'runMile',
       'run_mile_capacity_v1',
       week == 12,
-      'The Mile Beyond the Moon',
+      'The Moonward Trial${week == 12 ? ' Reforged' : ''}',
     ),
     (5, 1) || (12, 2) => (
       'bikeTenMinute',
       'bike_10_minute_capacity_v1',
       week == 12,
-      'The Ten-Minute Tempest',
+      'The Tenfold Tempest${week == 12 ? ' Reforged' : ''}',
     ),
     _ => null,
   };
@@ -355,6 +355,7 @@ Map<String, Object?>? _conditioning(ConditioningWork? value) => value == null
               (option) => {
                 'id': option.id,
                 'label': option.level.name,
+                'prescription': option.prescription,
                 'standards': option.standards,
               },
             )

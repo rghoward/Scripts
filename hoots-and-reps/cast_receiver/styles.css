@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap');
+
+:root { color-scheme: dark; font-family: system-ui, -apple-system, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; overflow: hidden; background: #070615; color: #f7f5ef; }
+.card { position: relative; isolation: isolate; height: 100vh; overflow: hidden; padding: clamp(22px, 3vw, 52px); }
+.content { height: 100%; display: flex; flex-direction: column; transform-origin: top left; }
+.stars { position: absolute; z-index: -1; inset: 0; opacity: .55; background-image: radial-gradient(circle at 8% 17%, #8b69c9 0 1px, transparent 2px), radial-gradient(circle at 74% 9%, #8b69c9 0 2px, transparent 3px), radial-gradient(circle at 91% 69%, #8b69c9 0 1px, transparent 2px), radial-gradient(circle at 24% 81%, #8b69c9 0 1px, transparent 2px); background-size: 180px 160px, 260px 240px, 190px 210px, 280px 250px; }
+.eyebrow { margin: 0; color: #8b69c9; font-size: clamp(16px, 1.7vw, 28px); font-weight: 800; letter-spacing: .14em; }
+h1 { margin: .16em 0 .22em; color: #ffc44e; font-size: clamp(28px, 3.2vw, 52px); line-height: 1.05; }
+.divider { height: 3px; background: #8b69c9; margin-bottom: clamp(12px, 1.4vw, 22px); }
+h2 { margin: 0 0 .32em; color: #ffc44e; font-size: clamp(22px, 2.5vw, 40px); line-height: 1.08; }
+.timer { margin: 0 0 clamp(10px, 1vw, 18px); padding: clamp(8px, 1vw, 16px); border: 2px solid #56d7ff; border-radius: 16px; background: #122b43; text-align: center; }
+.timer p { margin: 0; }
+.timer-stage { color: #56d7ff; font-size: clamp(13px, 1.4vw, 22px); font-weight: 900; letter-spacing: .12em; }
+.timer-count { color: #f7f5ef; font-size: clamp(42px, 5.4vw, 84px); font-weight: 900; line-height: 1; }
+.timer-label { color: #f7f5ef; font-size: clamp(13px, 1.3vw, 22px); font-weight: 700; margin-top: .2em !important; }
+.timer-cue { color: #ffc44e; font-size: clamp(14px, 1.6vw, 26px); font-weight: 900; margin-top: .25em !important; }
+pre { white-space: pre-wrap; font: 600 clamp(19px, 2.7vw, 43px)/1.25 system-ui, sans-serif; margin: 0; flex: 1; }
+.gender-symbol { font-family: 'Noto Sans Symbols 2', 'Noto Sans Symbols', 'Segoe UI Symbol', 'Apple Symbols', 'Arial Unicode MS', sans-serif; font-weight: 700; }
+footer { border-top: 2px solid #8b69c9; color: #ada6c1; font-size: clamp(12px, 1.3vw, 21px); font-weight: 800; letter-spacing: .08em; margin-top: 18px; padding-top: 12px; text-align: center; }

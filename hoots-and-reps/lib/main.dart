@@ -27,6 +27,7 @@ const border = Color(0xff4b3a78);
 const fire = Color(0xffa855f7);
 const ember = Color(0xffffc44e);
 const cyan = Color(0xff56d7ff);
+const projectedBorder = Color(0xff2a6f9b);
 const success = Color(0xff54ffae);
 const generatedPhaseWeeks = 12;
 
@@ -113,12 +114,16 @@ class ExternalWorkoutDisplay {
     required String workoutTitle,
     required String sectionTitle,
     required String body,
+    required int sectionNumber,
+    required int sectionCount,
   }) async {
     try {
       return await _channel.invokeMethod<bool>('show', {
             'workoutTitle': workoutTitle,
             'sectionTitle': sectionTitle,
             'body': body,
+            'sectionNumber': sectionNumber,
+            'sectionCount': sectionCount,
           }) ??
           false;
     } on MissingPluginException {
@@ -131,6 +136,55 @@ class ExternalWorkoutDisplay {
       await _channel.invokeMethod<void>('hide');
     } on MissingPluginException {
       // Secondary display mode is Android-only for this first release.
+    }
+  }
+
+  /// Opens Android's standard Cast device chooser. The selected workout card
+  /// is held by the native bridge and sent when the Cast session connects.
+  static Future<bool> cast({
+    required String workoutTitle,
+    required String sectionTitle,
+    required String body,
+    required int sectionNumber,
+    required int sectionCount,
+    Map<String, dynamic>? timer,
+  }) async {
+    try {
+      final arguments = <String, dynamic>{
+        'workoutTitle': workoutTitle,
+        'sectionTitle': sectionTitle,
+        'body': body,
+        'sectionNumber': sectionNumber,
+        'sectionCount': sectionCount,
+      };
+      if (timer != null) arguments['timer'] = timer;
+      return await _channel.invokeMethod<bool>('cast', arguments) ?? false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  static Future<void> updateCastTimer(Map<String, dynamic>? timer) async {
+    try {
+      await _channel.invokeMethod<void>('updateCastTimer', {'timer': timer});
+    } on MissingPluginException {
+      // Timers still work locally when Cast is unavailable.
+    }
+  }
+
+  static Future<bool> isCastConnected() async {
+    try {
+      return await _channel.invokeMethod<bool>('isCastConnected') ?? false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  static Future<void> stopCasting() async {
+    try {
+      await _channel.invokeMethod<void>('stopCasting');
+    } on MissingPluginException {
+      // Cast is currently Android-only, like the HDMI display bridge.
     }
   }
 
@@ -229,6 +283,28 @@ class _ConditioningSelection {
       customPrescription: value['custom_prescription'] as String?,
     );
   }
+}
+
+class _ConditioningTargetEdit {
+  _ConditioningTargetEdit({
+    required this.line,
+    required this.value,
+    required this.label,
+  }) : controller = TextEditingController(text: value);
+
+  final String line;
+  final String value;
+  final String label;
+  final TextEditingController controller;
+}
+
+class _ConditioningLoadEdit {
+  _ConditioningLoadEdit({required this.value, required this.label})
+    : controller = TextEditingController(text: value);
+
+  final String value;
+  final String label;
+  final TextEditingController controller;
 }
 
 enum WorkoutBenchmarkKind {
@@ -344,6 +420,39 @@ class WorkoutSection {
   }
 }
 
+enum _CardTimerStage { ready, running, paused, transition, finished }
+
+class _CardTimer {
+  _CardTimer({
+    required this.sectionKey,
+    required this.label,
+    required this.targetSeconds,
+    required this.stage,
+    required this.remainingSeconds,
+    required this.cooldownSteps,
+    required this.cooldownStepIndex,
+    required this.mode,
+    required this.roundCount,
+  });
+
+  final String sectionKey;
+  final String label;
+  int targetSeconds;
+  _CardTimerStage stage;
+  int remainingSeconds;
+  final List<String> cooldownSteps;
+  int cooldownStepIndex;
+  bool sideChangeRequired = false;
+  bool sideChanged = false;
+  bool transitionIsSideChange = false;
+  final String mode;
+  final int roundCount;
+  Map<String, dynamic>? castPlan;
+
+  bool get isCooldown => cooldownSteps.isNotEmpty;
+  bool get isActive => stage != _CardTimerStage.finished;
+}
+
 class _TrainingSubsection {
   const _TrainingSubsection({required this.title, required this.body});
 
@@ -367,6 +476,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     with TickerProviderStateMixin {
   // Retained for a future product decision; no Inertius UI is currently shown.
   static const bool _showInertiusUi = false;
+  // Retained for a future product decision; the full Hoots strike animation
+  // remains implemented but is intentionally disabled in the workout flow.
+  static const bool _showCompletionStrikeAnimation = false;
+  static const _customMovementReplacementMarker = '__athlete_custom__';
   final Map<String, bool> _sectionState = {};
   final Map<String, int> _fractureSeeds = {};
   final Map<String, MovementSubstitution> _movementSwaps = {};
@@ -397,7 +510,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
   ChronicleFilter _chronicleFilter = ChronicleFilter.all;
   bool _ready = false;
   bool _externalDisplayAvailable = false;
+  bool _castConnected = false;
   String? _projectedSectionKey;
+  String? _pendingCastSectionKey;
+  _CardTimer? _cardTimer;
+  Timer? _cardTimerTicker;
+  final Map<String, bool> _sectionExpanded = {};
   int _pageIndex = 0;
   int _workoutTransitionDirection = 1;
   double _workoutDragDistance = 0;
@@ -414,9 +532,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
     );
     _workoutSwipe = AnimationController(vsync: this);
     ExternalWorkoutDisplay.listen((call) async {
-      if (call.method != 'displayChanged' || !mounted) return;
+      if (!mounted) return;
       final values = call.arguments as Map?;
-      setState(() => _externalDisplayAvailable = values?['available'] == true);
+      if (call.method == 'displayChanged') {
+        setState(
+          () => _externalDisplayAvailable = values?['available'] == true,
+        );
+      } else if (call.method == 'castConnectionChanged') {
+        final connected = values?['connected'] == true;
+        setState(() {
+          _castConnected = connected;
+          if (connected && _pendingCastSectionKey != null) {
+            _projectedSectionKey = _pendingCastSectionKey;
+          }
+          if (!connected) _pendingCastSectionKey = null;
+        });
+      }
     });
     _load();
   }
@@ -429,6 +560,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     );
     final setupComplete = await store.getBool('athlete_setup_v1') ?? false;
     final externalDisplayAvailable = await ExternalWorkoutDisplay.isAvailable();
+    final castConnected = await ExternalWorkoutDisplay.isCastConnected();
     final preferredVariant = switch (await store.getString(
       'preferred_workout_variant',
     )) {
@@ -544,6 +676,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       _persistentMovementSwaps.addAll(persistentMovementSwaps);
       _athleteSettings = athleteSettings;
       _externalDisplayAvailable = externalDisplayAvailable;
+      _castConnected = castConnected;
       _preferredWorkoutVariant = preferredVariant;
       _variant = preferredVariant;
       _workouts = workouts;
@@ -709,13 +842,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
         };
         final title = switch (benchmark?.kind) {
           WorkoutBenchmarkKind.rowShortPower => 'The Twin Trials of Velocity',
-          WorkoutBenchmarkKind.rowTwoThousand => 'The Long Oar of the Void',
-          WorkoutBenchmarkKind.gymnasticsScreen =>
-            'The Four Seals of Bodyweight',
-          WorkoutBenchmarkKind.runFourHundred => 'The Comet-Lap Trial',
+          WorkoutBenchmarkKind.rowTwoThousand => 'The Voidward Vigil',
+          WorkoutBenchmarkKind.gymnasticsScreen => 'The Four Astral Seals',
+          WorkoutBenchmarkKind.runFourHundred => 'The Comet Circuit',
           WorkoutBenchmarkKind.skiSevenFifty => 'The Frozen Star Trial',
-          WorkoutBenchmarkKind.runMile => 'The Mile Beyond the Moon',
-          WorkoutBenchmarkKind.bikeTenMinute => 'The Ten-Minute Tempest',
+          WorkoutBenchmarkKind.runMile => 'The Moonward Trial',
+          WorkoutBenchmarkKind.bikeTenMinute => 'The Tenfold Tempest',
           null => day.title,
         };
         final signature = benchmark == null
@@ -914,6 +1046,30 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   ConditioningWork? _conditioningFromSnapshot(Object? source) {
     if (source is! Map<String, dynamic>) return null;
+    final levelOptions = (source['level_options'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map((raw) {
+          final levelName = raw['label'];
+          final level = levelName is String
+              ? WorkoutLevel.values
+                    .where((value) => value.name == levelName)
+                    .firstOrNull
+              : null;
+          return level == null
+              ? null
+              : ConditioningLevelOption(
+                  level: level,
+                  prescription:
+                      (raw['prescription'] as List<dynamic>? ?? const [])
+                          .whereType<String>()
+                          .toList(growable: false),
+                  standards: (raw['standards'] as List<dynamic>? ?? const [])
+                      .whereType<String>()
+                      .toList(growable: false),
+                );
+        })
+        .whereType<ConditioningLevelOption>()
+        .toList(growable: false);
     final tasks = (source['tasks'] as List<dynamic>)
         .map((raw) {
           final task = raw as Map<String, dynamic>;
@@ -937,6 +1093,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       durationMinutes: source['duration_minutes']! as int,
       effort: Effort.values.byName(source['effort']! as String),
       format: source['format']! as String,
+      levelOptions: levelOptions,
       templateId: source['template_id'] as String?,
       workSeconds: source['work_seconds'] as int?,
       restSeconds: source['rest_seconds'] as int?,
@@ -1228,6 +1385,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   @override
   void dispose() {
+    _cardTimerTicker?.cancel();
     _strike.dispose();
     _workoutSwipe.dispose();
     super.dispose();
@@ -1470,7 +1628,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       _sectionState[key] = true;
       _activeFractureSeed = math.Random().nextInt(1 << 31);
       _fractureSeeds[key] = _activeFractureSeed;
-      _strikingSection = index;
+      if (_showCompletionStrikeAnimation) _strikingSection = index;
     });
     final sections = _visibleSections(workout);
     final required = [
@@ -1489,8 +1647,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
     await _saveProgress();
     await _reloadSchedule();
-    await _strike.forward(from: 0);
-    if (mounted) setState(() => _strikingSection = null);
+    if (_showCompletionStrikeAnimation) {
+      await _strike.forward(from: 0);
+      if (mounted) setState(() => _strikingSection = null);
+    }
     if (finished &&
         workout.benchmark != null &&
         (workout.benchmark!.isRetest ||
@@ -1582,6 +1742,61 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
   }
 
+  Future<void> _undoWorkoutCompletion(WorkoutDay workout) async {
+    final partial = _partialWorkouts.contains(workout.sequence);
+    final undo = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(partial ? 'Undo partial quest?' : 'Undo victory claim?'),
+        content: const Text(
+          'This reopens the workout and clears its section checkmarks. Any benchmark or conditioning results you recorded will remain saved.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('UNDO'),
+          ),
+        ],
+      ),
+    );
+    if (undo != true) return;
+
+    final sections = _visibleSections(workout);
+    setState(() {
+      _completedWorkouts.remove(workout.sequence);
+      _partialWorkouts.remove(workout.sequence);
+      for (var index = 0; index < sections.length; index++) {
+        final sectionKey = _key(workout, index);
+        _sectionState.remove(sectionKey);
+        _fractureSeeds.remove(sectionKey);
+        final subsections = _trainingSubsections(sections[index]);
+        for (
+          var subsectionIndex = 0;
+          subsectionIndex < subsections.length;
+          subsectionIndex++
+        ) {
+          final subsectionKey = _trainingSubsectionKey(
+            workout,
+            index,
+            subsectionIndex,
+          );
+          _sectionState.remove(subsectionKey);
+          _fractureSeeds.remove(subsectionKey);
+        }
+      }
+    });
+    final assignment = _assignmentFor(_selected);
+    if (assignment != null) {
+      await _scheduleRepository?.reopen(assignment.assignmentId);
+    }
+    await _saveProgress();
+    await _reloadSchedule();
+  }
+
   bool _hasBenchmarkResult(WorkoutBenchmark benchmark) =>
       benchmark.hasCompleteResult(_benchmarkValues);
 
@@ -1620,79 +1835,179 @@ class _WorkoutHomeState extends State<WorkoutHome>
     ConditioningWork conditioning,
   ) async {
     final existing = _conditioningSelection(workout);
-    final controller = TextEditingController(
-      text:
-          existing.customPrescription ??
-          _publishedStandardsForLevel(
-            conditioning.templateId,
-            'level_2',
-          ).join('\n'),
+    var body =
+        existing.customPrescription ??
+        _conditioningBodyForLevel(
+          workout,
+          conditioning,
+          existing.levelId == 'custom' ? 'level_2' : existing.levelId,
+        );
+    if (existing.customPrescription == null) {
+      body = _inlineConditioningPrescription(
+        body,
+        conditioning.templateId,
+        _conditioningStandards(workout, conditioning),
+      );
+    }
+    final targets = <_ConditioningTargetEdit>[];
+    final targetExpression = RegExp(
+      r'^(?:(?:Odd|Even|Minute \d+):\s*)?(\d+(?:/\d+)?)(?=-calorie|\s+[A-Za-z])',
+      caseSensitive: false,
     );
+    for (final line in body.split('\n')) {
+      final match = targetExpression.firstMatch(line);
+      if (match == null) continue;
+      final value = match.group(1)!;
+      targets.add(
+        _ConditioningTargetEdit(
+          line: line,
+          value: value,
+          label: line.replaceFirst(value, '___'),
+        ),
+      );
+    }
+    final loads = <_ConditioningLoadEdit>[];
+    final loadExpression = RegExp(
+      r'(?:♀\s*)?\d+\s*(?:lb|in|ft)(?:\s*(?:/|to)\s*(?:♂\s*)?\d+\s*(?:lb|in|ft))?',
+      caseSensitive: false,
+    );
+    for (final match in loadExpression.allMatches(body)) {
+      final value = match.group(0)!;
+      final lineStart = body.lastIndexOf('\n', match.start) + 1;
+      final lineEnd = body.indexOf('\n', match.end);
+      final line = body.substring(
+        lineStart,
+        lineEnd < 0 ? body.length : lineEnd,
+      );
+      loads.add(
+        _ConditioningLoadEdit(
+          value: value,
+          label: line.replaceFirst(value, '___'),
+        ),
+      );
+    }
+    String? error;
     final custom = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: card,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            24,
-            22,
-            24,
-            MediaQuery.viewInsetsOf(context).bottom + 28,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'CUSTOM PRESCRIPTION',
-                style: TextStyle(
-                  color: ember,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Set the actual load, height, implement, or variation you will perform. This records as custom, never as RX.',
-                style: TextStyle(color: muted, height: 1.35),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: controller,
-                minLines: 2,
-                maxLines: 5,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'ACTUAL PRESCRIPTION',
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('CANCEL'),
-                    ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              22,
+              24,
+              MediaQuery.viewInsetsOf(context).bottom + 28,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'EDIT WORKOUT TARGETS',
+                  style: TextStyle(
+                    color: ember,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: FilledButton(
-                      onPressed: () =>
-                          Navigator.pop(context, controller.text.trim()),
-                      child: const Text('USE CUSTOM PRESCRIPTION'),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Adjust quantities and loading only. The workout movements, format, and coaching cues stay intact.',
+                  style: TextStyle(color: muted, height: 1.35),
+                ),
+                for (final target in targets) ...[
+                  const SizedBox(height: 14),
+                  Text(target.label, style: const TextStyle(color: cyan)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: target.controller,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'TARGET',
                     ),
                   ),
                 ],
-              ),
-            ],
+                for (final load in loads) ...[
+                  const SizedBox(height: 14),
+                  Text(load.label, style: const TextStyle(color: cyan)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: load.controller,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'LOAD / HEIGHT',
+                    ),
+                  ),
+                ],
+                if (error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(error!, style: const TextStyle(color: Colors.redAccent)),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('CANCEL'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: FilledButton(
+                        onPressed: () {
+                          if (targets.any(
+                            (target) => !RegExp(
+                              r'^\d+(?:/\d+)?$',
+                            ).hasMatch(target.controller.text.trim()),
+                          )) {
+                            setModalState(
+                              () => error =
+                                  'Use a whole number or a pair such as 10/8.',
+                            );
+                            return;
+                          }
+                          var edited = body;
+                          for (final target in targets) {
+                            edited = edited.replaceFirst(
+                              target.line,
+                              target.line.replaceFirst(
+                                target.value,
+                                target.controller.text.trim(),
+                              ),
+                            );
+                          }
+                          for (final load in loads) {
+                            final value = load.controller.text.trim();
+                            if (value.isEmpty) {
+                              setModalState(
+                                () => error = 'Enter every load or height.',
+                              );
+                              return;
+                            }
+                            edited = edited.replaceFirst(load.value, value);
+                          }
+                          Navigator.pop(context, edited);
+                        },
+                        child: const Text('SAVE TARGETS'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
-    controller.dispose();
+    _releaseSheetTextControllers([
+      for (final target in targets) target.controller,
+      for (final load in loads) load.controller,
+    ]);
     if (custom == null || custom.isEmpty) return;
     await _saveConditioningSelection(
       workout,
@@ -1719,10 +2034,153 @@ class _WorkoutHomeState extends State<WorkoutHome>
           .where((line) => line.trim().isNotEmpty)
           .toList(growable: false);
     }
+    final selected = _conditioningLevelOption(conditioning, selection.levelId);
+    if (selected?.prescription.isNotEmpty ?? false) {
+      return selected!.prescription;
+    }
     return _publishedStandardsForLevel(
       conditioning.templateId,
       selection.levelId,
     );
+  }
+
+  ConditioningLevelOption? _conditioningLevelOption(
+    ConditioningWork conditioning,
+    String levelId,
+  ) {
+    for (final option in conditioning.levelOptions) {
+      if (option.id == levelId) return option;
+    }
+    return null;
+  }
+
+  List<String> _conditioningStandards(
+    WorkoutDay workout,
+    ConditioningWork conditioning,
+  ) {
+    final selection = _conditioningSelection(workout);
+    final selected = _conditioningLevelOption(conditioning, selection.levelId);
+    return selected?.standards ??
+        _publishedStandardsForLevel(conditioning.templateId, selection.levelId);
+  }
+
+  String _applyConditioningLevel(
+    String body,
+    WorkoutDay workout,
+    ConditioningWork conditioning,
+  ) {
+    final selection = _conditioningSelection(workout);
+    if (selection.levelId == 'custom' &&
+        selection.customPrescription?.trim().isNotEmpty == true) {
+      return 'EDITED PRESCRIPTION\n\n${selection.customPrescription!.trim()}';
+    }
+    return _applyConditioningLevelForId(body, conditioning, selection.levelId);
+  }
+
+  String _applyConditioningLevelForId(
+    String body,
+    ConditioningWork conditioning,
+    String levelId,
+  ) {
+    if (levelId == 'custom') return body;
+    final selected = _conditioningLevelOption(conditioning, levelId);
+    final rx = _conditioningLevelOption(conditioning, 'level_3');
+    if (selected?.prescription.isNotEmpty == true &&
+        rx?.prescription.isNotEmpty == true) {
+      for (
+        var index = 0;
+        index < rx!.prescription.length &&
+            index < selected!.prescription.length;
+        index++
+      ) {
+        body = body.replaceAll(
+          rx.prescription[index],
+          selected.prescription[index],
+        );
+      }
+      return body;
+    }
+    return _scaleLegacyMachineCalories(body, levelId);
+  }
+
+  String _conditioningBodyForLevel(
+    WorkoutDay workout,
+    ConditioningWork conditioning,
+    String levelId,
+  ) {
+    final sections = switch (_variant) {
+      WorkoutVariant.full => workout.full,
+      WorkoutVariant.sixty => workout.sixty,
+      WorkoutVariant.recovery => workout.recovery,
+    };
+    for (final section in sections) {
+      if (section.title.startsWith('CONDITIONING')) {
+        return _applyConditioningLevelForId(
+          section.body,
+          conditioning,
+          levelId,
+        );
+      }
+    }
+    return '';
+  }
+
+  /// Keeps cached snapshots published before level prescriptions were embedded
+  /// in sync with the engine. RX is authored for a 40–45 second work window;
+  /// Forge uses a 30-second output budget (2/3), Ember 20–25 seconds (1/2).
+  String _scaleLegacyMachineCalories(String body, String levelId) {
+    // Snapshots published before the RX pull-up standard was elevated retain
+    // the older plain-pull-up wording. Normalize that wording before applying
+    // the same progression used by the current engine.
+    const chestToBarMarker = '__chest_to_bar_pull_ups__';
+    body = body
+        .replaceAll('chest-to-bar pull-ups', chestToBarMarker)
+        .replaceAll('pull-ups', 'chest-to-bar pull-ups')
+        .replaceAll(chestToBarMarker, 'chest-to-bar pull-ups');
+    final multiplier = switch (levelId) {
+      'level_2' => 2 / 3,
+      'level_1' => 1 / 2,
+      _ => null,
+    };
+    if (multiplier == null) return body;
+    final forge = <String, String>{
+      'strict handstand push-ups': 'pike push-ups',
+      'chest-to-bar pull-ups': '__pull_ups__',
+      'bar muscle-ups': '__pull_ups__',
+      'pull-ups': 'band-assisted pull-ups',
+      '__pull_ups__': 'pull-ups',
+      'rope climb': 'rope pulls from the floor',
+      'toes-to-bar': 'knees-to-elbows',
+      'double-unders': 'high-jumping single-unders',
+      'box jumps': 'low-box step-ups',
+    };
+    final ember = <String, String>{
+      'pike push-ups': 'incline push-ups',
+      'pull-ups': 'band-assisted pull-ups',
+      'knees-to-elbows': 'hanging knee raises',
+      'box jumps': 'box step-ups',
+      'high-jumping single-unders': 'line hops',
+    };
+    for (final entry in forge.entries) {
+      body = body.replaceAll(entry.key, entry.value);
+    }
+    if (levelId == 'level_1') {
+      for (final entry in ember.entries) {
+        body = body.replaceAll(entry.key, entry.value);
+      }
+    }
+    body = body.replaceAllMapped(RegExp(r'(\d+)(?:/(\d+))?-calorie\b'), (
+      match,
+    ) {
+      String scale(String value) =>
+          math.max(1, (int.parse(value) * multiplier).round()).toString();
+      final first = scale(match.group(1)!);
+      final second = match.group(2);
+      return second == null
+          ? '$first-calorie'
+          : '$first/${scale(second)}-calorie';
+    });
+    return body;
   }
 
   String _workUnitFor(ConditioningWork conditioning) {
@@ -1982,7 +2440,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         },
       ),
     );
-    for (final controller in [
+    _releaseSheetTextControllers([
       minutes,
       seconds,
       rounds,
@@ -1990,9 +2448,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       work,
       note,
       ...splitControllers,
-    ]) {
-      controller.dispose();
-    }
+    ]);
     if (saved == null) return;
     await ConditioningResultsRepository(store).save(saved);
     if (!mounted) return;
@@ -2178,7 +2634,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         );
       }
     }
-    _disposeBenchmarkControllersAfterSheet([
+    _releaseSheetTextControllers([
       firstMinutes,
       firstSeconds,
       secondMinutes,
@@ -2314,19 +2770,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
         );
       }
     }
-    _disposeBenchmarkControllersAfterSheet(controllers);
+    _releaseSheetTextControllers(controllers);
   }
 
-  void _disposeBenchmarkControllersAfterSheet(
-    Iterable<TextEditingController> controllers,
-  ) {
-    // Navigator.pop completes before the bottom-sheet reverse animation has
-    // fully detached focused EditableText dependents on Android.
-    Future<void>.delayed(const Duration(milliseconds: 350), () {
-      for (final controller in controllers) {
-        controller.dispose();
-      }
-    });
+  void _releaseSheetTextControllers(Iterable<TextEditingController> _) {
+    // Do not dispose here. A bottom sheet can remain in the Navigator/IME exit
+    // transition after its Future completes. Disposing a focused controller in
+    // that window triggers Flutter's `_dependents.isEmpty` assertion on Android.
+    // These one-shot controllers become unreachable after dismissal and are
+    // safely reclaimed after the framework has released their EditableText.
+    // New input sheets must call this helper rather than disposing controllers
+    // immediately after `showModalBottomSheet` or `showDialog` completes.
   }
 
   Widget _benchmarkTimeFields(
@@ -2713,7 +3167,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
               ),
             ],
           ),
-          if (_strikingSection != null) _strikeOverlay(),
+          if (_showCompletionStrikeAnimation && _strikingSection != null)
+            _strikeOverlay(),
         ],
       ),
     ),
@@ -3855,7 +4310,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
             const SizedBox(height: 10),
           ],
           InkWell(
-            onTap: completed ? null : () => _markWorkoutComplete(workout),
+            onTap: completed
+                ? () => _undoWorkoutCompletion(workout)
+                : () => _markWorkoutComplete(workout),
             borderRadius: BorderRadius.circular(18),
             child: Container(
               width: double.infinity,
@@ -3866,13 +4323,13 @@ class _WorkoutHomeState extends State<WorkoutHome>
                 gradient: completed
                     ? null
                     : const LinearGradient(colors: [fire, Color(0xff2d7eff)]),
-                color: completed ? success : null,
+                color: completed ? const Color(0xff1e3a35) : null,
               ),
               child: Text(
                 completed
                     ? partial
-                          ? '◐  Partial quest logged'
-                          : '✓  Victory claimed'
+                          ? '◐  PARTIAL QUEST LOGGED • UNDO'
+                          : '✓  VICTORY CLAIMED • UNDO'
                     : 'MARK ENTIRE QUEST COMPLETE',
                 style: const TextStyle(
                   color: Colors.white,
@@ -4137,6 +4594,21 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         style: TextStyle(color: ember, height: 1.35),
                       ),
                     ),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(context, (
+                      MovementSubstitution(
+                        movementId: movement,
+                        original: _substitutions.label(movement),
+                        replacement: _customMovementReplacementMarker,
+                        stimulus: 'Athlete-selected custom replacement',
+                        disclosure: 'Custom movement for this workout only.',
+                      ),
+                      MovementSwapScope.today,
+                    )),
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('CHOOSE MY OWN MOVEMENT'),
+                  ),
+                  const SizedBox(height: 14),
                   for (final candidate in _safeCandidates(movement))
                     Container(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -4194,17 +4666,29 @@ class _WorkoutHomeState extends State<WorkoutHome>
           ),
         );
     if (selected == null) return;
+    var substitution = selected.$1;
+    if (substitution?.replacement == _customMovementReplacementMarker) {
+      final replacement = await _enterCustomMovementReplacement(movement);
+      if (replacement == null) return;
+      substitution = MovementSubstitution(
+        movementId: movement,
+        original: _substitutions.label(movement),
+        replacement: replacement,
+        stimulus: 'Athlete-selected custom replacement',
+        disclosure: 'Custom movement for this workout only.',
+      );
+    }
     final scope = selected.$2!;
     final todayKey = _movementSwapKey(workout, index, movement);
     setState(() {
-      if (selected.$1 == null) {
+      if (substitution == null) {
         _movementSwaps.remove(todayKey);
         _persistentMovementSwaps.remove(movement);
       } else if (scope == MovementSwapScope.always) {
-        _persistentMovementSwaps[movement] = selected.$1!;
+        _persistentMovementSwaps[movement] = substitution;
         _movementSwaps.remove(todayKey);
       } else {
-        _movementSwaps[todayKey] = selected.$1!;
+        _movementSwaps[todayKey] = substitution;
       }
     });
     await _saveProgress();
@@ -4219,9 +4703,67 @@ class _WorkoutHomeState extends State<WorkoutHome>
       payload: {
         'scope': scope.name,
         'movement_id': movement,
-        'replacement': selected.$1?.replacement,
+        'replacement': substitution?.replacement,
       },
     );
+  }
+
+  Future<String?> _enterCustomMovementReplacement(String movement) async {
+    final controller = TextEditingController();
+    final replacement = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: card,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            22,
+            24,
+            MediaQuery.viewInsetsOf(context).bottom + 28,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'CUSTOM REPLACEMENT FOR ${_substitutions.label(movement).toUpperCase()}',
+                style: const TextStyle(
+                  color: ember,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Choose any movement you will actually perform. It applies to this workout only and is labeled custom.',
+                style: TextStyle(color: muted, height: 1.35),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'MOVEMENT',
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () =>
+                      Navigator.pop(context, controller.text.trim()),
+                  child: const Text('USE CUSTOM MOVEMENT'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    _releaseSheetTextControllers([controller]);
+    return replacement?.isEmpty ?? true ? null : replacement;
   }
 
   String _movementSwapKey(WorkoutDay workout, int index, String movement) =>
@@ -4263,12 +4805,15 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (section.title.startsWith('CONDITIONING')) {
       final conditioning = _conditioningFor(workout);
       if (conditioning != null) {
-        final prescription = _conditioningPrescription(workout, conditioning);
-        body = _inlineConditioningPrescription(
-          body,
-          conditioning.templateId,
-          prescription,
-        );
+        body = _applyConditioningLevel(body, workout, conditioning);
+        if (_conditioningSelection(workout).levelId != 'custom') {
+          final prescription = _conditioningStandards(workout, conditioning);
+          body = _inlineConditioningPrescription(
+            body,
+            conditioning.templateId,
+            prescription,
+          );
+        }
         body = _markConditioningMovements(body, conditioning);
       }
     }
@@ -4601,6 +5146,311 @@ class _WorkoutHomeState extends State<WorkoutHome>
         .join('\n\n');
   }
 
+  int _sectionTimerTargetSeconds(WorkoutDay workout, WorkoutSection section) {
+    final title = section.title.toLowerCase();
+    if (title.contains('conditioning')) {
+      return (_conditioningFor(workout)?.durationMinutes ?? 15) * 60;
+    }
+    if (title.contains('warm')) return 10 * 60;
+    if (title.contains('strength')) return 25 * 60;
+    if (title.contains('skill')) return 15 * 60;
+    if (title.contains('accessory')) return 10 * 60;
+    return 15 * 60;
+  }
+
+  List<String> _cooldownSteps(WorkoutSection section) => section.body
+      .split('\n')
+      .map((line) => line.trim())
+      .where(
+        (line) =>
+            line.isNotEmpty &&
+            !line.toLowerCase().startsWith('this recovery block'),
+      )
+      .toList(growable: false);
+
+  int _cooldownStretchSeconds() => 2 * 60;
+
+  bool _requiresMidpointSideChange(String instruction) => RegExp(
+    r'\b(?:switching\s+(?:sides\s+)?at\s+1:00|switch\s+halfway)\b',
+    caseSensitive: false,
+  ).hasMatch(instruction);
+
+  void _configureCooldownStep(_CardTimer timer) {
+    final step = timer.cooldownSteps[timer.cooldownStepIndex];
+    timer.sideChangeRequired = _requiresMidpointSideChange(step);
+    timer.sideChanged = false;
+    timer.transitionIsSideChange = false;
+    timer.targetSeconds = timer.sideChangeRequired
+        ? 60
+        : _cooldownStretchSeconds();
+  }
+
+  String _formatTimer(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainder = seconds % 60;
+    return '$minutes:${remainder.toString().padLeft(2, '0')}';
+  }
+
+  Map<String, dynamic>? _timerPayloadForSection(String sectionKey) {
+    final timer = _cardTimer;
+    if (timer == null || timer.sectionKey != sectionKey || !timer.isActive) {
+      return null;
+    }
+    return {
+      'plan': timer.castPlan,
+      // This is sent only when a user acts. The receiver's own clock renders
+      // every second, so Android/Dart suspension cannot freeze the TV.
+      'command': 'start',
+    };
+  }
+
+  Map<String, dynamic> _timerPlanForSection(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+    _CardTimer timer,
+  ) {
+    final phases = <Map<String, dynamic>>[
+      {
+        'id': 'ready',
+        'kind': 'ready',
+        'durationSeconds': 10,
+        'label': 'GET READY',
+      },
+    ];
+    final conditioning = _conditioningFor(workout);
+    final isConditioning = section.title.toLowerCase().contains('conditioning');
+    if (timer.isCooldown) {
+      for (
+        var stepIndex = 0;
+        stepIndex < timer.cooldownSteps.length;
+        stepIndex++
+      ) {
+        final step = timer.cooldownSteps[stepIndex];
+        final sideChange = _requiresMidpointSideChange(step);
+        phases.add({
+          'id': 'stretch-${stepIndex + 1}-a',
+          'kind': 'active',
+          'durationSeconds': sideChange ? 60 : 120,
+          'label': sideChange ? '$step — SIDE 1' : step,
+        });
+        if (sideChange) {
+          phases.add({
+            'id': 'side-change-${stepIndex + 1}',
+            'kind': 'sideChange',
+            'durationSeconds': 10,
+            'label': 'SWITCH SIDES',
+          });
+          phases.add({
+            'id': 'stretch-${stepIndex + 1}-b',
+            'kind': 'active',
+            'durationSeconds': 60,
+            'label': '$step — SIDE 2',
+          });
+        }
+        if (stepIndex + 1 < timer.cooldownSteps.length) {
+          phases.add({
+            'id': 'transition-${stepIndex + 1}',
+            'kind': 'transition',
+            'durationSeconds': 30,
+            'label': 'TRANSITION',
+          });
+        }
+      }
+    } else if (isConditioning && conditioning != null && timer.mode == 'emom') {
+      for (var round = 1; round <= timer.roundCount; round++) {
+        phases.add({
+          'id': 'round-$round',
+          'kind': 'emom',
+          'durationSeconds': 60,
+          'label': 'ROUND $round / ${timer.roundCount}',
+          'round': round,
+          'roundCount': timer.roundCount,
+        });
+      }
+    } else if (isConditioning &&
+        conditioning?.workSeconds != null &&
+        conditioning?.restSeconds != null) {
+      final work = conditioning!.workSeconds!;
+      final rest = conditioning.restSeconds!;
+      var remaining = conditioning.durationMinutes * 60;
+      var interval = 1;
+      while (remaining > 0) {
+        final workDuration = math.min(work, remaining);
+        phases.add({
+          'id': 'work-$interval',
+          'kind': 'work',
+          'durationSeconds': workDuration,
+          'label': 'WORK • INTERVAL $interval',
+        });
+        remaining -= workDuration;
+        if (remaining <= 0) break;
+        final restDuration = math.min(rest, remaining);
+        phases.add({
+          'id': 'rest-$interval',
+          'kind': 'rest',
+          'durationSeconds': restDuration,
+          'label': 'REST • INTERVAL $interval',
+        });
+        remaining -= restDuration;
+        interval++;
+      }
+    } else {
+      final format = conditioning?.format.toLowerCase() ?? '';
+      final kind = format.contains('amrap')
+          ? 'amrap'
+          : (format.contains('for time') || format.contains('for-time'))
+          ? 'forTime'
+          : 'active';
+      phases.add({
+        'id': kind,
+        'kind': kind,
+        'durationSeconds': timer.targetSeconds,
+        'label': timer.label,
+      });
+    }
+    return {
+      'id': '${timer.sectionKey}-${DateTime.now().microsecondsSinceEpoch}',
+      'mode': timer.mode,
+      'phases': phases,
+    };
+  }
+
+  void _startSectionTimer(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+  ) {
+    final sectionKey = _key(workout, index);
+    final steps = section.title.toLowerCase().contains('stretch')
+        ? _cooldownSteps(section)
+        : const <String>[];
+    var targetSeconds = steps.isEmpty
+        ? _sectionTimerTargetSeconds(workout, section)
+        : _cooldownStretchSeconds();
+    if (steps.isNotEmpty && _requiresMidpointSideChange(steps.first)) {
+      targetSeconds = 60;
+    }
+    final conditioning = _conditioningFor(workout);
+    final isEmom =
+        conditioning != null &&
+        section.title.toLowerCase().contains('conditioning') &&
+        conditioning.format.toLowerCase().contains('emom');
+    _cardTimerTicker?.cancel();
+    setState(() {
+      _cardTimer = _CardTimer(
+        sectionKey: sectionKey,
+        label: _sectionHeading(section.title),
+        targetSeconds: targetSeconds,
+        stage: _CardTimerStage.ready,
+        remainingSeconds: 10,
+        cooldownSteps: steps,
+        cooldownStepIndex: 0,
+        mode: isEmom ? 'emom' : 'countdown',
+        roundCount: isEmom ? conditioning.durationMinutes : 0,
+      );
+      if (steps.isNotEmpty) _configureCooldownStep(_cardTimer!);
+      _cardTimer!.castPlan = _timerPlanForSection(
+        workout,
+        section,
+        index,
+        _cardTimer!,
+      );
+    });
+    _cardTimerTicker = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _tickCardTimer(),
+    );
+    _sendTimerToCast(command: 'start', includePlan: true);
+  }
+
+  void _toggleCardTimer() {
+    final timer = _cardTimer;
+    if (timer == null) return;
+    if (timer.stage == _CardTimerStage.paused) {
+      setState(() => timer.stage = _CardTimerStage.running);
+      _cardTimerTicker ??= Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => _tickCardTimer(),
+      );
+    } else {
+      _cardTimerTicker?.cancel();
+      _cardTimerTicker = null;
+      setState(() => timer.stage = _CardTimerStage.paused);
+    }
+    _sendTimerToCast(
+      command: timer.stage == _CardTimerStage.paused ? 'pause' : 'resume',
+    );
+  }
+
+  void _resetCardTimer() {
+    _cardTimerTicker?.cancel();
+    final timer = _cardTimer;
+    if (timer == null) return;
+    setState(() {
+      timer.stage = _CardTimerStage.ready;
+      timer.remainingSeconds = 10;
+      timer.cooldownStepIndex = 0;
+      if (timer.isCooldown) _configureCooldownStep(timer);
+    });
+    _cardTimerTicker = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _tickCardTimer(),
+    );
+    _sendTimerToCast(command: 'reset', includePlan: true);
+  }
+
+  void _tickCardTimer() {
+    final timer = _cardTimer;
+    if (!mounted || timer == null) return;
+    setState(() {
+      if (timer.remainingSeconds > 1) {
+        timer.remainingSeconds--;
+      } else if (timer.stage == _CardTimerStage.ready) {
+        timer.stage = _CardTimerStage.running;
+        timer.remainingSeconds = timer.targetSeconds;
+      } else if (timer.stage == _CardTimerStage.running &&
+          timer.isCooldown &&
+          timer.sideChangeRequired &&
+          !timer.sideChanged) {
+        timer.sideChanged = true;
+        timer.transitionIsSideChange = true;
+        timer.stage = _CardTimerStage.transition;
+        timer.remainingSeconds = 10;
+      } else if (timer.stage == _CardTimerStage.running &&
+          timer.isCooldown &&
+          timer.cooldownStepIndex + 1 < timer.cooldownSteps.length) {
+        timer.cooldownStepIndex++;
+        timer.transitionIsSideChange = false;
+        timer.stage = _CardTimerStage.transition;
+        timer.remainingSeconds = 30;
+      } else if (timer.stage == _CardTimerStage.transition) {
+        timer.stage = _CardTimerStage.running;
+        if (!timer.transitionIsSideChange) _configureCooldownStep(timer);
+        timer.remainingSeconds = timer.targetSeconds;
+      } else {
+        timer.stage = _CardTimerStage.finished;
+        _cardTimerTicker?.cancel();
+        _cardTimerTicker = null;
+      }
+    });
+  }
+
+  void _sendTimerToCast({String command = 'start', bool includePlan = false}) {
+    final timer = _cardTimer;
+    if (!_castConnected ||
+        timer == null ||
+        _projectedSectionKey != timer.sectionKey) {
+      return;
+    }
+    unawaited(
+      ExternalWorkoutDisplay.updateCastTimer({
+        'command': command,
+        if (includePlan) 'plan': timer.castPlan,
+      }),
+    );
+  }
+
   Future<void> _showOnExternalDisplay(
     WorkoutDay workout,
     WorkoutSection section,
@@ -4611,6 +5461,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
       workoutTitle: workout.title,
       sectionTitle: _sectionHeading(section.title),
       body: _externalSectionBody(workout, section, index),
+      sectionNumber: index + 1,
+      sectionCount: _visibleSections(workout).length,
     );
     if (!mounted) return;
     setState(() {
@@ -4625,9 +5477,134 @@ class _WorkoutHomeState extends State<WorkoutHome>
     setState(() => _projectedSectionKey = null);
   }
 
+  Future<void> _showOnChromecast(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+  ) async {
+    final sectionKey = _key(workout, index);
+    setState(() => _pendingCastSectionKey = sectionKey);
+    final showing = await ExternalWorkoutDisplay.cast(
+      workoutTitle: workout.title,
+      sectionTitle: _sectionHeading(section.title),
+      body: _externalSectionBody(workout, section, index),
+      sectionNumber: index + 1,
+      sectionCount: _visibleSections(workout).length,
+      timer: _timerPayloadForSection(sectionKey),
+    );
+    if (!mounted || !showing) return;
+    setState(() {
+      _castConnected = true;
+      _projectedSectionKey = sectionKey;
+    });
+  }
+
+  Future<void> _stopCasting() async {
+    await ExternalWorkoutDisplay.stopCasting();
+    if (!mounted) return;
+    setState(() {
+      _castConnected = false;
+      _pendingCastSectionKey = null;
+      _projectedSectionKey = null;
+    });
+  }
+
+  Widget _sectionTimerControls(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+  ) {
+    final sectionKey = _key(workout, index);
+    final active = _cardTimer?.sectionKey == sectionKey ? _cardTimer : null;
+    if (active == null || active.stage == _CardTimerStage.finished) {
+      final target = _sectionTimerTargetSeconds(workout, section);
+      final isCooldown = section.title.toLowerCase().contains('stretch');
+      return FilledButton.icon(
+        onPressed: () => _startSectionTimer(workout, section, index),
+        icon: const Icon(Icons.play_arrow_rounded),
+        label: Text(
+          isCooldown
+              ? 'START GUIDED COOLDOWN • 10-SECOND COUNTDOWN'
+              : 'START ${_formatTimer(target)} TIMER • 10-SECOND COUNTDOWN',
+        ),
+      );
+    }
+    final step =
+        active.isCooldown &&
+            active.cooldownStepIndex < active.cooldownSteps.length
+        ? active.cooldownSteps[active.cooldownStepIndex]
+        : active.label;
+    final heading = switch (active.stage) {
+      _CardTimerStage.ready => 'GET READY',
+      _CardTimerStage.running => active.isCooldown ? 'STRETCH' : 'ACTIVE TIMER',
+      _CardTimerStage.paused => 'PAUSED',
+      _CardTimerStage.transition =>
+        active.transitionIsSideChange
+            ? '10-SECOND SIDE CHANGE'
+            : '30-SECOND TRANSITION',
+      _CardTimerStage.finished => 'COMPLETE',
+    };
+    final transitionCountdown =
+        active.stage == _CardTimerStage.transition &&
+        active.remainingSeconds <= 10;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xff122b43),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cyan),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$heading • ${_formatTimer(active.remainingSeconds)}',
+            style: const TextStyle(color: cyan, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 4),
+          Text(step, style: const TextStyle(color: ink, height: 1.25)),
+          if (transitionCountdown) ...[
+            const SizedBox(height: 6),
+            Text(
+              active.transitionIsSideChange
+                  ? 'NEXT SIDE STARTS IN ${active.remainingSeconds}'
+                  : 'NEXT STRETCH STARTS IN ${active.remainingSeconds}',
+              style: const TextStyle(color: ember, fontWeight: FontWeight.w900),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              OutlinedButton.icon(
+                onPressed: _toggleCardTimer,
+                icon: Icon(
+                  active.stage == _CardTimerStage.paused
+                      ? Icons.play_arrow_rounded
+                      : Icons.pause_rounded,
+                ),
+                label: Text(
+                  active.stage == _CardTimerStage.paused ? 'RESUME' : 'PAUSE',
+                ),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: _resetCardTimer,
+                icon: const Icon(Icons.restart_alt_rounded),
+                label: const Text('RESET'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _sectionCard(WorkoutDay workout, WorkoutSection section, int index) {
-    final completed = _sectionState[_key(workout, index)] == true;
-    final projected = _projectedSectionKey == _key(workout, index);
+    final sectionKey = _key(workout, index);
+    final completed = _sectionState[sectionKey] == true;
+    final projected = _projectedSectionKey == sectionKey;
+    final expanded = _sectionExpanded[sectionKey] ?? (index == 0 && !completed);
     final trainingSubsections = _trainingSubsections(section);
     final completedTrainingSubsections = List.generate(
       trainingSubsections.length,
@@ -4650,59 +5627,114 @@ class _WorkoutHomeState extends State<WorkoutHome>
       child: Stack(
         children: [
           ExpansionTile(
-            initiallyExpanded: index == 0 && !completed,
+            initiallyExpanded: expanded,
+            onExpansionChanged: (isExpanded) =>
+                setState(() => _sectionExpanded[sectionKey] = isExpanded),
+            showTrailingIcon: false,
             collapsedBackgroundColor: graphite,
             backgroundColor: graphite,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
-              side: BorderSide(color: completed ? ember : border),
+              side: BorderSide(
+                color: completed
+                    ? ember
+                    : projected
+                    ? projectedBorder
+                    : border,
+              ),
             ),
             collapsedShape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
-              side: BorderSide(color: completed ? ember : border),
+              side: BorderSide(
+                color: completed
+                    ? ember
+                    : projected
+                    ? projectedBorder
+                    : border,
+              ),
             ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _sectionHeading(section.title),
-                  style: const TextStyle(
-                    color: ink,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          if (trainingSubsections.isNotEmpty)
-                            Text(
-                              '$completedTrainingSubsections OF ${trainingSubsections.length} MOVEMENTS COMPLETE',
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: Text(
+                              _sectionHeading(section.title),
                               style: const TextStyle(
-                                color: cyan,
-                                fontSize: 9,
+                                color: ink,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w900,
                               ),
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          if (substitutions.isNotEmpty)
-                            Text(
-                              '↔ ${substitutions.length} SUBSTITUTION${substitutions.length == 1 ? '' : 'S'} • CUSTOM',
-                              style: const TextStyle(
-                                color: cyan,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
+                          ),
+                          if (trainingSubsections.isNotEmpty)
+                            Container(
+                              margin: const EdgeInsets.only(left: 7),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(9),
+                                border: Border.all(
+                                  color: const Color(0xff2a6f9b),
+                                ),
+                              ),
+                              child: Text(
+                                '$completedTrainingSubsections/${trainingSubsections.length}',
+                                style: const TextStyle(
+                                  color: cyan,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
                             ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff122b43),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xff2a6f9b)),
+                      ),
+                      child: Text(
+                        _duration(workout, section),
+                        maxLines: 1,
+                        softWrap: false,
+                        style: const TextStyle(
+                          color: cyan,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      expanded
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded,
+                      color: cyan,
+                      size: 24,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
                     IconButton(
                       tooltip: 'Swap a movement',
                       onPressed: completed
@@ -4730,6 +5762,21 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         size: 21,
                       ),
                     ),
+                    IconButton(
+                      tooltip: _castConnected && projected
+                          ? 'Stop casting this workout card'
+                          : 'Cast this card to a Chromecast',
+                      onPressed: _castConnected && projected
+                          ? _stopCasting
+                          : () => _showOnChromecast(workout, section, index),
+                      icon: Icon(
+                        _castConnected && projected
+                            ? Icons.cast_connected_rounded
+                            : Icons.cast_rounded,
+                        color: _castConnected && projected ? cyan : muted,
+                        size: 21,
+                      ),
+                    ),
                     InkWell(
                       onTap: trainingSubsections.isEmpty
                           ? () => _completeSection(workout, index)
@@ -4749,26 +5796,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                             color: completed ? ember : muted,
                             fontWeight: FontWeight.w900,
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xff122b43),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xff2a6f9b)),
-                      ),
-                      child: Text(
-                        _duration(workout, section),
-                        style: const TextStyle(
-                          color: cyan,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
@@ -4792,6 +5819,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         ),
                         const SizedBox(height: 14),
                       ],
+                      _sectionTimerControls(workout, section, index),
+                      const SizedBox(height: 14),
                       if (trainingSubsections.isEmpty)
                         Text(
                           _sectionBody(workout, section, index),
@@ -4878,19 +5907,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
               ),
             ],
           ),
-          if (completed)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(18)),
-                  child: CustomPaint(
-                    painter: FracturedCardPainter(
-                      seed: _fractureSeeds[_key(workout, index)] ?? 1,
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -4924,7 +5940,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
               ('level_1', 'EMBER'),
               ('level_2', 'FORGE'),
               ('level_3', 'RX'),
-              ('custom', 'CUSTOM'),
+              ('custom', 'EDIT'),
             ])
               ChoiceChip(
                 label: Text(option.$2),
@@ -4952,7 +5968,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
             onPressed: () =>
                 _editCustomConditioningPrescription(workout, conditioning),
             icon: const Icon(Icons.edit_outlined, size: 16),
-            label: const Text('EDIT CUSTOM LOAD / HEIGHT'),
+            label: const Text('EDIT THIS WORKOUT'),
           ),
       ],
     );

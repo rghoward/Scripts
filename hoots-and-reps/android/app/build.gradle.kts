@@ -34,6 +34,13 @@ android {
     }
 }
 
+dependencies {
+    // Workout cards use the Cast session's message channel rather than the
+    // media player, so the native sender framework is the only dependency.
+    implementation("com.google.android.gms:play-services-cast-framework:22.3.1")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17

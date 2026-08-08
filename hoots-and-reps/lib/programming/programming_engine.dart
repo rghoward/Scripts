@@ -1788,7 +1788,7 @@ class DeterministicProgrammingEngine {
     return GeneratedDay(
       date: date,
       role: role,
-      title: _questTitle(phaseWeek, strength, content.conditioningTemplateId),
+      title: _questTitle(phaseWeek, content.conditioningTemplateId),
       warmupMinutes: content.warmupMinutes,
       warmup: _specificWarmup(strength),
       strength: strength,
@@ -2246,7 +2246,7 @@ class DeterministicProgrammingEngine {
         continue;
       }
       final reps = RegExp(
-        r'(\d+)\s+(pull-ups|toes-to-bar|wall-ball shots|alternating [a-z -]+|power cleans|russian kettlebell swings|sandbag-to-shoulder repetitions|rope climbs?|strict handstand push-ups|lateral burpees over the dumbbell|step-back burpees)',
+        r'(\d+)\s+(chest-to-bar pull-ups|pull-ups|toes-to-bar|wall-ball shots|alternating [a-z -]+|power cleans|russian kettlebell swings|sandbag-to-shoulder repetitions|rope climbs?|strict handstand push-ups|lateral burpees over the dumbbell|step-back burpees)',
       ).firstMatch(text);
       if (reps != null) {
         tasks.add(
@@ -2718,23 +2718,56 @@ class DeterministicProgrammingEngine {
     ];
     final forge = regress(rx, const {
       'strict handstand push-ups': 'pike push-ups',
-      'chest-to-bar pull-ups': 'pull-ups',
-      'bar muscle-ups': 'chest-to-bar pull-ups',
+      'chest-to-bar pull-ups': '__pull_ups__',
+      'bar muscle-ups': '__pull_ups__',
+      'pull-ups': 'band-assisted pull-ups',
+      '__pull_ups__': 'pull-ups',
       'rope climb': 'rope pulls from the floor',
-      'toes-to-bar': 'hanging knee raises',
-      'double-unders': 'single-unders',
+      'toes-to-bar': 'knees-to-elbows',
+      'double-unders': 'high-jumping single-unders',
       'box jumps': 'low-box step-ups',
       'power cleans': 'dumbbell power cleans',
     });
     final ember = regress(forge, const {
       'pike push-ups': 'incline push-ups',
-      'chest-to-bar pull-ups': 'ring rows',
-      'pull-ups': 'ring rows',
-      'hanging knee raises': 'anchored sit-ups',
+      'pull-ups': 'band-assisted pull-ups',
+      'knees-to-elbows': 'hanging knee raises',
       'box jumps': 'box step-ups',
-      'single-unders': 'line hops',
+      'high-jumping single-unders': 'line hops',
       'barbell thrusters': 'light dumbbell thrusters',
     });
+    List<String> scaleMachineCalories(
+      List<String> lines,
+      double multiplier,
+    ) => [
+      for (final line in lines)
+        line.replaceAllMapped(RegExp(r'(\d+)(?:/(\d+))?-calorie\b'), (match) {
+          String scale(String value) =>
+              math.max(1, (int.parse(value) * multiplier).round()).toString();
+          final first = scale(match.group(1)!);
+          final second = match.group(2);
+          return second == null
+              ? '$first-calorie'
+              : '$first/${scale(second)}-calorie';
+        }),
+    ];
+    // RX machine stations are authored for a 40–45 second work window. Forge
+    // caps the same output at roughly 30 seconds; Ember at 20–25 seconds.
+    // These are time-budgeted output tiers, not per-workout ad hoc edits.
+    const forgeMachineCalorieMultiplier = 2 / 3;
+    const emberMachineCalorieMultiplier = 1 / 2;
+    // The corpus analysis defines the default gymnastics ladders:
+    // band-assisted pull-up -> pull-up -> chest-to-bar and hanging knee raise
+    // -> knees-to-elbows -> toes-to-bar. Keep authored reps and move down one
+    // skill rung; do not apply a generic rep percentage.
+    final forgePrescription = scaleMachineCalories(
+      forge,
+      forgeMachineCalorieMultiplier,
+    );
+    final emberPrescription = scaleMachineCalories(
+      ember,
+      emberMachineCalorieMultiplier,
+    );
     List<String> scaleStandards(List<String> standards, bool ember) => [
       for (final line in standards)
         line
@@ -2755,12 +2788,12 @@ class DeterministicProgrammingEngine {
     return [
       ConditioningLevelOption(
         level: WorkoutLevel.ember,
-        prescription: ember,
+        prescription: emberPrescription,
         standards: scaleStandards(content.conditioningRxStandards, true),
       ),
       ConditioningLevelOption(
         level: WorkoutLevel.forge,
-        prescription: forge,
+        prescription: forgePrescription,
         standards: scaleStandards(content.conditioningRxStandards, false),
       ),
       ConditioningLevelOption(
@@ -2772,76 +2805,53 @@ class DeterministicProgrammingEngine {
     ];
   }
 
-  static String _questTitle(
-    int phaseWeek,
-    StrengthWork strength,
-    String conditioningId,
-  ) {
-    final strengthLegend = _strengthLegend(strength.movement);
-    final conditioningLegend = _conditioningLegend(conditioningId);
-    final progression = phaseWeek > 6 ? ' Reforged' : '';
-    return '$strengthLegend$progression: $conditioningLegend';
-  }
+  /// Workout titles are thematic identifiers, never a preview of the work.
+  /// The conditioning template supplies deterministic variety while movement
+  /// names remain exclusive to the card prescriptions themselves.
+  static String _questTitle(int phaseWeek, String conditioningId) =>
+      '${_phaseLegend(phaseWeek)}: ${_sessionLegend(conditioningId)}';
 
-  static String _strengthLegend(String movement) {
-    final value = movement.toLowerCase();
-    if (value.contains('hang power snatch')) return 'The Hanging Starhook';
-    if (value.contains('squat snatch')) return 'The Deep-Caught Star';
-    if (value.contains('power snatch')) return 'The Lightning Snatch';
-    if (value.contains('snatch pull')) return 'The Starforge Pull';
-    if (value.contains('squat clean')) return 'The Deep Clean';
-    if (value.contains('power clean') && value.contains('split jerk')) {
-      return 'The Clean Strike and Split Thunder';
-    }
-    if (value.contains('power clean')) return 'The Clean Strike';
-    if (value.contains('clean pull')) return 'The Thunderforge Pull';
-    if (value.contains('clean') && value.contains('split jerk')) {
-      return 'The Clean Strike and Split Thunder';
-    }
-    if (value.contains('clean') && value.contains('jerk')) {
-      return 'The Clean Strike and Skyward Thunder';
-    }
-    if (value.contains('front squat')) return 'The Frontline Bastion';
-    if (value.contains('back squat')) return 'The Iron Throne';
-    if (value.contains('bench press')) return 'The Unbroken Shield';
-    if (value.contains('strict press')) return 'The Crownward Press';
-    if (value.contains('push press') && value.contains('split jerk')) {
-      return 'The Twin Thunder Salute';
-    }
-    if (value.contains('push press')) return 'The Thunder Salute';
-    if (value.contains('romanian deadlift')) return 'The Hinge of the Deep';
-    if (value.contains('deadlift')) return 'The Chains of the Deep';
-    return movement.replaceAll(' Practice', '').replaceAll(' Technique', '');
-  }
+  static String _phaseLegend(int week) => const [
+    'The Forge Awakens',
+    'Beneath the Astral Crown',
+    'Across the Frozen Meridian',
+    'The Stormwheel Ascendant',
+    'The Violet Citadel',
+    'The Starfire Passage',
+    'The Obsidian Oath',
+    'The Celestial Crucible',
+    'The Thunderbound March',
+    'The Silver Void',
+    'The Last Aurora',
+    'The Eternal Forge',
+  ][week - 1];
 
-  static String _conditioningLegend(String id) {
-    if (id.contains('row_threshold')) return 'Oars Against the Rising Tide';
-    if (id.contains('bike_db_clean_jerk')) {
-      return 'The Clockwork Clean-and-Jerk';
-    }
-    if (id.contains('ski_clean_pull')) return 'The Frozen Climb';
-    if (id.contains('run_core')) return 'The Comet Path and Hanging Guard';
-    if (id.contains('row_box_jump')) return 'Oars and Skyward Leaps';
-    if (id.contains('fan_bike_vo2')) return 'The Tempest Engine';
-    if (id.contains('db_snatch_burpee')) return 'The One-Armed Meteorfall';
-    if (id.contains('row_toes_to_bar')) return 'The Oar and Hanging Blade';
-    if (id.contains('ski_hspu')) return 'The Inverted Froststorm';
-    if (id.contains('bike_step_ttb')) return 'The Climb of the Stormwheel';
-    if (id.contains('row_swing')) return 'The Oar and Iron Pendulum';
-    if (id.contains('bike_sandbag_rope')) return 'The Siege Sack and Rope';
-    if (id.contains('wall_ball_row')) return 'The Meteor Barrage and Oar';
-    if (id.contains('ski_db_snatch')) return 'The Frostbound One-Arm Trial';
+  static String _sessionLegend(String id) {
+    if (id.contains('row_threshold')) return 'The Trial of Rising Stars';
+    if (id.contains('bike_db_clean_jerk')) return 'The Clockwork Gauntlet';
+    if (id.contains('ski_clean_pull')) return 'The Frozen Meridian';
+    if (id.contains('run_core')) return 'The Comet’s Measure';
+    if (id.contains('row_box_jump')) return 'The Vault of Starlight';
+    if (id.contains('fan_bike_vo2')) return 'The Tempest Circuit';
+    if (id.contains('db_snatch_burpee')) return 'The Falling Star Trial';
+    if (id.contains('row_toes_to_bar')) return 'The Astral Gate';
+    if (id.contains('ski_hspu')) return 'The Winter Crown';
+    if (id.contains('bike_step_ttb')) return 'The Stormwheel Passage';
+    if (id.contains('row_swing')) return 'The Pendulum of Night';
+    if (id.contains('bike_sandbag_rope')) return 'The Siege of Radiant Stone';
+    if (id.contains('wall_ball_row')) return 'The Meteor Barrage';
+    if (id.contains('ski_db_snatch')) return 'The Frostfire Crucible';
     if (id.contains('shuttle')) return 'The Turning Comet';
-    if (id.contains('steady_row')) return 'The Long Oar';
-    if (id.contains('thruster_pull')) return 'The Thruster and the High Gate';
+    if (id.contains('steady_row')) return 'The Long Vigil';
+    if (id.contains('thruster_pull')) return 'The High Dominion';
     if (id.contains('ski_muscle_up')) return 'The Frostbound Ascent';
-    if (id.contains('ski_threshold')) return 'Pulses of the Frozen Star';
-    if (id.contains('row_reverse_lunge')) return 'The Oar and Reverse March';
-    if (id.contains('bike_swing_step')) return 'The Stormwheel Chipper';
-    if (id.contains('sled_push_pull')) return 'The Endless Siege Engine';
-    if (id.contains('row_wall_ball_chest')) return 'The Oar and High Barrage';
-    if (id.contains('row_power')) return 'Thirty-Second Oarstrikes';
-    return 'The Mixed-Modal Trial';
+    if (id.contains('ski_threshold')) return 'The Pulse of the Frozen Star';
+    if (id.contains('row_reverse_lunge')) return 'The March of Distant Suns';
+    if (id.contains('bike_swing_step')) return 'The Stormwheel Relay';
+    if (id.contains('sled_push_pull')) return 'The Endless Citadel';
+    if (id.contains('row_wall_ball_chest')) return 'The Starfall Barrage';
+    if (id.contains('row_power')) return 'The Twin Trials of Velocity';
+    return 'The Ascendant Trial';
   }
 
   static SkillQualification? _qualificationFor(StrengthWork work) {

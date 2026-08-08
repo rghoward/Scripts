@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "forged_phase_2026_07_27_v4",
-  "version": 4,
-  "published_at": "2026-08-04T00:00:00.000Z",
+  "snapshot_id": "forged_phase_2026_07_27_v5",
+  "version": 5,
+  "published_at": "2026-08-06T00:00:00.000Z",
   "workouts": [
     {
       "sequence": 1,
@@ -114,7 +114,7 @@
     {
       "sequence": 2,
       "phase": "FORGED PHASE • WEEK 1",
-      "title": "The Unbroken Shield: The Clockwork Clean-and-Jerk",
+      "title": "The Forge Awakens: The Clockwork Gauntlet",
       "full_minutes": 64,
       "sixty_minutes": 56,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light bench press repetitions||finish with 3 gradual sets of bench press||bench press|ascending|reps|1x8@0.6000|1x6@0.6700|1x4@0.7300|1x3@0.7800||strict pull-up|straight|reps|4x6@0.0000||hanging knee-raise progression|straight|reps|3x8@0.0000||3 sets: 10 one-arm dumbbell rows per side||20||moderate||20-minute alternating emom:||odd: 10/8-calorie fan bike||even: 6 alternating dumbbell clean and jerks||use one dumbbell and alternate arms after each repetition||effort target • rpe 5–6; controlled and repeatable||rx • one dumbbell: ♀ 35 lb / ♂ 50 lb||ascendant||cyclical||hinge||vertical_push||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 doorway chest stretch, switching sides at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 forearm flexor and biceps stretch, switching sides at 1:00",
@@ -185,8 +185,14 @@
         "work_seconds": 45,
         "rest_seconds": 15,
         "station_target_seconds": [
-          {"min": 40, "max": 45},
-          {"min": 20, "max": 30}
+          {
+            "min": 40,
+            "max": 45
+          },
+          {
+            "min": 20,
+            "max": 30
+          }
         ],
         "tasks": [
           {
@@ -227,8 +233,14 @@
         "work_seconds": 45,
         "rest_seconds": 15,
         "station_target_seconds": [
-          {"min": 40, "max": 45},
-          {"min": 20, "max": 30}
+          {
+            "min": 40,
+            "max": 45
+          },
+          {
+            "min": 20,
+            "max": 30
+          }
         ],
         "tasks": [
           {
@@ -265,7 +277,7 @@
     {
       "sequence": 3,
       "phase": "FORGED PHASE • WEEK 1",
-      "title": "The Hanging Starhook: The Frozen Climb",
+      "title": "The Forge Awakens: The Frozen Meridian",
       "full_minutes": 55,
       "sixty_minutes": 55,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||hang power snatch + overhead squat|complex|reps|5x2@0.5800||snatch pull|straight|reps|3x4@0.7800||3 sets: 8 controlled back extensions||16||moderate||for time — 5 rounds, 16:00 hard cap:||12/10-calorie skierg||8 power cleans||10 pull-ups||stop at the cap and record completed rounds plus repetitions||effort target • rpe 5–6; controlled and repeatable||rx • power clean: ♀ 65 lb / ♂ 95 lb||ascendant||cyclical||hinge||vertical_pull||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -436,7 +448,7 @@
     {
       "sequence": 4,
       "phase": "FORGED PHASE • WEEK 1",
-      "title": "The Long Oar of the Void",
+      "title": "The Voidward Vigil",
       "full_minutes": 71,
       "sixty_minutes": 54,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|ascending|reps|1x8@0.6000|1x6@0.6700|1x4@0.7300|1x3@0.7800||suitcase carry|straight|meters|4x30@0.0000||box jump power practice|straight|contacts|5x3@0.0000||half-kneeling dumbbell press|straight|reps|3x8@0.4500||3 sets: 10 half-kneeling cable presses per side||18||easy||18-minute sustainable amrap:||200-meter run||8 toes-to-bar||walk briefly if needed to keep every run repeatable||effort target • rpe 3–4; conversational throughout||ascendant||cyclical||hanging_core||impact||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00|benchmark:row_2000_capacity_v1",
@@ -444,7 +456,7 @@
         "kind": "rowTwoThousand",
         "id": "row_2000_capacity_v1",
         "is_retest": false,
-        "title": "The Long Oar of the Void"
+        "title": "The Voidward Vigil"
       },
       "full": [
         {
@@ -568,7 +580,7 @@
     {
       "sequence": 5,
       "phase": "FORGED PHASE • WEEK 2",
-      "title": "The Four Seals of Bodyweight",
+      "title": "The Four Astral Seals",
       "full_minutes": 76,
       "sixty_minutes": 60,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar front squat repetitions||finish with 3 gradual sets of front squat||front squat|topsetbackoff|reps|1x4@0.7750|3x5@0.6950||muscle snatch + power snatch technique|complex|reps|3x2@0.4950||barbell row|straight|reps|4x8@0.6350||front-rack reverse lunge|straight|reps|3x8@0.4950||double-under skill practice|straight|contacts|5x20@0.0000||3 sets: 10 light romanian deadlifts||16||moderate||16-minute controlled amrap:||12/9-calorie row||8 box jumps — jump up, stand tall, and step down||24 double-unders||keep every landing quiet and repeatable; do not rebound||effort target • rpe 5–6; controlled and repeatable||rx • box: ♀ 20 in / ♂ 24 in||ascendant||coordination||cyclical||impact||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 supine figure-four stretch, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides||2:00 crocodile breathing with long, relaxed exhales|benchmark:gymnastics_capacity_v1",
@@ -576,7 +588,7 @@
         "kind": "gymnasticsScreen",
         "id": "gymnastics_capacity_v1",
         "is_retest": false,
-        "title": "The Four Seals of Bodyweight"
+        "title": "The Four Astral Seals"
       },
       "full": [
         {
@@ -742,7 +754,7 @@
     {
       "sequence": 6,
       "phase": "FORGED PHASE • WEEK 2",
-      "title": "The Comet-Lap Trial",
+      "title": "The Comet Circuit",
       "full_minutes": 65,
       "sixty_minutes": 54,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light strict press repetitions||finish with 3 gradual sets of strict press||strict press|topsetbackoff|reps|1x4@0.7350|3x5@0.6550||wall-facing handstand hold|straight|seconds|4x20@0.0000||toes-to-bar quality practice|straight|reps|4x4@0.0000||3 sets: 8 controlled chin-ups or pulldowns||20||hard||20:00 fan-bike vo2-oriented intervals:||2:00 hard but repeatable fan bike||2:00 very easy fan bike||repeat until the clock expires; the final hard interval must match the first||effort target • rpe 7–8; hard but never an all-out test||ascendant||cyclical||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 bench-supported lat stretch with slow breathing|benchmark:run_400_speed_v1",
@@ -750,7 +762,7 @@
         "kind": "runFourHundred",
         "id": "run_400_speed_v1",
         "is_retest": false,
-        "title": "The Comet-Lap Trial"
+        "title": "The Comet Circuit"
       },
       "full": [
         {
@@ -846,7 +858,7 @@
     {
       "sequence": 7,
       "phase": "FORGED PHASE • WEEK 2",
-      "title": "The Clean Strike and Split Thunder: The One-Armed Meteorfall",
+      "title": "Beneath the Astral Crown: The Falling Star Trial",
       "full_minutes": 55,
       "sixty_minutes": 55,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||power clean + split jerk|complex|reps|6x1@0.6350||front squat|straight|reps|3x5@0.6550||3 sets: 8 single-leg hip bridges per side||16||moderate||for time — 6 rounds, 16:00 hard cap:||12 alternating dumbbell snatches||10 lateral burpees over the dumbbell||stop at the cap and record completed rounds plus repetitions||rx • one dumbbell: ♀ 35 lb / ♂ 50 lb||ascendant||hinge||mixed_bodyweight||unilateral||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches",
@@ -1003,7 +1015,7 @@
     {
       "sequence": 8,
       "phase": "FORGED PHASE • WEEK 2",
-      "title": "The Hinge of the Deep: The Oar and Hanging Blade",
+      "title": "Beneath the Astral Crown: The Astral Gate",
       "full_minutes": 63,
       "sixty_minutes": 60,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of romanian deadlift||romanian deadlift|straight|reps|4x8@0.6350||rope-climb skill practice|straight|reps|5x1@0.0000||landmine press|straight|reps|3x8@0.4650||3 sets: 8 low box step-ups per side||18||moderate||18-minute alternating emom:||odd: 11/8-calorie row||even: 8 toes-to-bar||keep every hanging set technically consistent||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||hanging_core||2:00 crocodile breathing with long, relaxed exhales||2:00 bench-supported lat stretch with slow breathing||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00",
@@ -1146,7 +1158,7 @@
     {
       "sequence": 9,
       "phase": "FORGED PHASE • WEEK 3",
-      "title": "The Iron Throne: The Inverted Froststorm",
+      "title": "Across the Frozen Meridian: The Winter Crown",
       "full_minutes": 78,
       "sixty_minutes": 55,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|wave|reps|1x5@0.6900|1x3@0.7600|1x2@0.8100|1x5@0.7200|1x3@0.7900|1x2@0.8400||hang clean + power clean technique|complex|reps|3x2@0.5300||bulgarian split squat|straight|reps|3x8@0.6100||double-under skill practice|straight|contacts|5x20@0.0000||3 sets: 10 light romanian deadlifts||16||moderate||16-minute quality amrap:||10/8-calorie skierg||6 strict handstand push-ups||8 alternating dumbbell push presses||stop each handstand set before technique changes||effort target • rpe 5–6; controlled and repeatable||rx • one dumbbell: ♀ 25 lb / ♂ 35 lb||ascendant||cyclical||inversion||vertical_push||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 supine figure-four stretch, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides||2:00 crocodile breathing with long, relaxed exhales",
@@ -1479,7 +1491,7 @@
     {
       "sequence": 11,
       "phase": "FORGED PHASE • WEEK 3",
-      "title": "The Lightning Snatch: The Oar and Iron Pendulum",
+      "title": "Across the Frozen Meridian: The Pendulum of Night",
       "full_minutes": 58,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||power snatch|ascending|reps|2x3@0.6100|2x2@0.6700|3x1@0.7300||overhead squat|straight|reps|3x5@0.6100||3 sets: 8 single-leg hip bridges per side||16||moderate||16-minute interval session on a repeating 3:00 clock:||2:00 to complete 10/8 calories row + 10 russian kettlebell swings||1:00 easy walk and breathing reset||use a swing load that preserves a crisp hinge||effort target • rpe 5–6; controlled and repeatable||rx • kettlebell: ♀ 35 lb / ♂ 53 lb||ascendant||cyclical||hinge||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -1596,7 +1608,7 @@
     {
       "sequence": 12,
       "phase": "FORGED PHASE • WEEK 3",
-      "title": "The Chains of the Deep: The Siege Sack and Rope",
+      "title": "Across the Frozen Meridian: The Siege of Radiant Stone",
       "full_minutes": 69,
       "sixty_minutes": 59,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|topsetbackoff|reps|1x4@0.8100|3x5@0.7300||sandbag bear-hug carry|straight|meters|5x40@0.0000||half-kneeling dumbbell press|straight|reps|3x8@0.4800||box jump power practice|straight|contacts|4x3@0.0000||3 sets: 8 low box step-ups per side||18||moderate||18-minute rotation at sustainable effort:||minute 1: 10/8-calorie fan bike||minute 2: 6 sandbag-to-shoulder repetitions, alternating sides||minute 3: 1 rope climb||continue until the clock expires; never chase failed repetitions||effort target • rpe 5–6; controlled and repeatable||rx • sandbag: ♀ 70 lb / ♂ 100 lb||ascendant||cyclical||odd_object||vertical_pull||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00",
@@ -1735,7 +1747,7 @@
     {
       "sequence": 13,
       "phase": "FORGED PHASE • WEEK 4",
-      "title": "The Mile Beyond the Moon",
+      "title": "The Moonward Trial",
       "full_minutes": 36,
       "sixty_minutes": 36,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|deload|reps|3x5@0.6000||2 sets: 10 light romanian deadlifts||12||moderate||for time — descending chipper, 12:00 hard cap:||42 wall-ball shots||32/25-calorie row||24 wall-ball shots||16/12-calorie row||stop at the cap and record the last completed checkpoint||effort target • rpe 5–6; controlled and repeatable||rx • wall ball: ♀ 14 lb to 9 ft / ♂ 20 lb to 10 ft||ascendant||cyclical||squat||vertical_push||2:00 gentle adductor rock-backs, alternating sides||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales|benchmark:run_mile_capacity_v1",
@@ -1743,7 +1755,7 @@
         "kind": "runMile",
         "id": "run_mile_capacity_v1",
         "is_retest": false,
-        "title": "The Mile Beyond the Moon"
+        "title": "The Moonward Trial"
       },
       "full": [
         {
@@ -1911,7 +1923,7 @@
     {
       "sequence": 14,
       "phase": "FORGED PHASE • WEEK 4",
-      "title": "The Unbroken Shield: The Frostbound One-Arm Trial",
+      "title": "The Stormwheel Ascendant: The Frostfire Crucible",
       "full_minutes": 51,
       "sixty_minutes": 51,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light bench press repetitions||finish with 3 gradual sets of bench press||bench press|deload|reps|3x6@0.5500||wall-facing handstand deload hold|straight|seconds|2x20@0.0000||hanging knee-raise deload practice|straight|reps|2x6@0.0000||2 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute controlled amrap:||10/8-calorie skierg||10 alternating dumbbell snatches from the hang||10 low-box step-overs||use a load that stays technically identical from first round to last||effort target • rpe 5–6; controlled and repeatable||rx • one dumbbell: ♀ 35 lb / ♂ 50 lb||rx • box: ♀ 20 in / ♂ 24 in||ascendant||cyclical||hinge||unilateral||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 doorway chest stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -2046,7 +2058,7 @@
     {
       "sequence": 15,
       "phase": "FORGED PHASE • WEEK 4",
-      "title": "The Clean Strike: The Turning Comet",
+      "title": "The Stormwheel Ascendant: The Turning Comet",
       "full_minutes": 42,
       "sixty_minutes": 42,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||power clean + jerk|deload|reps|5x1@0.5500||2 sets: 8 single-leg hip bridges per side||12||moderate||12-minute shuttle-run interval session:||1:00 strong, controlled 25-foot shuttle runs||1:00 easy walking||repeat until the clock expires without sprinting the first interval||ascendant||cyclical||impact||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00",
@@ -2141,7 +2153,7 @@
     {
       "sequence": 16,
       "phase": "FORGED PHASE • WEEK 4",
-      "title": "The Chains of the Deep: The Long Oar",
+      "title": "The Stormwheel Ascendant: The Long Vigil",
       "full_minutes": 38,
       "sixty_minutes": 38,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|deload|reps|3x5@0.5500||2 sets: 8 low box step-ups per side||15||moderate||15:00 continuous row||keep a conversational pace throughout||stroke rate: 20–24 per minute with consistent splits||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||horizontal_pull||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -2246,7 +2258,7 @@
     {
       "sequence": 17,
       "phase": "FORGED PHASE • WEEK 5",
-      "title": "The Iron Throne: The Thruster and the High Gate",
+      "title": "The Violet Citadel: The High Dominion",
       "full_minutes": 56,
       "sixty_minutes": 56,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|topsetbackoff|reps|1x4@0.7900|3x5@0.7100||hang clean + power clean technique|complex|reps|3x2@0.5000||romanian deadlift|straight|reps|3x8@0.5800||rear-foot-elevated split squat|straight|reps|3x8@0.5000||16||moderate||for time — 5 rounds, 16:00 hard cap:||7 barbell thrusters||9 pull-ups||11/9-calorie fan bike||stop at the cap and record completed rounds plus repetitions||rx • barbell: ♀ 65 lb / ♂ 95 lb||ascendant||cyclical||horizontal_pull||squat||vertical_push||2:00 supine figure-four stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides",
@@ -2403,7 +2415,7 @@
     {
       "sequence": 18,
       "phase": "FORGED PHASE • WEEK 5",
-      "title": "The Ten-Minute Tempest",
+      "title": "The Tenfold Tempest",
       "full_minutes": 76,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light strict press repetitions||finish with 3 gradual sets of strict press||strict press|ascending|reps|1x8@0.6000|1x6@0.6700|1x4@0.7300|1x3@0.7800||toes-to-bar quality practice|straight|reps|4x4@0.0000||wall-walk position practice|straight|seconds|4x2@0.0000||strict pull-up|straight|reps|5x5@0.0000||3 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute quality amrap:||9/7-calorie skierg||3 bar muscle-ups||40-meter farmer carry||keep every muscle-up technically consistent||effort target • rpe 5–6; controlled and repeatable||rx • farmer carry: ♀ 35 lb each / ♂ 50 lb each||ascendant||carry||cyclical||vertical_pull||2:00 bench-supported lat stretch with slow breathing||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales|benchmark:bike_10_minute_capacity_v1",
@@ -2411,7 +2423,7 @@
         "kind": "bikeTenMinute",
         "id": "bike_10_minute_capacity_v1",
         "is_retest": false,
-        "title": "The Ten-Minute Tempest"
+        "title": "The Tenfold Tempest"
       },
       "full": [
         {
@@ -2539,7 +2551,7 @@
     {
       "sequence": 19,
       "phase": "FORGED PHASE • WEEK 5",
-      "title": "The Deep-Caught Star: Pulses of the Frozen Star",
+      "title": "The Violet Citadel: The Pulse of the Frozen Star",
       "full_minutes": 57,
       "sixty_minutes": 57,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||squat snatch|wave|reps|1x2@0.6100|1x1@0.6800|1x2@0.6300|1x1@0.7100|2x1@0.7400||snatch pull|straight|reps|3x3@0.8500||3 sets: 8 single-leg hip bridges per side||16||moderate||16-minute skierg interval session:||1:30 at a strong repeatable pace||0:30 very easy||repeat until the clock expires; keep power loss under 10%||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -2634,7 +2646,7 @@
     {
       "sequence": 20,
       "phase": "FORGED PHASE • WEEK 5",
-      "title": "The Chains of the Deep: The Oar and Reverse March",
+      "title": "The Violet Citadel: The March of Distant Suns",
       "full_minutes": 80,
       "sixty_minutes": 52,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|wave|reps|1x5@0.6600|1x3@0.7300|1x2@0.7800|1x5@0.6900|1x3@0.7600|1x2@0.8100||muscle-up transition practice|straight|reps|5x3@0.0000||half-kneeling dumbbell press|straight|reps|3x8@0.4500||box jump power practice|straight|contacts|4x3@0.0000||3 sets: 8 low box step-ups per side||18||moderate||18-minute alternating emom:||odd: 11/8-calorie row||even: 8 alternating front-rack dumbbell reverse lunges||use a load that leaves at least 15 seconds to transition||effort target • rpe 5–6; controlled and repeatable||rx • two dumbbells: ♀ 25 lb each / ♂ 35 lb each||ascendant||cyclical||unilateral||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00",
@@ -2773,7 +2785,7 @@
     {
       "sequence": 21,
       "phase": "FORGED PHASE • WEEK 6",
-      "title": "The Frontline Bastion: The Stormwheel Chipper",
+      "title": "The Starfire Passage: The Stormwheel Relay",
       "full_minutes": 80,
       "sixty_minutes": 55,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar front squat repetitions||finish with 3 gradual sets of front squat||front squat|wave|reps|1x5@0.6750|1x3@0.7450|1x2@0.7950|1x5@0.7050|1x3@0.7750|1x2@0.8250||muscle snatch + power snatch technique|complex|reps|3x2@0.4950||overhead squat|straight|reps|4x4@0.5650||double-under skill practice|straight|contacts|5x20@0.0000||3 sets: 10 light romanian deadlifts||16||moderate||for time — chipper, 16:00 hard cap:||35/28-calorie fan bike||30 russian kettlebell swings||24 alternating box step-overs||12 step-back burpees||stop at the cap and record the last completed checkpoint||effort target • rpe 5–6; controlled and repeatable||rx • kettlebell: ♀ 35 lb / ♂ 53 lb||rx • box step-over: ♀ 20 in / ♂ 24 in||ascendant||cyclical||hinge||mixed_bodyweight||unilateral||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 supine figure-four stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 gentle adductor rock-backs, alternating sides",
@@ -2948,7 +2960,7 @@
     {
       "sequence": 22,
       "phase": "FORGED PHASE • WEEK 6",
-      "title": "The Twin Thunder Salute: The Endless Siege Engine",
+      "title": "The Starfire Passage: The Endless Citadel",
       "full_minutes": 68,
       "sixty_minutes": 56,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||push press + split jerk|complex|reps|5x2@0.6350||l-sit compression practice|straight|seconds|4x20@0.0000||barbell row|straight|reps|4x8@0.6650||3 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute quality amrap:||20-meter sled push||20-meter backward sled drag||rest as needed to keep each trip between 30 and 40 seconds||effort target • rpe 5–6; controlled and repeatable||rx • sled load must produce repeatable 30–40-second trips on the available surface||ascendant||knee||locomotion||posterior_chain||2:00 bench-supported lat stretch with slow breathing||2:00 crocodile breathing with long, relaxed exhales||2:00 forearm flexor and biceps stretch, switching sides at 1:00||2:00 cross-body posterior-shoulder stretch, switching at 1:00",
@@ -3075,7 +3087,7 @@
     {
       "sequence": 23,
       "phase": "FORGED PHASE • WEEK 6",
-      "title": "The Clean Strike and Split Thunder: The Oar and High Barrage",
+      "title": "The Starfire Passage: The Starfall Barrage",
       "full_minutes": 57,
       "sixty_minutes": 57,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||clean + split jerk|ascending|reps|2x3@0.5950|2x2@0.6550|3x1@0.7150||front squat|straight|reps|3x3@0.7350||3 sets: 8 single-leg hip bridges per side||16||moderate||16-minute controlled amrap:||10/8-calorie row||12 wall-ball shots||6 chest-to-bar pull-ups||choose a wall-ball load that keeps every set unbroken and smooth||effort target • rpe 5–6; controlled and repeatable||rx • wall ball: ♀ 14 lb to 9 ft / ♂ 20 lb to 10 ft||ascendant||cyclical||squat||vertical_pull||vertical_push||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches",
@@ -3210,7 +3222,7 @@
     {
       "sequence": 24,
       "phase": "FORGED PHASE • WEEK 6",
-      "title": "The Starforge Pull: Thirty-Second Oarstrikes",
+      "title": "The Starfire Passage: The Twin Trials of Velocity",
       "full_minutes": 66,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||snatch pull|topsetbackoff|reps|1x4@0.8950|3x5@0.8150||rope-climb foot-lock practice|straight|reps|3x3@0.0000||walking lunge|straight|reps|3x10@0.4650||landmine press|straight|reps|3x8@0.4650||3 sets: 8 low box step-ups per side||18||moderate||18-minute row interval session:||0:30 powerful but technically smooth rowing||0:30 very easy rowing||repeat until the clock expires; no interval may drop more than 10%||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||horizontal_pull||2:00 supine figure-four stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supported hamstring stretch, switching sides at 1:00",
@@ -3313,7 +3325,7 @@
     {
       "sequence": 25,
       "phase": "FORGED PHASE • WEEK 7",
-      "title": "The Iron Throne Reforged: Oars Against the Rising Tide",
+      "title": "The Obsidian Oath: The Trial of Rising Stars",
       "full_minutes": 79,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|ascending|reps|1x8@0.6300|1x6@0.7000|1x4@0.7600|1x3@0.8100||hang clean + power clean technique|complex|reps|3x2@0.5300||barbell row|straight|reps|4x8@0.6300||dumbbell step-up|straight|reps|3x8@0.4800||double-under skill practice|straight|contacts|5x20@0.0000||3 sets: 10 light romanian deadlifts||16||moderate||16-minute row interval session:||row 3:00 at a moderate-hard but repeatable pace||row 1:00 very easily||repeat that 4-minute pattern until the 16:00 clock expires||if time expires during an interval, stop immediately||your final hard interval should stay close to your first||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||horizontal_pull||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 supine figure-four stretch, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides||2:00 crocodile breathing with long, relaxed exhales",
@@ -3416,7 +3428,7 @@
     {
       "sequence": 26,
       "phase": "FORGED PHASE • WEEK 7",
-      "title": "The Unbroken Shield Reforged: The Clockwork Clean-and-Jerk",
+      "title": "The Obsidian Oath: The Clockwork Gauntlet",
       "full_minutes": 64,
       "sixty_minutes": 56,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light bench press repetitions||finish with 3 gradual sets of bench press||bench press|ascending|reps|1x8@0.6300|1x6@0.7000|1x4@0.7600|1x3@0.8100||strict pull-up|straight|reps|4x6@0.0000||hanging knee-raise progression|straight|reps|3x8@0.0000||3 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute alternating emom:||odd: 12/10-calorie fan bike||even: 8 alternating dumbbell clean and jerks||use one dumbbell and alternate arms after each repetition||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • one dumbbell: ♀ 35 lb / ♂ 50 lb||ascendant||cyclical||hinge||vertical_push||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 doorway chest stretch, switching sides at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 forearm flexor and biceps stretch, switching sides at 1:00",
@@ -3559,7 +3571,7 @@
     {
       "sequence": 27,
       "phase": "FORGED PHASE • WEEK 7",
-      "title": "The Hanging Starhook Reforged: The Frozen Climb",
+      "title": "The Obsidian Oath: The Frozen Meridian",
       "full_minutes": 55,
       "sixty_minutes": 55,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||hang power snatch + overhead squat|complex|reps|5x2@0.6100||snatch pull|straight|reps|3x4@0.8100||3 sets: 8 single-leg hip bridges per side||16||moderate||for time — 5 rounds, 16:00 hard cap:||14/12-calorie skierg||10 power cleans||12 pull-ups||stop at the cap and record completed rounds plus repetitions||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • power clean: ♀ 65 lb / ♂ 95 lb||ascendant||cyclical||hinge||vertical_pull||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -3730,7 +3742,7 @@
     {
       "sequence": 28,
       "phase": "FORGED PHASE • WEEK 7",
-      "title": "The Chains of the Deep Reforged: The Comet Path and Hanging Guard",
+      "title": "The Obsidian Oath: The Comet’s Measure",
       "full_minutes": 71,
       "sixty_minutes": 54,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|ascending|reps|1x8@0.6300|1x6@0.7000|1x4@0.7600|1x3@0.8100||suitcase carry|straight|meters|4x30@0.0000||box jump power practice|straight|contacts|5x3@0.0000||half-kneeling dumbbell press|straight|reps|3x8@0.4800||3 sets: 8 low box step-ups per side||18||easy||18-minute sustainable amrap:||250-meter run||10 toes-to-bar||walk briefly if needed to keep every run repeatable||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 3–4; conversational throughout||ascendant||cyclical||hanging_core||impact||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00",
@@ -3857,7 +3869,7 @@
     {
       "sequence": 29,
       "phase": "FORGED PHASE • WEEK 8",
-      "title": "The Iron Throne Reforged: Oars and Skyward Leaps",
+      "title": "The Celestial Crucible: The Vault of Starlight",
       "full_minutes": 36,
       "sixty_minutes": 36,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|deload|reps|3x5@0.6000||2 sets: 10 light romanian deadlifts||12||moderate||12-minute controlled amrap:||14/11-calorie row||10 box jumps — jump up, stand tall, and step down||32 double-unders||keep every landing quiet and repeatable; do not rebound||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • box: ♀ 20 in / ♂ 24 in||ascendant||coordination||cyclical||impact||2:00 gentle adductor rock-backs, alternating sides||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -4006,7 +4018,7 @@
     {
       "sequence": 30,
       "phase": "FORGED PHASE • WEEK 8",
-      "title": "The Unbroken Shield Reforged: The Tempest Engine",
+      "title": "The Celestial Crucible: The Tempest Circuit",
       "full_minutes": 51,
       "sixty_minutes": 51,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light bench press repetitions||finish with 3 gradual sets of bench press||bench press|deload|reps|3x6@0.5500||wall-facing handstand deload hold|straight|seconds|2x20@0.0000||hanging knee-raise deload practice|straight|reps|2x6@0.0000||2 sets: 8 controlled chin-ups or pulldowns||20||moderate||20:00 fan-bike vo2-oriented intervals:||2:00 hard but repeatable fan bike||2:00 very easy fan bike||repeat until the clock expires; the final hard interval must match the first||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 doorway chest stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -4109,7 +4121,7 @@
     {
       "sequence": 31,
       "phase": "FORGED PHASE • WEEK 8",
-      "title": "The Clean Strike Reforged: The One-Armed Meteorfall",
+      "title": "The Celestial Crucible: The Falling Star Trial",
       "full_minutes": 42,
       "sixty_minutes": 42,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||power clean + jerk|deload|reps|5x1@0.5500||2 sets: 8 single-leg hip bridges per side||12||moderate||for time — 6 rounds, 12:00 hard cap:||14 alternating dumbbell snatches||12 lateral burpees over the dumbbell||stop at the cap and record completed rounds plus repetitions||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||rx • one dumbbell: ♀ 35 lb / ♂ 50 lb||ascendant||hinge||mixed_bodyweight||unilateral||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00",
@@ -4258,7 +4270,7 @@
     {
       "sequence": 32,
       "phase": "FORGED PHASE • WEEK 8",
-      "title": "The Chains of the Deep Reforged: The Oar and Hanging Blade",
+      "title": "The Celestial Crucible: The Astral Gate",
       "full_minutes": 38,
       "sixty_minutes": 38,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|deload|reps|3x5@0.5500||2 sets: 8 low box step-ups per side||15||moderate||15-minute alternating emom:||odd: 13/10-calorie row||even: 10 toes-to-bar||keep every hanging set technically consistent||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||hanging_core||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -4397,7 +4409,7 @@
     {
       "sequence": 33,
       "phase": "FORGED PHASE • WEEK 9",
-      "title": "The Iron Throne Reforged: The Inverted Froststorm",
+      "title": "The Thunderbound March: The Winter Crown",
       "full_minutes": 77,
       "sixty_minutes": 60,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|wave|reps|1x5@0.6600|1x3@0.7300|1x2@0.7800|1x5@0.6900|1x3@0.7600|1x2@0.8100||hang clean + power clean technique|complex|reps|3x2@0.5000||bulgarian split squat|straight|reps|3x8@0.5800||double-under skill practice|straight|contacts|5x20@0.0000||3 sets: 10 light romanian deadlifts||16||moderate||16-minute quality amrap:||12/10-calorie skierg||8 strict handstand push-ups||10 alternating dumbbell push presses||stop each handstand set before technique changes||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • one dumbbell: ♀ 25 lb / ♂ 35 lb||ascendant||cyclical||inversion||vertical_push||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 supine figure-four stretch, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides||2:00 crocodile breathing with long, relaxed exhales",
@@ -4558,7 +4570,7 @@
     {
       "sequence": 34,
       "phase": "FORGED PHASE • WEEK 9",
-      "title": "The Thunder Salute Reforged: The Climb of the Stormwheel",
+      "title": "The Thunderbound March: The Stormwheel Passage",
       "full_minutes": 79,
       "sixty_minutes": 54,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light push press repetitions||finish with 3 gradual sets of push press||push press|wave|reps|1x5@0.6600|1x3@0.7300|1x2@0.7800|1x5@0.6900|1x3@0.7600|1x2@0.8100||l-sit compression practice|straight|seconds|4x20@0.0000||handstand weight-shift practice|straight|seconds|4x6@0.0000||dumbbell bench press|straight|reps|3x10@0.5000||3 sets: 8 controlled chin-ups or pulldowns||20||moderate||for time — 4 rounds, 20:00 hard cap:||16/13-calorie fan bike||14 alternating box step-overs||12 toes-to-bar||stop at the cap and record completed rounds plus repetitions||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • box step-over: ♀ 20 in / ♂ 24 in||ascendant||cyclical||hanging_core||unilateral||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 bench-supported lat stretch with slow breathing",
@@ -4729,7 +4741,7 @@
     {
       "sequence": 35,
       "phase": "FORGED PHASE • WEEK 9",
-      "title": "The Lightning Snatch Reforged: The Oar and Iron Pendulum",
+      "title": "The Thunderbound March: The Pendulum of Night",
       "full_minutes": 58,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||power snatch|ascending|reps|2x3@0.5800|2x2@0.6400|3x1@0.7000||overhead squat|straight|reps|3x5@0.5800||3 sets: 8 single-leg hip bridges per side||16||moderate||16-minute interval session on a repeating 3:00 clock:||2:00 to complete 12/10 calories row + 12 russian kettlebell swings||1:00 easy walk and breathing reset||use a swing load that preserves a crisp hinge||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • kettlebell: ♀ 35 lb / ♂ 53 lb||ascendant||cyclical||hinge||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -4846,7 +4858,7 @@
     {
       "sequence": 36,
       "phase": "FORGED PHASE • WEEK 9",
-      "title": "The Chains of the Deep Reforged: The Siege Sack and Rope",
+      "title": "The Thunderbound March: The Siege of Radiant Stone",
       "full_minutes": 69,
       "sixty_minutes": 59,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|topsetbackoff|reps|1x4@0.7800|3x5@0.7000||sandbag bear-hug carry|straight|meters|5x40@0.0000||half-kneeling dumbbell press|straight|reps|3x8@0.4500||box jump power practice|straight|contacts|4x3@0.0000||3 sets: 8 low box step-ups per side||18||moderate||18-minute rotation at sustainable effort:||minute 1: 12/10-calorie fan bike||minute 2: 8 sandbag-to-shoulder repetitions, alternating sides||minute 3: 1 rope climb||continue until the clock expires; never chase failed repetitions||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • sandbag: ♀ 70 lb / ♂ 100 lb||ascendant||cyclical||odd_object||vertical_pull||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00",
@@ -4985,7 +4997,7 @@
     {
       "sequence": 37,
       "phase": "FORGED PHASE • WEEK 10",
-      "title": "The Twin Trials of Velocity",
+      "title": "The Twin Trials of Velocity Reforged",
       "full_minutes": 80,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar front squat repetitions||finish with 3 gradual sets of front squat||front squat|ascending|reps|1x8@0.6150|1x6@0.6850|1x4@0.7450|1x3@0.7950||muscle snatch + power snatch technique|complex|reps|3x2@0.4950||barbell row|straight|reps|4x8@0.6550||dumbbell step-up|straight|reps|3x10@0.4750||double-under skill practice|straight|contacts|5x20@0.0000||3 sets: 10 light romanian deadlifts||16||moderate||for time — descending chipper, 16:00 hard cap:||46 wall-ball shots||36/29-calorie row||26 wall-ball shots||18/14-calorie row||stop at the cap and record the last completed checkpoint||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • wall ball: ♀ 14 lb to 9 ft / ♂ 20 lb to 10 ft||ascendant||cyclical||squat||vertical_push||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 supine figure-four stretch, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides||2:00 crocodile breathing with long, relaxed exhales|benchmark:row_short_power_v1",
@@ -4993,7 +5005,7 @@
         "kind": "rowShortPower",
         "id": "row_short_power_v1",
         "is_retest": true,
-        "title": "The Twin Trials of Velocity"
+        "title": "The Twin Trials of Velocity Reforged"
       },
       "full": [
         {
@@ -5169,7 +5181,7 @@
     {
       "sequence": 38,
       "phase": "FORGED PHASE • WEEK 10",
-      "title": "The Unbroken Shield Reforged: The Frostbound One-Arm Trial",
+      "title": "The Silver Void: The Frostfire Crucible",
       "full_minutes": 61,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light bench press repetitions||finish with 3 gradual sets of bench press||bench press|topsetbackoff|reps|1x4@0.8150|3x5@0.7350||ring dip|straight|reps|4x6@0.0000||hanging knee-raise progression|straight|reps|3x8@0.0000||3 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute controlled amrap:||12/10-calorie skierg||12 alternating dumbbell snatches from the hang||12 low-box step-overs||use a load that stays technically identical from first round to last||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • one dumbbell: ♀ 35 lb / ♂ 50 lb||rx • box: ♀ 20 in / ♂ 24 in||ascendant||cyclical||hinge||unilateral||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 doorway chest stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -5300,7 +5312,7 @@
     {
       "sequence": 39,
       "phase": "FORGED PHASE • WEEK 10",
-      "title": "The Deep Clean Reforged: The Turning Comet",
+      "title": "The Silver Void: The Turning Comet",
       "full_minutes": 55,
       "sixty_minutes": 55,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||squat clean + push jerk|complex|reps|5x2@0.6650||clean pull|straight|reps|3x4@0.8350||3 sets: 8 single-leg hip bridges per side||16||moderate||16-minute shuttle-run interval session:||1:00 strong, controlled 25-foot shuttle runs||1:00 easy walking||repeat until the clock expires without sprinting the first interval||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||ascendant||cyclical||impact||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -5395,7 +5407,7 @@
     {
       "sequence": 40,
       "phase": "FORGED PHASE • WEEK 10",
-      "title": "The Long Oar of the Void",
+      "title": "The Voidward Vigil Reforged",
       "full_minutes": 79,
       "sixty_minutes": 59,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||clean pull|wave|reps|1x5@0.6750|1x3@0.7450|1x2@0.7950|1x5@0.7050|1x3@0.7750|1x2@0.8250||rope-climb foot-lock practice|straight|reps|3x3@0.0000||farmer carry|straight|meters|5x40@0.0000||landmine press|straight|reps|3x8@0.4650||3 sets: 8 low box step-ups per side||18||easy||18:00 continuous row||keep a conversational pace throughout||stroke rate: 22–26 per minute with consistent splits||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 3–4; conversational throughout||ascendant||cyclical||horizontal_pull||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00|benchmark:row_2000_capacity_v1",
@@ -5403,7 +5415,7 @@
         "kind": "rowTwoThousand",
         "id": "row_2000_capacity_v1",
         "is_retest": true,
-        "title": "The Long Oar of the Void"
+        "title": "The Voidward Vigil Reforged"
       },
       "full": [
         {
@@ -5505,7 +5517,7 @@
     {
       "sequence": 41,
       "phase": "FORGED PHASE • WEEK 11",
-      "title": "The Four Seals of Bodyweight",
+      "title": "The Four Astral Seals Reforged",
       "full_minutes": 57,
       "sixty_minutes": 57,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|topsetbackoff|reps|1x4@0.8200|3x5@0.7400||hang clean + power clean technique|complex|reps|3x2@0.5300||romanian deadlift|straight|reps|3x8@0.6100||rear-foot-elevated split squat|straight|reps|3x8@0.5300||16||moderate||for time — 5 rounds, 16:00 hard cap:||9 barbell thrusters||11 pull-ups||13/11-calorie fan bike||stop at the cap and record completed rounds plus repetitions||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||rx • barbell: ♀ 65 lb / ♂ 95 lb||ascendant||cyclical||horizontal_pull||squat||vertical_push||2:00 supine figure-four stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 gentle adductor rock-backs, alternating sides|benchmark:gymnastics_capacity_v1",
@@ -5513,7 +5525,7 @@
         "kind": "gymnasticsScreen",
         "id": "gymnastics_capacity_v1",
         "is_retest": true,
-        "title": "The Four Seals of Bodyweight"
+        "title": "The Four Astral Seals Reforged"
       },
       "full": [
         {
@@ -5675,7 +5687,7 @@
     {
       "sequence": 42,
       "phase": "FORGED PHASE • WEEK 11",
-      "title": "The Comet-Lap Trial",
+      "title": "The Comet Circuit Reforged",
       "full_minutes": 76,
       "sixty_minutes": 58,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light strict press repetitions||finish with 3 gradual sets of strict press||strict press|ascending|reps|1x8@0.6300|1x6@0.7000|1x4@0.7600|1x3@0.8100||toes-to-bar quality practice|straight|reps|4x4@0.0000||wall-walk position practice|straight|seconds|4x2@0.0000||strict pull-up|straight|reps|5x5@0.0000||3 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute quality amrap:||11/9-calorie skierg||5 bar muscle-ups||50-meter farmer carry||keep every muscle-up technically consistent||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • farmer carry: ♀ 35 lb each / ♂ 50 lb each||ascendant||carry||cyclical||vertical_pull||2:00 bench-supported lat stretch with slow breathing||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales|benchmark:run_400_speed_v1",
@@ -5683,7 +5695,7 @@
         "kind": "runFourHundred",
         "id": "run_400_speed_v1",
         "is_retest": true,
-        "title": "The Comet-Lap Trial"
+        "title": "The Comet Circuit Reforged"
       },
       "full": [
         {
@@ -5811,7 +5823,7 @@
     {
       "sequence": 43,
       "phase": "FORGED PHASE • WEEK 11",
-      "title": "The Deep-Caught Star Reforged: Pulses of the Frozen Star",
+      "title": "The Last Aurora: The Pulse of the Frozen Star",
       "full_minutes": 57,
       "sixty_minutes": 57,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or skierg||8 cossack squats, alternating sides||6 snatch-grip press-behind-neck with an empty bar||6 overhead squats with a 2-second bottom pause||then complete: 5 muscle snatches + 5 snatch pulls||finish with 4 gradual sets of today’s exact lift or complex||squat snatch|wave|reps|1x2@0.6400|1x1@0.7100|1x2@0.6600|1x1@0.7400|2x1@0.7700||snatch pull|straight|reps|3x3@0.8800||3 sets: 8 single-leg hip bridges per side||16||moderate||16-minute skierg interval session:||1:30 at a strong repeatable pace||0:30 very easy||repeat until the clock expires; keep power loss under 10%||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -5906,7 +5918,7 @@
     {
       "sequence": 44,
       "phase": "FORGED PHASE • WEEK 11",
-      "title": "The Frozen Star Trial",
+      "title": "The Frozen Star Trial Reforged",
       "full_minutes": 80,
       "sixty_minutes": 52,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|wave|reps|1x5@0.6900|1x3@0.7600|1x2@0.8100|1x5@0.7200|1x3@0.7900|1x2@0.8400||muscle-up transition practice|straight|reps|5x3@0.0000||half-kneeling dumbbell press|straight|reps|3x8@0.4800||box jump power practice|straight|contacts|4x3@0.0000||3 sets: 8 low box step-ups per side||18||moderate||18-minute alternating emom:||odd: 13/10-calorie row||even: 10 alternating front-rack dumbbell reverse lunges||use a load that leaves at least 15 seconds to transition||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • two dumbbells: ♀ 25 lb each / ♂ 35 lb each||ascendant||cyclical||unilateral||2:00 crocodile breathing with long, relaxed exhales||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00|benchmark:ski_750_capacity_v1",
@@ -5914,7 +5926,7 @@
         "kind": "skiSevenFifty",
         "id": "ski_750_capacity_v1",
         "is_retest": true,
-        "title": "The Frozen Star Trial"
+        "title": "The Frozen Star Trial Reforged"
       },
       "full": [
         {
@@ -6050,7 +6062,7 @@
     {
       "sequence": 45,
       "phase": "FORGED PHASE • WEEK 12",
-      "title": "The Mile Beyond the Moon",
+      "title": "The Moonward Trial Reforged",
       "full_minutes": 36,
       "sixty_minutes": 36,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 squat-to-stands||8 reverse lunges, alternating sides||10 glute bridges with a 2-second squeeze||8 empty-bar back squat repetitions||finish with 3 gradual sets of back squat||back squat|deload|reps|3x5@0.6000||2 sets: 10 light romanian deadlifts||12||moderate||for time — chipper, 12:00 hard cap:||39/32-calorie fan bike||34 russian kettlebell swings||28 alternating box step-overs||14 step-back burpees||stop at the cap and record the last completed checkpoint||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • kettlebell: ♀ 35 lb / ♂ 53 lb||rx • box step-over: ♀ 20 in / ♂ 24 in||ascendant||cyclical||hinge||mixed_bodyweight||unilateral||2:00 gentle adductor rock-backs, alternating sides||2:00 supine figure-four stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales|benchmark:run_mile_capacity_v1",
@@ -6058,7 +6070,7 @@
         "kind": "runMile",
         "id": "run_mile_capacity_v1",
         "is_retest": true,
-        "title": "The Mile Beyond the Moon"
+        "title": "The Moonward Trial Reforged"
       },
       "full": [
         {
@@ -6226,7 +6238,7 @@
     {
       "sequence": 46,
       "phase": "FORGED PHASE • WEEK 12",
-      "title": "The Unbroken Shield Reforged: The Endless Siege Engine",
+      "title": "The Eternal Forge: The Endless Citadel",
       "full_minutes": 51,
       "sixty_minutes": 51,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||10 band pull-aparts||8 scapular push-ups||8 light bench press repetitions||finish with 3 gradual sets of bench press||bench press|deload|reps|3x6@0.5500||wall-facing handstand deload hold|straight|seconds|2x20@0.0000||hanging knee-raise deload practice|straight|reps|2x6@0.0000||2 sets: 8 controlled chin-ups or pulldowns||20||moderate||20-minute quality amrap:||20-meter sled push||20-meter backward sled drag||rest as needed to keep each trip between 30 and 40 seconds||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • sled load must produce repeatable 30–40-second trips on the available surface||ascendant||knee||locomotion||posterior_chain||2:00 cross-body posterior-shoulder stretch, switching at 1:00||2:00 overhead triceps stretch, switching sides at 1:00||2:00 doorway chest stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",
@@ -6361,7 +6373,7 @@
     {
       "sequence": 47,
       "phase": "FORGED PHASE • WEEK 12",
-      "title": "The Ten-Minute Tempest",
+      "title": "The Tenfold Tempest Reforged",
       "full_minutes": 42,
       "sixty_minutes": 42,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy bike or row||6 front-rack reverse lunges, alternating sides||6 tall cleans with an empty bar||5 clean pulls with a 1-second pause at the knee||6 jerk footwork repetitions without load||finish with 4 gradual sets of today’s exact lift or complex||power clean + jerk|deload|reps|5x1@0.5500||2 sets: 8 single-leg hip bridges per side||12||moderate||12-minute controlled amrap:||12/10-calorie row||14 wall-ball shots||8 chest-to-bar pull-ups||choose a wall-ball load that keeps every set unbroken and smooth||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||rx • wall ball: ♀ 14 lb to 9 ft / ♂ 20 lb to 10 ft||ascendant||cyclical||squat||vertical_pull||vertical_push||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 couch stretch for the quadriceps, switching sides at 1:00|benchmark:bike_10_minute_capacity_v1",
@@ -6369,7 +6381,7 @@
         "kind": "bikeTenMinute",
         "id": "bike_10_minute_capacity_v1",
         "is_retest": true,
-        "title": "The Ten-Minute Tempest"
+        "title": "The Tenfold Tempest Reforged"
       },
       "full": [
         {
@@ -6493,7 +6505,7 @@
     {
       "sequence": 48,
       "phase": "FORGED PHASE • WEEK 12",
-      "title": "The Chains of the Deep Reforged: Thirty-Second Oarstrikes",
+      "title": "The Eternal Forge: The Twin Trials of Velocity",
       "full_minutes": 38,
       "sixty_minutes": 38,
       "signature": "2 rounds at an unhurried pace:||90 seconds easy row or bike||8 glute bridges with a 2-second squeeze||8 dead bugs per side||8 empty-bar romanian deadlifts||finish with 3 gradual sets of deadlift||deadlift|deload|reps|3x5@0.5500||2 sets: 8 low box step-ups per side||15||moderate||15-minute row interval session:||0:30 powerful but technically smooth rowing||0:30 very easy rowing||repeat until the clock expires; no interval may drop more than 10%||progression target: improve total work or average pace by 2–3% without changing the prescribed effort.||effort target • rpe 5–6; controlled and repeatable||ascendant||cyclical||horizontal_pull||2:00 relaxed child’s pose with slow lateral reaches||2:00 supine figure-four stretch, switching sides at 1:00||2:00 supported hamstring stretch, switching sides at 1:00||2:00 crocodile breathing with long, relaxed exhales",

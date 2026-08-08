@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Hoots &amp; Reps</title>
+    <link rel="stylesheet" href="styles.css?v=authoritative-timer-11">
+    <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+  </head>
+  <body>
+    <!-- CAF owns this element through PlayerManager. Keeping cue audio in the
+         Cast media pipeline avoids Web Audio resampling/clicks on Chromecast. -->
+    <audio id="cue-player" preload="auto"></audio>
+    <main class="card" aria-live="polite">
+      <div class="stars" aria-hidden="true"></div>
+      <div class="content" id="content">
+        <p class="eyebrow">HOOTS &amp; REPS</p>
+        <h1 id="workout-title">Ready to train</h1>
+        <div class="divider"></div>
+        <h2 id="section-title">Choose a workout card on your phone</h2>
+        <section class="timer" id="timer" hidden>
+          <p class="timer-stage" id="timer-stage"></p>
+          <p class="timer-count" id="timer-count"></p>
+          <p class="timer-label" id="timer-label"></p>
+          <p class="timer-cue" id="timer-cue"></p>
+        </section>
+        <pre id="body">This screen is controlled from Hoots &amp; Reps.</pre>
+        <footer id="footer">CONNECTED TO HOOTS &amp; REPS</footer>
+      </div>
+    </main>
+    <script src="receiver.js?v=persistent-session-17"></script>
+  </body>
+</html>

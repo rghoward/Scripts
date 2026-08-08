@@ -155,6 +155,10 @@ class ScheduleRepository {
   Future<void> complete(String assignmentId) =>
       _setStatus(assignmentId, 'completed', 'complete');
 
+  /// Reopens a completed or partial workout without changing its assigned day.
+  Future<void> reopen(String assignmentId) =>
+      _setStatus(assignmentId, 'in_progress', 'reopen');
+
   Future<void> skip(String assignmentId) =>
       _setStatus(assignmentId, 'skipped', 'skip');
 

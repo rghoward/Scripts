@@ -451,7 +451,7 @@ void main() {
     );
   });
 
-  test('all 48 generated workouts have unique workout-derived titles', () {
+  test('all 48 generated workouts have unique non-movement titles', () {
     final phase = engine.generatePhase(
       athlete: athlete,
       startsOn: DateTime(2026, 7, 27),
@@ -462,18 +462,33 @@ void main() {
         .toList();
     expect(titles, hasLength(48));
     expect(titles.toSet(), hasLength(48));
-    expect(titles.first, 'The Iron Throne: Oars Against the Rising Tide');
+    expect(titles.first, 'The Forge Awakens: The Trial of Rising Stars');
+    const movementTerms = [
+      'row',
+      'bike',
+      'ski',
+      'run',
+      'clean',
+      'jerk',
+      'snatch',
+      'squat',
+      'press',
+      'deadlift',
+      'pull',
+      'lunge',
+      'swing',
+      'thruster',
+      'burpee',
+      'oar',
+    ];
     expect(
-      titles.where((title) => title.contains('Unbroken Shield')),
-      isNotEmpty,
-    );
-    expect(
-      titles
-          .where((title) => title.contains('Unbroken Shield'))
-          .every((title) => !title.toLowerCase().contains('frostfire')),
+      titles.every(
+        (title) => movementTerms.every(
+          (term) => !RegExp('\\b$term\\b').hasMatch(title.toLowerCase()),
+        ),
+      ),
       isTrue,
     );
-    expect(titles.where((title) => title.contains('Reforged')), hasLength(24));
   });
 
   test(
@@ -631,6 +646,132 @@ void main() {
     });
     expect(forge.level, WorkoutLevel.forge);
     expect(rx.prescription, isNot(forge.prescription));
+  });
+
+  test('conditioning levels scale machine calories and retain EMOM volume', () {
+    final week = engine.generateWeek(
+      athlete: athlete,
+      weekOf: DateTime(2026, 8, 3),
+      phaseWeek: 1,
+    );
+    final work = week.days
+        .map((day) => day.conditioning)
+        .whereType<ConditioningWork>()
+        .firstWhere((work) => work.templateId!.contains('emom_bike_db_clean'));
+    final ember = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ember,
+    );
+    final forge = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.forge,
+    );
+    final ascendant = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ascendant,
+    );
+
+    expect(ascendant.prescription, contains('Odd: 15/12-calorie fan bike'));
+    expect(forge.prescription, contains('Odd: 10/8-calorie fan bike'));
+    expect(ember.prescription, contains('Odd: 8/6-calorie fan bike'));
+    expect(
+      ascendant.prescription,
+      contains('Even: 10 alternating dumbbell clean and jerks'),
+    );
+  });
+
+  test('conditioning levels use skill progressions without reducing reps', () {
+    final phase = engine.generatePhase(
+      athlete: athlete,
+      startsOn: DateTime(2026, 7, 27),
+    );
+    final work = phase.days
+        .map((day) => day.conditioning)
+        .whereType<ConditioningWork>()
+        .firstWhere(
+          (work) => work.templateId!.contains('emom_row_toes_to_bar'),
+        );
+    final ember = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ember,
+    );
+    final forge = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.forge,
+    );
+    final ascendant = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ascendant,
+    );
+
+    expect(ascendant.prescription, contains('Even: 12 toes-to-bar'));
+    expect(forge.prescription, contains('Even: 12 knees-to-elbows'));
+    expect(ember.prescription, contains('Even: 12 hanging knee raises'));
+  });
+
+  test('double-unders become a same-volume skill substitution', () {
+    final phase = engine.generatePhase(
+      athlete: athlete,
+      startsOn: DateTime(2026, 7, 27),
+    );
+    final work = phase.days
+        .map((day) => day.conditioning)
+        .whereType<ConditioningWork>()
+        .firstWhere(
+          (work) => work.prescription.join(' ').contains('double-unders'),
+        );
+    final forge = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.forge,
+    );
+    final ember = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ember,
+    );
+
+    final doubleUnderLine = work.prescription.firstWhere(
+      (line) => line.contains('double-unders'),
+    );
+    final reps = RegExp(r'\d+').firstMatch(doubleUnderLine)!.group(0)!;
+    expect(forge.prescription, contains('$reps high-jumping single-unders'));
+    expect(ember.prescription, contains('$reps line hops'));
+  });
+
+  test('chest-to-bar pull-ups stay exclusive to the RX tier', () {
+    final phase = engine.generatePhase(
+      athlete: athlete,
+      startsOn: DateTime(2026, 7, 27),
+    );
+    final work = phase.days
+        .map((day) => day.conditioning)
+        .whereType<ConditioningWork>()
+        .firstWhere(
+          (work) => work.prescription.join(' ').contains('chest-to-bar'),
+        );
+    final forge = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.forge,
+    );
+    final ember = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ember,
+    );
+
+    expect(forge.prescription.join(' '), isNot(contains('chest-to-bar')));
+    expect(forge.prescription.join(' '), contains('pull-ups'));
+    expect(ember.prescription.join(' '), contains('band-assisted pull-ups'));
+  });
+
+  test('plain pull-ups have accessible Forge and Ember progressions', () {
+    final phase = engine.generatePhase(
+      athlete: athlete,
+      startsOn: DateTime(2026, 7, 27),
+    );
+    final work = phase.days
+        .map((day) => day.conditioning)
+        .whereType<ConditioningWork>()
+        .firstWhere(
+          (work) => work.templateId!.contains('for_time_ski_clean_pull'),
+        );
+    final forge = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.forge,
+    );
+    final ember = work.levelOptions.firstWhere(
+      (option) => option.level == WorkoutLevel.ember,
+    );
+
+    expect(forge.prescription.join(' '), contains('pull-ups'));
+    expect(ember.prescription.join(' '), contains('band-assisted pull-ups'));
   });
 
   test('dumbbell snatches recur across distinct conditioning formats', () {

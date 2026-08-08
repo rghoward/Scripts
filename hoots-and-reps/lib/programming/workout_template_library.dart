@@ -112,7 +112,7 @@ class WorkoutTemplateLibrary {
         prescription: [
           '$minutes-minute alternating EMOM:',
           'Odd: ${15 + add}/${12 + add}-calorie fan bike',
-          'Even: ${8 + add} alternating dumbbell clean and jerks',
+          'Even: ${10 + add} alternating dumbbell clean and jerks',
           'Use one dumbbell and alternate arms after each repetition',
           'Pacing target: finish the bike in 40–45 seconds; keep the dumbbell work unbroken and under 30 seconds',
         ],
@@ -126,7 +126,7 @@ class WorkoutTemplateLibrary {
           'For time — 5 rounds, $minutes:00 hard cap:',
           '${12 + add}/${10 + add}-calorie SkiErg',
           '${8 + add} power cleans',
-          '${10 + add} pull-ups',
+          '${10 + add} chest-to-bar pull-ups',
           'Stop at the cap and record completed rounds plus repetitions',
         ],
         patterns: const {'cyclical', 'hinge', 'vertical_pull'},
@@ -293,7 +293,7 @@ class WorkoutTemplateLibrary {
         prescription: [
           'For time — 5 rounds, $minutes:00 hard cap:',
           '${7 + add} barbell thrusters',
-          '${9 + add} pull-ups',
+          '${9 + add} chest-to-bar pull-ups',
           '${11 + add}/${9 + add}-calorie fan bike',
           'Stop at the cap and record completed rounds plus repetitions',
         ],
