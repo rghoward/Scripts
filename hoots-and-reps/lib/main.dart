@@ -5922,7 +5922,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
           true,
     ).where((done) => done).length;
     final substitutions = _sectionSwaps(workout, section, index);
-    final canSwap = _substitutions.detectedMovements(section.body).isNotEmpty;
     final conditioning = _conditioningFor(workout);
     final isConditioning =
         conditioning != null && section.title.startsWith('CONDITIONING');
