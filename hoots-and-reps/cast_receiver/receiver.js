@@ -9,6 +9,11 @@
   let readySequenceLoaded = false;
   let readySequencePlayRequested = false;
   let readySequencePlaying = false;
+  let emomSequenceLoading = false;
+  let emomSequenceLoaded = false;
+  let emomSequencePlayRequested = false;
+  let emomSequencePlaying = false;
+  let emomSequencePhaseId = '';
   let suppressNextGo = false;
   let activePlan = null;
   let currentPhaseIndex = 0;
@@ -71,6 +76,16 @@
     return media;
   }
 
+  function emomSequenceMedia() {
+    const url = new URL('timer-emom-countdown.mp3', window.location.href).href;
+    const media = new cast.framework.messages.MediaInformation();
+    media.contentId = url;
+    media.contentUrl = url;
+    media.contentType = 'audio/mpeg';
+    media.streamType = cast.framework.messages.StreamType.BUFFERED;
+    return media;
+  }
+
   // Load the complete 3–2–1–Go recording during the seven-second lead-in.
   // When the visible display reaches 3, CAF already has one media item ready,
   // so the words have no per-number network/media-load delay.
@@ -99,6 +114,42 @@
     playerManager.play();
   }
 
+  function preloadEmomSequence() {
+    if (emomSequenceLoading || emomSequenceLoaded || emomSequencePlaying) return;
+    emomSequenceLoading = true;
+    emomSequencePlayRequested = false;
+    const request = new cast.framework.messages.LoadRequestData();
+    request.media = emomSequenceMedia();
+    request.autoplay = false;
+    request.currentTime = 0;
+    try {
+      playerManager.load(request);
+    } catch (_) {
+      emomSequenceLoading = false;
+    }
+  }
+
+  function playEmomSequence() {
+    const current = phase();
+    if (!current || emomSequencePlaying || emomSequencePhaseId === current.id) {
+      return;
+    }
+    emomSequencePhaseId = current.id;
+    emomSequencePlayRequested = true;
+    if (!emomSequenceLoaded) {
+      // A direct CAF load is preferable to silently losing the station cue if
+      // the optional preload was delayed by a Chromecast network hiccup.
+      emomSequencePlayRequested = false;
+      emomSequenceLoading = false;
+      suppressNextGo = true;
+      playVoiceClip('emom-countdown');
+      return;
+    }
+    emomSequencePlaying = true;
+    suppressNextGo = true;
+    playerManager.play();
+  }
+
   // CAF owns this media element, so receive lifecycle notifications from CAF
   // itself. Chromium's DOM `ended` event can be swallowed by the receiver
   // pipeline; MEDIA_FINISHED is the reliable completion signal for the queue.
@@ -107,6 +158,11 @@
     () => {
       if (readySequencePlaying) {
         readySequencePlaying = false;
+        return;
+      }
+      if (emomSequencePlaying) {
+        emomSequencePlaying = false;
+        emomSequenceLoaded = false;
         return;
       }
       finishCue();
@@ -119,10 +175,15 @@
   playerManager.addEventListener(
     cast.framework.events.EventType.PLAYER_LOAD_COMPLETE,
     () => {
-      if (!readySequenceLoading) return;
-      readySequenceLoading = false;
-      readySequenceLoaded = true;
-      if (readySequencePlayRequested) playReadySequence();
+      if (readySequenceLoading) {
+        readySequenceLoading = false;
+        readySequenceLoaded = true;
+        if (readySequencePlayRequested) playReadySequence();
+      } else if (emomSequenceLoading) {
+        emomSequenceLoading = false;
+        emomSequenceLoaded = true;
+        if (emomSequencePlayRequested) playEmomSequence();
+      }
     },
   );
 
@@ -141,6 +202,12 @@
         body.appendChild(symbol);
       } else body.appendChild(document.createTextNode(part));
     });
+  }
+
+  function renderEmomPreview(current) {
+    const preview = document.getElementById('emom-preview');
+    preview.hidden = true;
+    preview.replaceChildren();
   }
 
   function fitCard() {
@@ -174,6 +241,10 @@
     currentPhaseIndex += 1;
     if (!phase()) {
       finished = true;
+      playOnce(
+        `${activePlan.id}:complete`,
+        activePlan.completionCue || 'complete',
+      );
       return;
     }
     phaseStartedAt = now - Math.max(0, carry) * 1000;
@@ -195,15 +266,18 @@
       playOnce(eventId, 'transition');
     } else if (current.kind === 'sideChange') {
       playOnce(eventId, 'switch-sides');
+    } else if (suppressNextGo) {
+      // The countdown sprite already says “Go” at the exact phase boundary.
+      // Do not also enqueue a separate Go for the first EMOM/active phase.
+      suppressNextGo = false;
     } else if (current.kind === 'emom') {
       // Every minute uses the same lossless CAF media path—not a Web Audio
       // oscillator—so an EMOM cue remains as clean as the countdown voice.
       playOnce(eventId, 'go');
-    } else if (current.kind !== 'ready') {
-      if (suppressNextGo) {
-        suppressNextGo = false;
-        return;
+      if (Number(current.round) < Number(current.roundCount)) {
+        window.setTimeout(preloadEmomSequence, 8000);
       }
+    } else if (current.kind !== 'ready') {
       playOnce(eventId, 'go');
     }
   }
@@ -211,10 +285,13 @@
   function renderTimer() {
     const panel = document.getElementById('timer');
     const current = phase();
-    if (!activePlan || !current) {
+    if (!activePlan) {
+      document.body.classList.remove('timer-active', 'timer-complete', 'emom-active');
+      renderEmomPreview(null);
       renderLegacyTimer(panel);
       return;
     }
+    document.body.classList.add('timer-active');
     panel.hidden = false;
     const duration = Number(current.durationSeconds || 0);
     let elapsed = elapsedSeconds();
@@ -223,7 +300,20 @@
       elapsed = elapsedSeconds();
     }
     const displayed = phase();
-    if (!displayed) return;
+    if (!displayed) {
+      document.body.classList.add('timer-complete');
+      document.body.classList.remove('emom-active');
+      renderEmomPreview(null);
+      panel.hidden = false;
+      setText('timer-stage', 'COMPLETE');
+      setText('timer-count', '✓');
+      setText('timer-label', activePlan.completionLabel || 'TIMER COMPLETE');
+      setText('timer-cue', '');
+      return;
+    }
+    document.body.classList.remove('timer-complete');
+    document.body.classList.toggle('emom-active', displayed.kind === 'emom');
+    renderEmomPreview(displayed);
     const remaining = Math.max(0, Number(displayed.durationSeconds || 0) - elapsedSeconds());
     const state = pausedAt ? 'PAUSED' : displayed.kind === 'ready' ? 'GET READY' :
       displayed.kind === 'transition' ? 'TRANSITION' :
@@ -236,12 +326,22 @@
       lastRenderedKey = key;
       setText('timer-stage', state);
       setText('timer-count', formatTimer(remaining));
-      setText('timer-label', displayed.label || '');
+      const hasCurrentMovement = ['emom', 'active', 'sideChange'].includes(displayed.kind);
+      setText(
+        'timer-label',
+        hasCurrentMovement && displayed.label ? `NOW • ${displayed.label}` : (displayed.label || ''),
+      );
       setText('timer-cue', displayed.kind === 'transition' ? 'TRANSITION' : displayed.kind === 'sideChange' ? 'SWITCH SIDES' : '');
     }
     if (!pausedAt && displayed.kind === 'ready') {
       const seconds = Math.ceil(remaining);
       if (seconds === 3) playReadySequence();
+    }
+    if (!pausedAt &&
+        displayed.kind === 'emom' &&
+        Number(displayed.round) < Number(displayed.roundCount) &&
+        Math.ceil(remaining) === 3) {
+      playEmomSequence();
     }
   }
 
@@ -282,14 +382,28 @@
     activePlanId = plan.id;
     legacyTimer = null;
     currentPhaseIndex = 0;
-    phaseStartedAt = performance.now();
+    const now = performance.now();
+    let elapsed = Math.max(0, Number(plan.startOffsetSeconds) || 0);
+    while (currentPhaseIndex < activePlan.phases.length - 1) {
+      const duration = Number(activePlan.phases[currentPhaseIndex].durationSeconds || 0);
+      if (elapsed < duration) break;
+      elapsed -= duration;
+      currentPhaseIndex += 1;
+    }
+    phaseStartedAt = now - elapsed * 1000;
     pausedAt = 0;
     pausedElapsed = 0;
     finished = false;
     lastRenderedKey = '';
     playedEvents.clear();
-    // Prime the one-piece countdown well before the visible 3–2–1 begins.
-    preloadReadySequence();
+    emomSequenceLoading = false;
+    emomSequenceLoaded = false;
+    emomSequencePlayRequested = false;
+    emomSequencePlaying = false;
+    emomSequencePhaseId = '';
+    // Joining a cast already in progress should mirror the live phase
+    // silently; only a brand-new timer needs the countdown audio primed.
+    if (Number(plan.startOffsetSeconds || 0) === 0) preloadReadySequence();
     renderTimer();
   }
 
@@ -300,14 +414,18 @@
       renderTimer();
       return;
     }
-    if (!timer.plan) {
+    // Pause/resume messages intentionally contain only a command. Retain the
+    // receiver-owned plan instead of treating either one as a legacy timer.
+    const isPlanControl = activePlan &&
+      (timer.command === 'pause' || timer.command === 'resume');
+    if (!timer.plan && !isPlanControl) {
       activePlan = null;
       legacyTimer = timer;
       renderTimer();
       return;
     }
     if (timer.plan && timer.command === 'reset') startPlan(timer.plan);
-    if (timer.plan && timer.command === 'start' && timer.plan.id !== activePlanId) {
+    if (timer.plan && timer.plan.id !== activePlanId) {
       startPlan(timer.plan);
     }
     if (!activePlan) return;

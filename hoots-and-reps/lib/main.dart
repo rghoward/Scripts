@@ -448,6 +448,8 @@ class _CardTimer {
   final String mode;
   final int roundCount;
   Map<String, dynamic>? castPlan;
+  DateTime? lastTickAt;
+  int elapsedPlanSeconds = 0;
 
   bool get isCooldown => cooldownSteps.isNotEmpty;
   bool get isActive => stage != _CardTimerStage.finished;
@@ -5168,6 +5170,47 @@ class _WorkoutHomeState extends State<WorkoutHome>
       )
       .toList(growable: false);
 
+  List<String> _emomMovements(String body) {
+    final movements = <String>[];
+    final pattern = RegExp(
+      r'^(?:odd|even|minute\s*\d+)\s*[:\-–—•]\s*(.+)$',
+      caseSensitive: false,
+    );
+    for (final line in body.split('\n')) {
+      // Conditioning work lines receive a quest marker in the athlete-facing
+      // card. Remove that presentation marker before recognizing Odd/Even or
+      // Minute N, otherwise every EMOM minute falls back to “Round N”.
+      final visibleLine = line.replaceFirst(RegExp(r'^\s*⚔\s*'), '').trim();
+      final match = pattern.firstMatch(visibleLine);
+      final movement = match?.group(1)?.trim();
+      if (movement != null && movement.isNotEmpty) movements.add(movement);
+    }
+    return movements;
+  }
+
+  ({String label, String cue}) _completionCueFor(WorkoutSection section) {
+    final title = section.title.toLowerCase();
+    if (title.contains('conditioning')) {
+      return (label: 'CONDITIONING COMPLETE', cue: 'conditioning-complete');
+    }
+    if (title.contains('strength')) {
+      return (label: 'STRENGTH COMPLETE', cue: 'strength-complete');
+    }
+    if (title.contains('skill')) {
+      return (label: 'SKILL TRAINING COMPLETE', cue: 'skills-complete');
+    }
+    if (title.contains('accessory')) {
+      return (label: 'ACCESSORY COMPLETE', cue: 'accessory-complete');
+    }
+    if (title.contains('warm')) {
+      return (label: 'WARM-UP COMPLETE', cue: 'warmup-complete');
+    }
+    if (title.contains('stretch') || title.contains('cooldown')) {
+      return (label: 'STRETCHING COMPLETE', cue: 'stretches-complete');
+    }
+    return (label: 'TIMER COMPLETE', cue: 'complete');
+  }
+
   int _cooldownStretchSeconds() => 2 * 60;
 
   bool _requiresMidpointSideChange(String instruction) => RegExp(
@@ -5196,11 +5239,15 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (timer == null || timer.sectionKey != sectionKey || !timer.isActive) {
       return null;
     }
+    _advanceCardTimerToNow(timer);
     return {
-      'plan': timer.castPlan,
+      'plan': {
+        ...?timer.castPlan,
+        'startOffsetSeconds': timer.elapsedPlanSeconds,
+      },
       // This is sent only when a user acts. The receiver's own clock renders
       // every second, so Android/Dart suspension cannot freeze the TV.
-      'command': 'start',
+      'command': timer.stage == _CardTimerStage.paused ? 'pause' : 'start',
     };
   }
 
@@ -5239,7 +5286,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
             'id': 'side-change-${stepIndex + 1}',
             'kind': 'sideChange',
             'durationSeconds': 10,
-            'label': 'SWITCH SIDES',
+            'label': 'SWITCH SIDES • $step',
           });
           phases.add({
             'id': 'stretch-${stepIndex + 1}-b',
@@ -5252,18 +5299,24 @@ class _WorkoutHomeState extends State<WorkoutHome>
           phases.add({
             'id': 'transition-${stepIndex + 1}',
             'kind': 'transition',
-            'durationSeconds': 30,
+            'durationSeconds': 15,
             'label': 'TRANSITION',
           });
         }
       }
     } else if (isConditioning && conditioning != null && timer.mode == 'emom') {
+      final movements = _emomMovements(
+        _externalSectionBody(workout, section, index),
+      );
       for (var round = 1; round <= timer.roundCount; round++) {
+        final movement = movements.isEmpty
+            ? 'ROUND $round'
+            : movements[(round - 1) % movements.length];
         phases.add({
           'id': 'round-$round',
           'kind': 'emom',
           'durationSeconds': 60,
-          'label': 'ROUND $round / ${timer.roundCount}',
+          'label': movement,
           'round': round,
           'roundCount': timer.roundCount,
         });
@@ -5309,9 +5362,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
         'label': timer.label,
       });
     }
+    final completion = _completionCueFor(section);
     return {
       'id': '${timer.sectionKey}-${DateTime.now().microsecondsSinceEpoch}',
       'mode': timer.mode,
+      'completionLabel': completion.label,
+      'completionCue': completion.cue,
       'phases': phases,
     };
   }
@@ -5356,6 +5412,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         index,
         _cardTimer!,
       );
+      _cardTimer!.lastTickAt = DateTime.now();
     });
     _cardTimerTicker = Timer.periodic(
       const Duration(seconds: 1),
@@ -5368,15 +5425,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final timer = _cardTimer;
     if (timer == null) return;
     if (timer.stage == _CardTimerStage.paused) {
-      setState(() => timer.stage = _CardTimerStage.running);
+      setState(() {
+        timer.stage = _CardTimerStage.running;
+        timer.lastTickAt = DateTime.now();
+      });
       _cardTimerTicker ??= Timer.periodic(
         const Duration(seconds: 1),
         (_) => _tickCardTimer(),
       );
     } else {
+      _advanceCardTimerToNow(timer);
       _cardTimerTicker?.cancel();
       _cardTimerTicker = null;
-      setState(() => timer.stage = _CardTimerStage.paused);
+      setState(() {
+        timer.stage = _CardTimerStage.paused;
+        timer.lastTickAt = null;
+      });
     }
     _sendTimerToCast(
       command: timer.stage == _CardTimerStage.paused ? 'pause' : 'resume',
@@ -5391,6 +5455,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
       timer.stage = _CardTimerStage.ready;
       timer.remainingSeconds = 10;
       timer.cooldownStepIndex = 0;
+      timer.elapsedPlanSeconds = 0;
+      timer.lastTickAt = DateTime.now();
       if (timer.isCooldown) _configureCooldownStep(timer);
     });
     _cardTimerTicker = Timer.periodic(
@@ -5400,40 +5466,62 @@ class _WorkoutHomeState extends State<WorkoutHome>
     _sendTimerToCast(command: 'reset', includePlan: true);
   }
 
+  void _advanceCardTimerPhase(_CardTimer timer) {
+    if (timer.stage == _CardTimerStage.ready) {
+      timer.stage = _CardTimerStage.running;
+      timer.remainingSeconds = timer.targetSeconds;
+    } else if (timer.stage == _CardTimerStage.running &&
+        timer.isCooldown &&
+        timer.sideChangeRequired &&
+        !timer.sideChanged) {
+      timer.sideChanged = true;
+      timer.transitionIsSideChange = true;
+      timer.stage = _CardTimerStage.transition;
+      timer.remainingSeconds = 10;
+    } else if (timer.stage == _CardTimerStage.running &&
+        timer.isCooldown &&
+        timer.cooldownStepIndex + 1 < timer.cooldownSteps.length) {
+      timer.cooldownStepIndex++;
+      timer.transitionIsSideChange = false;
+      timer.stage = _CardTimerStage.transition;
+      timer.remainingSeconds = 15;
+    } else if (timer.stage == _CardTimerStage.transition) {
+      timer.stage = _CardTimerStage.running;
+      if (!timer.transitionIsSideChange) _configureCooldownStep(timer);
+      timer.remainingSeconds = timer.targetSeconds;
+    } else {
+      timer.stage = _CardTimerStage.finished;
+      _cardTimerTicker?.cancel();
+      _cardTimerTicker = null;
+    }
+  }
+
+  void _advanceCardTimerToNow(_CardTimer timer) {
+    if (timer.stage == _CardTimerStage.paused ||
+        timer.stage == _CardTimerStage.finished) {
+      return;
+    }
+    final now = DateTime.now();
+    final previousTick = timer.lastTickAt ?? now;
+    var elapsed = now.difference(previousTick).inSeconds;
+    if (elapsed <= 0) return;
+    timer.lastTickAt = previousTick.add(Duration(seconds: elapsed));
+    while (elapsed > 0 && timer.isActive) {
+      if (elapsed < timer.remainingSeconds) {
+        timer.remainingSeconds -= elapsed;
+        timer.elapsedPlanSeconds += elapsed;
+        return;
+      }
+      timer.elapsedPlanSeconds += timer.remainingSeconds;
+      elapsed -= timer.remainingSeconds;
+      _advanceCardTimerPhase(timer);
+    }
+  }
+
   void _tickCardTimer() {
     final timer = _cardTimer;
     if (!mounted || timer == null) return;
-    setState(() {
-      if (timer.remainingSeconds > 1) {
-        timer.remainingSeconds--;
-      } else if (timer.stage == _CardTimerStage.ready) {
-        timer.stage = _CardTimerStage.running;
-        timer.remainingSeconds = timer.targetSeconds;
-      } else if (timer.stage == _CardTimerStage.running &&
-          timer.isCooldown &&
-          timer.sideChangeRequired &&
-          !timer.sideChanged) {
-        timer.sideChanged = true;
-        timer.transitionIsSideChange = true;
-        timer.stage = _CardTimerStage.transition;
-        timer.remainingSeconds = 10;
-      } else if (timer.stage == _CardTimerStage.running &&
-          timer.isCooldown &&
-          timer.cooldownStepIndex + 1 < timer.cooldownSteps.length) {
-        timer.cooldownStepIndex++;
-        timer.transitionIsSideChange = false;
-        timer.stage = _CardTimerStage.transition;
-        timer.remainingSeconds = 30;
-      } else if (timer.stage == _CardTimerStage.transition) {
-        timer.stage = _CardTimerStage.running;
-        if (!timer.transitionIsSideChange) _configureCooldownStep(timer);
-        timer.remainingSeconds = timer.targetSeconds;
-      } else {
-        timer.stage = _CardTimerStage.finished;
-        _cardTimerTicker?.cancel();
-        _cardTimerTicker = null;
-      }
-    });
+    setState(() => _advanceCardTimerToNow(timer));
   }
 
   void _sendTimerToCast({String command = 'start', bool includePlan = false}) {
