@@ -152,8 +152,13 @@ class ScheduleRepository {
   Future<void> markInProgress(String assignmentId) =>
       _setStatus(assignmentId, 'in_progress', 'start');
 
-  Future<void> complete(String assignmentId) =>
-      _setStatus(assignmentId, 'completed', 'complete');
+  Future<void> complete(String assignmentId, {DateTime? completedOn}) =>
+      _setStatus(
+        assignmentId,
+        'completed',
+        'complete',
+        assignedDate: completedOn,
+      );
 
   /// Reopens a completed or partial workout without changing its assigned day.
   Future<void> reopen(String assignmentId) =>
@@ -162,29 +167,59 @@ class ScheduleRepository {
   Future<void> skip(String assignmentId) =>
       _setStatus(assignmentId, 'skipped', 'skip');
 
-  Future<void> defer(String assignmentId) async {
-    await database.transaction((transaction) async {
-      final before = await _pendingSnapshot(transaction);
-      final selected = before.firstWhere(
-        (row) => row['id'] == assignmentId,
-        orElse: () =>
-            throw StateError('Only a pending workout can be deferred.'),
+  /// Moves only the selected unfinished workout to the next free training
+  /// day. Later workouts deliberately keep their dates and program week.
+  Future<DateTime?> defer(String assignmentId) async {
+    return database.transaction((transaction) async {
+      final rows = await transaction.query(
+        'schedule_assignments',
+        where: "id = ? AND status IN ('planned', 'unconfirmed', 'in_progress')",
+        whereArgs: [assignmentId],
+        limit: 1,
       );
-      final selectedIndex = before.indexWhere(
-        (row) => row['id'] == selected['id'],
+      if (rows.isEmpty) return null;
+      final prior = rows.first;
+      var target = _followingTrainingDate(
+        DateTime.parse(prior['assigned_date']! as String),
       );
-      final affected = before.sublist(selectedIndex);
-      final target = _followingTrainingDate(
-        DateTime.parse(selected['assigned_date']! as String),
+      while (true) {
+        final occupied = await transaction.query(
+          'schedule_assignments',
+          columns: ['id'],
+          where:
+              "program_id = ? AND assigned_date = ? AND status != 'skipped' AND id != ?",
+          whereArgs: [programId, _day(target), assignmentId],
+          limit: 1,
+        );
+        if (occupied.isEmpty) break;
+        target = _followingTrainingDate(target);
+      }
+      final now = DateTime.now().toUtc().toIso8601String();
+      await transaction.update(
+        'schedule_assignments',
+        {
+          'assigned_date': _day(target),
+          'status': 'planned',
+          'revision': (prior['revision']! as int) + 1,
+          'updated_at': now,
+        },
+        where: 'id = ?',
+        whereArgs: [assignmentId],
       );
-      await _reflow(transaction, affected, target, now: DateTime.now().toUtc());
+      final resulting = (await transaction.query(
+        'schedule_assignments',
+        where: 'id = ?',
+        whereArgs: [assignmentId],
+        limit: 1,
+      )).first;
       await _event(
         transaction,
-        type: 'confirm_defer',
+        type: 'defer_one',
         assignmentId: assignmentId,
-        prior: affected,
-        resulting: await _pendingSnapshot(transaction),
+        prior: [prior],
+        resulting: [resulting],
       );
+      return target;
     });
   }
 
@@ -407,8 +442,9 @@ class ScheduleRepository {
   Future<void> _setStatus(
     String assignmentId,
     String status,
-    String eventType,
-  ) async {
+    String eventType, {
+    DateTime? assignedDate,
+  }) async {
     await database.transaction((transaction) async {
       final rows = await transaction.query(
         'schedule_assignments',
@@ -422,6 +458,7 @@ class ScheduleRepository {
         'schedule_assignments',
         {
           'status': status,
+          if (assignedDate != null) 'assigned_date': _day(assignedDate),
           'revision': (prior['revision']! as int) + 1,
           'updated_at': DateTime.now().toUtc().toIso8601String(),
         },

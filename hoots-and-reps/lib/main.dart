@@ -1479,76 +1479,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
     );
   }
 
-  Future<void> _moveSelectedWorkoutEarlier() async {
-    final assignment = _assignmentFor(_selected);
-    if (assignment?.status != ScheduleStatus.completed) return;
-    final assignmentId = assignment!.assignmentId;
-    final earlier = await _scheduleRepository?.moveNextPendingEarlier(
-      assignmentId,
-    );
-    await _reloadSchedule();
-    if (!mounted) return;
-    final moved = _schedule
-        .where(
-          (item) =>
-              item.sequence > assignment.sequence &&
-              (item.status == ScheduleStatus.planned ||
-                  item.status == ScheduleStatus.unconfirmed),
-        )
-        .firstOrNull;
-    if (earlier == null || moved == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No upcoming workout is available to move earlier.'),
-        ),
-      );
-      return;
-    }
-    setState(() => _selected = moved.date);
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Next workout moved'),
-        content: Text(
-          'Your next workout is now scheduled for ${DateFormat('EEEE, MMM d').format(earlier)}.',
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('GOT IT'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _skipSelectedWorkout() async {
-    final assignment = _assignmentFor(_selected);
-    if (assignment == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Skip this quest?'),
-        content: const Text(
-          'This records an intentional skip. It will not count as a completed workout.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('CANCEL'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('SKIP QUEST'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    await _scheduleRepository?.skip(assignment.assignmentId);
-    await _reloadSchedule();
-  }
-
   Future<void> _pauseProgram() async {
     final returnDate = await showDatePicker(
       context: context,
@@ -1730,7 +1660,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
       _completedWorkouts.add(workout.sequence);
       _partialWorkouts.remove(workout.sequence);
       if (assignment != null) {
-        await _scheduleRepository?.complete(assignment.assignmentId);
+        await _scheduleRepository?.complete(
+          assignment.assignmentId,
+          completedOn: DateUtils.dateOnly(DateTime.now()),
+        );
       }
     }
     await _saveProgress();
@@ -1954,7 +1887,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
     final assignment = _assignmentFor(_selected);
     if (assignment != null) {
-      await _scheduleRepository?.complete(assignment.assignmentId);
+      await _scheduleRepository?.complete(
+        assignment.assignmentId,
+        completedOn: DateUtils.dateOnly(DateTime.now()),
+      );
     }
     await _saveProgress();
     await _reloadSchedule();
@@ -1992,7 +1928,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
     final assignment = _assignmentFor(_selected);
     if (assignment != null) {
-      await _scheduleRepository?.complete(assignment.assignmentId);
+      await _scheduleRepository?.complete(
+        assignment.assignmentId,
+        completedOn: DateUtils.dateOnly(DateTime.now()),
+      );
     }
     await _saveProgress();
     await _reloadSchedule();
@@ -4580,19 +4519,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     icon: const Icon(Icons.redo),
                     color: cyan,
                   ),
-                  IconButton(
-                    tooltip: 'Skip workout',
-                    onPressed: _skipSelectedWorkout,
-                    icon: const Icon(Icons.skip_next_rounded),
-                    color: muted,
-                  ),
-                ] else
-                  IconButton(
-                    tooltip: 'Move next workout earlier',
-                    onPressed: _moveSelectedWorkoutEarlier,
-                    icon: const Icon(Icons.undo_rounded),
-                    color: cyan,
-                  ),
+                ],
               ],
             ),
           ],
