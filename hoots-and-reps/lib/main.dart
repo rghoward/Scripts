@@ -1444,10 +1444,34 @@ class _WorkoutHomeState extends State<WorkoutHome>
     await _scheduleRepository?.defer(assignment.assignmentId);
     await _reloadSchedule();
     if (!mounted) return;
+    final moved = _schedule
+        .where((item) => item.assignmentId == assignment.assignmentId)
+        .firstOrNull;
+    if (moved != null) setState(() => _selected = moved.date);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Quest moved to the next safe training day.'),
+      SnackBar(
+        content: Text(
+          moved == null
+              ? 'Quest moved to the next safe training day.'
+              : 'Quest moved to ${DateFormat('EEE, MMM d').format(moved.date)}.',
+        ),
       ),
+    );
+  }
+
+  Future<void> _moveSelectedWorkoutEarlier() async {
+    final assignment = _assignmentFor(_selected);
+    if (assignment?.status != ScheduleStatus.completed) return;
+    final assignmentId = assignment!.assignmentId;
+    await _scheduleRepository?.moveCompletedEarlier(assignmentId);
+    await _reloadSchedule();
+    if (!mounted) return;
+    final moved = _schedule
+        .where((item) => item.assignmentId == assignmentId)
+        .firstOrNull;
+    if (moved != null) setState(() => _selected = moved.date);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Completed workout moved back one day.')),
     );
   }
 
@@ -4484,6 +4508,25 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                     color: ember,
                   ),
+                ],
+              ),
+            ),
+          ],
+          if (assignment != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Text(
+                  'SCHEDULE',
+                  style: TextStyle(
+                    color: muted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+                const Spacer(),
+                if (!completed) ...[
                   IconButton(
                     tooltip: 'Move workout forward',
                     onPressed: _deferSelectedWorkout,
@@ -4496,8 +4539,14 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     icon: const Icon(Icons.skip_next_rounded),
                     color: muted,
                   ),
-                ],
-              ),
+                ] else
+                  IconButton(
+                    tooltip: 'Move completed workout back one day',
+                    onPressed: _moveSelectedWorkoutEarlier,
+                    icon: const Icon(Icons.undo_rounded),
+                    color: cyan,
+                  ),
+              ],
             ),
           ],
           if (!completed && _workoutChanges(workout, sections).isNotEmpty) ...[

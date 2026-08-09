@@ -188,6 +188,47 @@ class ScheduleRepository {
     });
   }
 
+  /// Records an early completion against the preceding calendar day. This is
+  /// intentionally separate from defer(): future workout order stays intact.
+  Future<void> moveCompletedEarlier(String assignmentId) async {
+    await database.transaction((transaction) async {
+      final rows = await transaction.query(
+        'schedule_assignments',
+        where: 'id = ? AND status = ?',
+        whereArgs: [assignmentId, 'completed'],
+        limit: 1,
+      );
+      if (rows.isEmpty) return;
+      final prior = rows.first;
+      final date = DateTime.parse(prior['assigned_date']! as String);
+      final earlier = date.subtract(const Duration(days: 1));
+      final now = DateTime.now().toUtc().toIso8601String();
+      await transaction.update(
+        'schedule_assignments',
+        {
+          'assigned_date': _day(earlier),
+          'revision': (prior['revision']! as int) + 1,
+          'updated_at': now,
+        },
+        where: 'id = ?',
+        whereArgs: [assignmentId],
+      );
+      final resulting = (await transaction.query(
+        'schedule_assignments',
+        where: 'id = ?',
+        whereArgs: [assignmentId],
+        limit: 1,
+      )).first;
+      await _event(
+        transaction,
+        type: 'move_earlier',
+        assignmentId: assignmentId,
+        prior: [prior],
+        resulting: [resulting],
+      );
+    });
+  }
+
   Future<void> pauseUntil(DateTime returnDate) async {
     await database.transaction((transaction) async {
       final before = await _pendingSnapshot(transaction);
