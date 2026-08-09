@@ -532,6 +532,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   WorkoutDay? _activeTimerWorkout;
   int? _activeTimerSectionIndex;
   final Map<String, bool> _sectionExpanded = {};
+  final Map<String, GlobalKey> _sectionCardKeys = {};
   int _pageIndex = 0;
   int _workoutTransitionDirection = 1;
   double _workoutDragDistance = 0;
@@ -1684,6 +1685,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
   Future<void> _guidedCompleteSection(WorkoutDay workout, int index) async {
     final sections = _visibleSections(workout);
     final section = sections[index];
+    final nextIndex = _nextRequiredIncompleteIndex(
+      workout,
+      afterIndex: index,
+      treatingIndexAsComplete: index,
+    );
     final note = TextEditingController();
     final proceed = await showModalBottomSheet<bool>(
       context: context,
@@ -1726,9 +1732,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
-                index + 1 < sections.length
-                    ? 'SAVE & SHOW NEXT'
-                    : 'FINISH WORKOUT',
+                nextIndex == null ? 'FINISH WORKOUT' : 'SAVE & SHOW NEXT',
               ),
             ),
             TextButton(
@@ -1750,10 +1754,58 @@ class _WorkoutHomeState extends State<WorkoutHome>
       );
     }
     await _completeSection(workout, index);
-    if (proceed == true && index + 1 < sections.length && mounted) {
-      final next = sections[index + 1];
-      setState(() => _sectionExpanded[_key(workout, index + 1)] = true);
-      if (_castConnected) await _showOnChromecast(workout, next, index + 1);
+    if (proceed == true && nextIndex != null && mounted) {
+      await _openGuidedSection(workout, nextIndex);
+    }
+  }
+
+  int? _nextRequiredIncompleteIndex(
+    WorkoutDay workout, {
+    int afterIndex = -1,
+    int? treatingIndexAsComplete,
+  }) {
+    final sections = _visibleSections(workout);
+    for (var index = afterIndex + 1; index < sections.length; index++) {
+      if (!sections[index].optional &&
+          index != treatingIndexAsComplete &&
+          _sectionState[_key(workout, index)] != true) {
+        return index;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _openGuidedSection(WorkoutDay workout, int index) async {
+    final sections = _visibleSections(workout);
+    if (index < 0 || index >= sections.length) return;
+    final assignment = _assignmentFor(_selected);
+    if (assignment != null &&
+        (assignment.status == ScheduleStatus.planned ||
+            assignment.status == ScheduleStatus.unconfirmed)) {
+      await _scheduleRepository?.markInProgress(assignment.assignmentId);
+      await _reloadSchedule();
+    }
+    if (!mounted) return;
+    final sectionKey = _key(workout, index);
+    setState(() {
+      _sectionExpanded[sectionKey] = true;
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    if (!mounted) return;
+    final target = _sectionCardKeys[sectionKey]?.currentContext;
+    if (target != null && target.mounted) {
+      await Scrollable.ensureVisible(
+        target,
+        alignment: .08,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    }
+    if (!mounted) return;
+    if (_castConnected) {
+      await _showOnChromecast(workout, sections[index], index);
+    } else if (_externalDisplayAvailable) {
+      await _showOnExternalDisplay(workout, sections[index], index);
     }
   }
 
@@ -4353,6 +4405,23 @@ class _WorkoutHomeState extends State<WorkoutHome>
           ),
           const SizedBox(height: 20),
           _variantTabs(workout),
+          if (!completed) ...[
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: () async {
+                final next = _nextRequiredIncompleteIndex(workout);
+                if (next != null) await _openGuidedSection(workout, next);
+              },
+              icon: Icon(
+                anySectionDone ? Icons.play_arrow_rounded : Icons.bolt_rounded,
+              ),
+              label: Text(
+                anySectionDone
+                    ? 'RESUME WORKOUT • $done / $required'
+                    : 'START WORKOUT • $done / $required',
+              ),
+            ),
+          ],
           if (!completed && _workoutChanges(workout, sections).isNotEmpty) ...[
             const SizedBox(height: 16),
             _workoutChangesCard(workout, sections),
@@ -5815,9 +5884,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final result = _conditioningResults[workout.sequence];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
+      key: _sectionCardKeys.putIfAbsent(sectionKey, GlobalKey.new),
       child: Stack(
         children: [
           ExpansionTile(
+            key: ValueKey('$sectionKey:${expanded ? 'open' : 'closed'}'),
             initiallyExpanded: expanded,
             onExpansionChanged: (isExpanded) =>
                 setState(() => _sectionExpanded[sectionKey] = isExpanded),
