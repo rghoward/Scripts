@@ -1836,6 +1836,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
           headingFor: _sectionHeading,
           bodyFor: (index) => _sectionBody(workout, sections[index], index),
           isComplete: (index) => _sectionState[_key(workout, index)] == true,
+          externalDisplayAvailable: _externalDisplayAvailable,
+          castConnected: _castConnected,
+          onShowExternal: (index) =>
+              _showOnExternalDisplay(workout, sections[index], index),
+          onShowCast: (index) =>
+              _showOnChromecast(workout, sections[index], index),
           onSelect: (index) =>
               _openGuidedSection(workout, index, scrollIntoView: false),
           onComplete: (index) =>
@@ -6488,6 +6494,10 @@ class GuidedWorkoutPage extends StatefulWidget {
     required this.headingFor,
     required this.bodyFor,
     required this.isComplete,
+    required this.externalDisplayAvailable,
+    required this.castConnected,
+    required this.onShowExternal,
+    required this.onShowCast,
     required this.onSelect,
     required this.onComplete,
   });
@@ -6498,6 +6508,10 @@ class GuidedWorkoutPage extends StatefulWidget {
   final String Function(String title) headingFor;
   final String Function(int index) bodyFor;
   final bool Function(int index) isComplete;
+  final bool externalDisplayAvailable;
+  final bool castConnected;
+  final Future<void> Function(int index) onShowExternal;
+  final Future<void> Function(int index) onShowCast;
   final Future<void> Function(int index) onSelect;
   final Future<({bool proceeded, int? nextIndex})> Function(int index)
   onComplete;
@@ -6634,6 +6648,32 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
                 ),
               ),
               const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (widget.externalDisplayAvailable) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => widget.onShowExternal(_index),
+                        icon: const Icon(Icons.tv_outlined),
+                        label: const Text('DISPLAY'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => widget.onShowCast(_index),
+                      icon: Icon(
+                        widget.castConnected
+                            ? Icons.cast_connected_rounded
+                            : Icons.cast_rounded,
+                      ),
+                      label: Text(widget.castConnected ? 'CASTING' : 'CAST'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               if (!completed)
                 FilledButton.icon(
                   onPressed: _complete,
