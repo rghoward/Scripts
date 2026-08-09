@@ -1441,6 +1441,26 @@ class _WorkoutHomeState extends State<WorkoutHome>
   Future<void> _deferSelectedWorkout() async {
     final assignment = _assignmentFor(_selected);
     if (assignment == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Move workout forward?'),
+        content: const Text(
+          'This moves this workout and the remaining schedule to the next safe training days.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('MOVE FORWARD'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     await _scheduleRepository?.defer(assignment.assignmentId);
     await _reloadSchedule();
     if (!mounted) return;
@@ -1463,15 +1483,26 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final assignment = _assignmentFor(_selected);
     if (assignment?.status != ScheduleStatus.completed) return;
     final assignmentId = assignment!.assignmentId;
-    await _scheduleRepository?.moveCompletedEarlier(assignmentId);
+    await _scheduleRepository?.moveNextPendingEarlier(assignmentId);
     await _reloadSchedule();
     if (!mounted) return;
     final moved = _schedule
-        .where((item) => item.assignmentId == assignmentId)
+        .where(
+          (item) =>
+              item.sequence > assignment.sequence &&
+              (item.status == ScheduleStatus.planned ||
+                  item.status == ScheduleStatus.unconfirmed),
+        )
         .firstOrNull;
     if (moved != null) setState(() => _selected = moved.date);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Completed workout moved back one day.')),
+      SnackBar(
+        content: Text(
+          moved == null
+              ? 'No upcoming workout is available to move earlier.'
+              : 'Next workout moved to ${DateFormat('EEE, MMM d').format(moved.date)}.',
+        ),
+      ),
     );
   }
 
@@ -4541,7 +4572,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
                   ),
                 ] else
                   IconButton(
-                    tooltip: 'Move completed workout back one day',
+                    tooltip: 'Move next workout earlier',
                     onPressed: _moveSelectedWorkoutEarlier,
                     icon: const Icon(Icons.undo_rounded),
                     color: cyan,

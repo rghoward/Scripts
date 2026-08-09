@@ -188,15 +188,34 @@ class ScheduleRepository {
     });
   }
 
-  /// Records an early completion against the preceding calendar day. This is
-  /// intentionally separate from defer(): future workout order stays intact.
-  Future<void> moveCompletedEarlier(String assignmentId) async {
+  /// Pulls the next unfinished workout one calendar day earlier after an
+  /// athlete completes today's work ahead of schedule.
+  Future<void> moveNextPendingEarlier(String assignmentId) async {
     await database.transaction((transaction) async {
-      final rows = await transaction.query(
-        'schedule_assignments',
-        where: 'id = ? AND status = ?',
-        whereArgs: [assignmentId, 'completed'],
-        limit: 1,
+      final completedRows = await transaction.rawQuery(
+        '''
+        SELECT p.sequence_number
+        FROM schedule_assignments a
+        JOIN workout_prescriptions p ON p.id = a.workout_id
+        WHERE a.id = ? AND a.status = 'completed'
+        LIMIT 1
+        ''',
+        [assignmentId],
+      );
+      if (completedRows.isEmpty) return;
+      final sequence = completedRows.first['sequence_number']! as int;
+      final rows = await transaction.rawQuery(
+        '''
+        SELECT a.id, a.assigned_date, a.status, a.revision
+        FROM schedule_assignments a
+        JOIN workout_prescriptions p ON p.id = a.workout_id
+        WHERE a.program_id = ?
+          AND p.sequence_number > ?
+          AND a.status IN ('planned', 'unconfirmed')
+        ORDER BY p.sequence_number
+        LIMIT 1
+        ''',
+        [programId, sequence],
       );
       if (rows.isEmpty) return;
       final prior = rows.first;
@@ -211,18 +230,18 @@ class ScheduleRepository {
           'updated_at': now,
         },
         where: 'id = ?',
-        whereArgs: [assignmentId],
+        whereArgs: [prior['id']! as String],
       );
       final resulting = (await transaction.query(
         'schedule_assignments',
         where: 'id = ?',
-        whereArgs: [assignmentId],
+        whereArgs: [prior['id']! as String],
         limit: 1,
       )).first;
       await _event(
         transaction,
-        type: 'move_earlier',
-        assignmentId: assignmentId,
+        type: 'advance_next',
+        assignmentId: prior['id']! as String,
         prior: [prior],
         resulting: [resulting],
       );
