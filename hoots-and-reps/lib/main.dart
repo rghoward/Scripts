@@ -678,17 +678,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
     )) {
       await scheduleRepository.complete(assignment.assignmentId);
     }
-    // User-requested schedule repair: keep the first three completed days
-    // intact, restart Day 4 on Sunday, August 9, and preserve one workout per
-    // day for every unfinished assignment after it.
-    const scheduleRepairKey = 'schedule_repair_day4_2026_08_09';
-    if (!(await store.getBool(scheduleRepairKey) ?? false)) {
-      await scheduleRepository.rescheduleUnfinishedFrom(
-        4,
-        DateTime(2026, 8, 9),
-      );
-      await store.setBool(scheduleRepairKey, true);
-    }
     await scheduleRepository.markPastUnresolved(
       DateUtils.dateOnly(DateTime.now()),
     );
@@ -724,6 +713,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
       _partialWorkouts.addAll(partialWorkouts.map(int.parse));
       _ready = true;
     });
+    // This user-requested repair must never keep the workout shell on its
+    // loading state. Run it after the app is usable, then refresh the calendar.
+    unawaited(_applyDay4ScheduleRepair());
     if (!setupComplete) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _openFirstRunSetup());
     }
@@ -737,6 +729,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
     if (start == null) {
       await store.setString('schedule_start', _scheduleStart.toIso8601String());
+    }
+  }
+
+  Future<void> _applyDay4ScheduleRepair() async {
+    const repairKey = 'schedule_repair_day4_2026_08_09';
+    final store = _store;
+    final repository = _scheduleRepository;
+    if (store == null || repository == null) return;
+    if (await store.getBool(repairKey) ?? false) return;
+    try {
+      await repository.rescheduleUnfinishedFrom(4, DateTime(2026, 8, 9));
+      await store.setBool(repairKey, true);
+      await _reloadSchedule();
+    } catch (_) {
+      // The normal workout surface stays available if a local database repair
+      // is interrupted; the next app launch can safely retry it.
     }
   }
 

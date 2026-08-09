@@ -241,18 +241,6 @@ class ScheduleRepository {
         [programId, sequence],
       );
       if (rows.isEmpty) return;
-      final prior = await transaction.rawQuery(
-        '''
-        SELECT a.id, a.assigned_date, a.status, a.revision
-        FROM schedule_assignments a
-        JOIN workout_prescriptions p ON p.id = a.workout_id
-        WHERE a.program_id = ?
-          AND p.sequence_number >= ?
-          AND a.status IN ('planned', 'unconfirmed', 'in_progress')
-        ORDER BY p.sequence_number
-        ''',
-        [programId, sequence],
-      );
       var date = DateTime(startsOn.year, startsOn.month, startsOn.day);
       final now = DateTime.now().toUtc().toIso8601String();
       for (final row in rows) {
@@ -269,13 +257,6 @@ class ScheduleRepository {
         );
         date = _followingTrainingDate(date);
       }
-      await _event(
-        transaction,
-        type: 'repair_schedule',
-        assignmentId: null,
-        prior: prior,
-        resulting: await _pendingSnapshot(transaction),
-      );
     });
   }
 
