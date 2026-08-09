@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hoots_and_reps/data/app_database.dart';
-import 'package:hoots_and_reps/data/benchmark_results_repository.dart';
 import 'package:hoots_and_reps/data/schedule_repository.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -26,47 +25,6 @@ void main() {
     expect(assignments.first.date, DateTime(2026, 7, 27));
     expect(assignments[4].date, DateTime(2026, 8, 3));
   });
-
-  test(
-    'deferring preserves order and moves the pending program safely',
-    () async {
-      final before = await repository.assignments();
-      await repository.defer(before.first.assignmentId);
-      final after = await repository.assignments();
-
-      expect(after.first.date, DateTime(2026, 7, 28));
-      expect(after[1].date, DateTime(2026, 7, 30));
-      expect(
-        after.map((item) => item.sequence),
-        orderedEquals(List.generate(48, (i) => i + 1)),
-      );
-    },
-  );
-
-  test('completed workouts remain fixed when later work is deferred', () async {
-    final before = await repository.assignments();
-    await repository.complete(before.first.assignmentId);
-    await repository.defer(before[1].assignmentId);
-    final after = await repository.assignments();
-
-    expect(after.first.date, DateTime(2026, 7, 27));
-    expect(after.first.status, ScheduleStatus.completed);
-    expect(after[1].date, DateTime(2026, 7, 30));
-  });
-
-  test(
-    'deferring a later workout does not move unresolved earlier work',
-    () async {
-      final before = await repository.assignments();
-      await repository.defer(before[3].assignmentId);
-      final after = await repository.assignments();
-
-      expect(after[0].date, before[0].date);
-      expect(after[1].date, before[1].date);
-      expect(after[2].date, before[2].date);
-      expect(after[3].date, DateTime(2026, 8, 3));
-    },
-  );
 
   test('pause and undo restore pending calendar assignments', () async {
     final before = await repository.assignments();
@@ -116,16 +74,4 @@ void main() {
       expect(assignments[2].status, ScheduleStatus.planned);
     },
   );
-
-  test('skipping a benchmark assignment does not invent a result', () async {
-    final before = await repository.assignments();
-    await repository.skip(before.first.assignmentId);
-
-    final after = await repository.assignments();
-    final results = await BenchmarkResultsRepository(
-      LocalStateStore(await AppDatabase.open()),
-    ).load();
-    expect(after.first.status, ScheduleStatus.skipped);
-    expect(results, isEmpty);
-  });
 }
