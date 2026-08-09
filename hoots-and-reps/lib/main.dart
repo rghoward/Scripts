@@ -517,6 +517,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
   String? _pendingCastSectionKey;
   _CardTimer? _cardTimer;
   Timer? _cardTimerTicker;
+  WorkoutDay? _activeTimerWorkout;
+  int? _activeTimerSectionIndex;
   final Map<String, bool> _sectionExpanded = {};
   int _pageIndex = 0;
   int _workoutTransitionDirection = 1;
@@ -1664,6 +1666,82 @@ class _WorkoutHomeState extends State<WorkoutHome>
         !(await _store?.containsKey('session_feedback_${workout.sequence}') ??
             false)) {
       await _collectFeedback(workout);
+    }
+  }
+
+  Future<void> _guidedCompleteSection(WorkoutDay workout, int index) async {
+    final sections = _visibleSections(workout);
+    final section = sections[index];
+    final note = TextEditingController();
+    final proceed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: card,
+      builder: (context) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          22,
+          24,
+          MediaQuery.viewInsetsOf(context).bottom + 28,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'COMPLETE • ${_sectionHeading(section.title)}',
+              style: const TextStyle(
+                color: ember,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add anything worth keeping, then continue when you are ready.',
+              style: TextStyle(color: muted),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: note,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Optional note',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                index + 1 < sections.length
+                    ? 'SAVE & SHOW NEXT'
+                    : 'FINISH WORKOUT',
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('SAVE & STAY HERE'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (section.title.startsWith('CONDITIONING')) {
+      await _recordConditioningResult(workout);
+    }
+    if (note.text.trim().isNotEmpty) {
+      await _store?.setString(
+        'section_note_${_key(workout, index)}',
+        note.text.trim(),
+      );
+    }
+    await _completeSection(workout, index);
+    if (proceed == true && index + 1 < sections.length && mounted) {
+      final next = sections[index + 1];
+      setState(() => _sectionExpanded[_key(workout, index + 1)] = true);
+      if (_castConnected) await _showOnChromecast(workout, next, index + 1);
     }
   }
 
@@ -5394,6 +5472,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
         conditioning.format.toLowerCase().contains('emom');
     _cardTimerTicker?.cancel();
     setState(() {
+      _activeTimerWorkout = workout;
+      _activeTimerSectionIndex = index;
       _cardTimer = _CardTimer(
         sectionKey: sectionKey,
         label: _sectionHeading(section.title),
@@ -5521,7 +5601,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
   void _tickCardTimer() {
     final timer = _cardTimer;
     if (!mounted || timer == null) return;
-    setState(() => _advanceCardTimerToNow(timer));
+    var justFinished = false;
+    setState(() {
+      final wasActive = timer.isActive;
+      _advanceCardTimerToNow(timer);
+      justFinished = wasActive && !timer.isActive;
+    });
+    final workout = _activeTimerWorkout;
+    final index = _activeTimerSectionIndex;
+    if (justFinished && workout != null && index != null) {
+      unawaited(_guidedCompleteSection(workout, index));
+    }
   }
 
   void _sendTimerToCast({String command = 'start', bool includePlan = false}) {
@@ -5867,7 +5957,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                     InkWell(
                       onTap: trainingSubsections.isEmpty
-                          ? () => _completeSection(workout, index)
+                          ? () => _guidedCompleteSection(workout, index)
                           : null,
                       borderRadius: BorderRadius.circular(20),
                       child: Container(

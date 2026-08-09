@@ -14,6 +14,9 @@
   let emomSequencePlayRequested = false;
   let emomSequencePlaying = false;
   let emomSequencePhaseId = '';
+  let switchSidesLoading = false;
+  let switchSidesLoaded = false;
+  let switchSidesPlaying = false;
   let suppressNextGo = false;
   let activePlan = null;
   let currentPhaseIndex = 0;
@@ -39,7 +42,7 @@
   function playNextCue() {
     if (cuePlaying || !cueQueue.length) return;
     const name = cueQueue.shift();
-    const url = new URL(`timer-${name}.mp3?v=caf-ready-sequence-16`, window.location.href).href;
+    const url = new URL(`timer-${name}.mp3?v=switch-lead-in-30`, window.location.href).href;
     const media = new cast.framework.messages.MediaInformation();
     media.contentId = url;
     media.contentUrl = url;
@@ -84,6 +87,40 @@
     media.contentType = 'audio/mpeg';
     media.streamType = cast.framework.messages.StreamType.BUFFERED;
     return media;
+  }
+
+  function switchSidesMedia() {
+    const url = new URL('timer-switch-sides.mp3?v=switch-preload-31', window.location.href).href;
+    const media = new cast.framework.messages.MediaInformation();
+    media.contentId = url;
+    media.contentUrl = url;
+    media.contentType = 'audio/mpeg';
+    media.streamType = cast.framework.messages.StreamType.BUFFERED;
+    return media;
+  }
+
+  function preloadSwitchSides() {
+    if (switchSidesLoading || switchSidesLoaded || switchSidesPlaying) return;
+    switchSidesLoading = true;
+    const request = new cast.framework.messages.LoadRequestData();
+    request.media = switchSidesMedia();
+    request.autoplay = false;
+    request.currentTime = 0;
+    try {
+      playerManager.load(request);
+    } catch (_) {
+      switchSidesLoading = false;
+    }
+  }
+
+  function playSwitchSides(eventId) {
+    if (switchSidesLoaded) {
+      switchSidesLoaded = false;
+      switchSidesPlaying = true;
+      playerManager.play();
+      return;
+    }
+    playOnce(eventId, 'switch-sides');
   }
 
   // Load the complete 3–2–1–Go recording during the seven-second lead-in.
@@ -165,6 +202,10 @@
         emomSequenceLoaded = false;
         return;
       }
+      if (switchSidesPlaying) {
+        switchSidesPlaying = false;
+        return;
+      }
       finishCue();
     },
   );
@@ -183,6 +224,9 @@
         emomSequenceLoading = false;
         emomSequenceLoaded = true;
         if (emomSequencePlayRequested) playEmomSequence();
+      } else if (switchSidesLoading) {
+        switchSidesLoading = false;
+        switchSidesLoaded = true;
       }
     },
   );
@@ -249,7 +293,10 @@
     }
     phaseStartedAt = now - Math.max(0, carry) * 1000;
     pausedElapsed = 0;
-    playPhaseStart();
+    // Render the next phase before CAF starts loading its cue. A synchronous
+    // media load can otherwise leave the previous second on screen while the
+    // new “Go” has already begun playing.
+    window.setTimeout(playPhaseStart, 0);
   }
 
   function playOnce(eventId, name) {
@@ -265,7 +312,7 @@
     if (current.kind === 'transition') {
       playOnce(eventId, 'transition');
     } else if (current.kind === 'sideChange') {
-      playOnce(eventId, 'switch-sides');
+      playSwitchSides(eventId);
     } else if (suppressNextGo) {
       // The countdown sprite already says “Go” at the exact phase boundary.
       // Do not also enqueue a separate Go for the first EMOM/active phase.
@@ -279,6 +326,10 @@
       }
     } else if (current.kind !== 'ready') {
       playOnce(eventId, 'go');
+    }
+    const next = activePlan.phases[currentPhaseIndex + 1];
+    if (next?.kind === 'sideChange') {
+      window.setTimeout(preloadSwitchSides, 5000);
     }
   }
 
@@ -401,6 +452,9 @@
     emomSequencePlayRequested = false;
     emomSequencePlaying = false;
     emomSequencePhaseId = '';
+    switchSidesLoading = false;
+    switchSidesLoaded = false;
+    switchSidesPlaying = false;
     // Joining a cast already in progress should mirror the live phase
     // silently; only a brand-new timer needs the countdown audio primed.
     if (Number(plan.startOffsetSeconds || 0) === 0) preloadReadySequence();
@@ -458,7 +512,8 @@
     } catch (_) {}
   });
 
-  renderHandle = window.setInterval(renderTimer, 200);
+  // Keep phase flips visually tight even while CAF is preparing a cue.
+  renderHandle = window.setInterval(renderTimer, 50);
   const options = new cast.framework.CastReceiverOptions();
   options.customNamespaces = { [namespace]: cast.framework.system.MessageType.JSON };
   options.mediaElement = cuePlayer;
