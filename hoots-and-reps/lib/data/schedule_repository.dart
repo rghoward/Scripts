@@ -164,65 +164,6 @@ class ScheduleRepository {
   Future<void> reopen(String assignmentId) =>
       _setStatus(assignmentId, 'in_progress', 'reopen');
 
-  Future<void> skip(String assignmentId) =>
-      _setStatus(assignmentId, 'skipped', 'skip');
-
-  /// Moves only the selected unfinished workout to the next free training
-  /// day. Later workouts deliberately keep their dates and program week.
-  Future<DateTime?> defer(String assignmentId) async {
-    return database.transaction((transaction) async {
-      final rows = await transaction.query(
-        'schedule_assignments',
-        where: "id = ? AND status IN ('planned', 'unconfirmed', 'in_progress')",
-        whereArgs: [assignmentId],
-        limit: 1,
-      );
-      if (rows.isEmpty) return null;
-      final prior = rows.first;
-      var target = _followingTrainingDate(
-        DateTime.parse(prior['assigned_date']! as String),
-      );
-      while (true) {
-        final occupied = await transaction.query(
-          'schedule_assignments',
-          columns: ['id'],
-          where:
-              "program_id = ? AND assigned_date = ? AND status != 'skipped' AND id != ?",
-          whereArgs: [programId, _day(target), assignmentId],
-          limit: 1,
-        );
-        if (occupied.isEmpty) break;
-        target = _followingTrainingDate(target);
-      }
-      final now = DateTime.now().toUtc().toIso8601String();
-      await transaction.update(
-        'schedule_assignments',
-        {
-          'assigned_date': _day(target),
-          'status': 'planned',
-          'revision': (prior['revision']! as int) + 1,
-          'updated_at': now,
-        },
-        where: 'id = ?',
-        whereArgs: [assignmentId],
-      );
-      final resulting = (await transaction.query(
-        'schedule_assignments',
-        where: 'id = ?',
-        whereArgs: [assignmentId],
-        limit: 1,
-      )).first;
-      await _event(
-        transaction,
-        type: 'defer_one',
-        assignmentId: assignmentId,
-        prior: [prior],
-        resulting: [resulting],
-      );
-      return target;
-    });
-  }
-
   /// One-time athlete schedule repair: preserve completed work before
   /// [sequence] and place that sequence on [startsOn], then give each later
   /// unfinished workout its own following training day.
@@ -257,67 +198,6 @@ class ScheduleRepository {
         );
         date = _followingTrainingDate(date);
       }
-    });
-  }
-
-  /// Pulls the next unfinished workout one calendar day earlier after an
-  /// athlete completes today's work ahead of schedule.
-  Future<DateTime?> moveNextPendingEarlier(String assignmentId) async {
-    return database.transaction((transaction) async {
-      final completedRows = await transaction.rawQuery(
-        '''
-        SELECT p.sequence_number
-        FROM schedule_assignments a
-        JOIN workout_prescriptions p ON p.id = a.workout_id
-        WHERE a.id = ? AND a.status = 'completed'
-        LIMIT 1
-        ''',
-        [assignmentId],
-      );
-      if (completedRows.isEmpty) return null;
-      final sequence = completedRows.first['sequence_number']! as int;
-      final rows = await transaction.rawQuery(
-        '''
-        SELECT a.id, a.assigned_date, a.status, a.revision
-        FROM schedule_assignments a
-        JOIN workout_prescriptions p ON p.id = a.workout_id
-        WHERE a.program_id = ?
-          AND p.sequence_number > ?
-          AND a.status IN ('planned', 'unconfirmed', 'in_progress')
-        ORDER BY p.sequence_number
-        LIMIT 1
-        ''',
-        [programId, sequence],
-      );
-      if (rows.isEmpty) return null;
-      final prior = rows.first;
-      final date = DateTime.parse(prior['assigned_date']! as String);
-      final earlier = date.subtract(const Duration(days: 1));
-      final now = DateTime.now().toUtc().toIso8601String();
-      await transaction.update(
-        'schedule_assignments',
-        {
-          'assigned_date': _day(earlier),
-          'revision': (prior['revision']! as int) + 1,
-          'updated_at': now,
-        },
-        where: 'id = ?',
-        whereArgs: [prior['id']! as String],
-      );
-      final resulting = (await transaction.query(
-        'schedule_assignments',
-        where: 'id = ?',
-        whereArgs: [prior['id']! as String],
-        limit: 1,
-      )).first;
-      await _event(
-        transaction,
-        type: 'advance_next',
-        assignmentId: prior['id']! as String,
-        prior: [prior],
-        resulting: [resulting],
-      );
-      return earlier;
     });
   }
 

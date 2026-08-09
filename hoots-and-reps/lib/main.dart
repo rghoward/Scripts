@@ -1457,47 +1457,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
   }
 
-  Future<void> _deferSelectedWorkout() async {
-    final assignment = _assignmentFor(_selected);
-    if (assignment == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Move workout forward?'),
-        content: const Text(
-          'This moves this workout and the remaining schedule to the next safe training days.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('CANCEL'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('MOVE FORWARD'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    await _scheduleRepository?.defer(assignment.assignmentId);
-    await _reloadSchedule();
-    if (!mounted) return;
-    final moved = _schedule
-        .where((item) => item.assignmentId == assignment.assignmentId)
-        .firstOrNull;
-    if (moved != null) setState(() => _selected = moved.date);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          moved == null
-              ? 'Quest moved to the next safe training day.'
-              : 'Quest moved to ${DateFormat('EEE, MMM d').format(moved.date)}.',
-        ),
-      ),
-    );
-  }
-
   Future<void> _pauseProgram() async {
     final returnDate = await showDatePicker(
       context: context,
@@ -4515,31 +4474,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                   ),
                 ],
               ),
-            ),
-          ],
-          if (assignment != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Text(
-                  'SCHEDULE',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: .8,
-                  ),
-                ),
-                const Spacer(),
-                if (!completed) ...[
-                  IconButton(
-                    tooltip: 'Move workout forward',
-                    onPressed: _deferSelectedWorkout,
-                    icon: const Icon(Icons.redo),
-                    color: cyan,
-                  ),
-                ],
-              ],
             ),
           ],
           if (!completed && _workoutChanges(workout, sections).isNotEmpty) ...[
