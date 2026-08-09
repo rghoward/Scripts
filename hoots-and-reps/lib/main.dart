@@ -1483,7 +1483,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final assignment = _assignmentFor(_selected);
     if (assignment?.status != ScheduleStatus.completed) return;
     final assignmentId = assignment!.assignmentId;
-    await _scheduleRepository?.moveNextPendingEarlier(assignmentId);
+    final earlier = await _scheduleRepository?.moveNextPendingEarlier(
+      assignmentId,
+    );
     await _reloadSchedule();
     if (!mounted) return;
     final moved = _schedule
@@ -1494,14 +1496,28 @@ class _WorkoutHomeState extends State<WorkoutHome>
                   item.status == ScheduleStatus.unconfirmed),
         )
         .firstOrNull;
-    if (moved != null) setState(() => _selected = moved.date);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          moved == null
-              ? 'No upcoming workout is available to move earlier.'
-              : 'Next workout moved to ${DateFormat('EEE, MMM d').format(moved.date)}.',
+    if (earlier == null || moved == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No upcoming workout is available to move earlier.'),
         ),
+      );
+      return;
+    }
+    setState(() => _selected = moved.date);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Next workout moved'),
+        content: Text(
+          'Your next workout is now scheduled for ${DateFormat('EEEE, MMM d').format(earlier)}.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('GOT IT'),
+          ),
+        ],
       ),
     );
   }

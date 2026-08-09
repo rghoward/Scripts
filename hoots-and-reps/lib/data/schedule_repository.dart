@@ -190,8 +190,8 @@ class ScheduleRepository {
 
   /// Pulls the next unfinished workout one calendar day earlier after an
   /// athlete completes today's work ahead of schedule.
-  Future<void> moveNextPendingEarlier(String assignmentId) async {
-    await database.transaction((transaction) async {
+  Future<DateTime?> moveNextPendingEarlier(String assignmentId) async {
+    return database.transaction((transaction) async {
       final completedRows = await transaction.rawQuery(
         '''
         SELECT p.sequence_number
@@ -202,7 +202,7 @@ class ScheduleRepository {
         ''',
         [assignmentId],
       );
-      if (completedRows.isEmpty) return;
+      if (completedRows.isEmpty) return null;
       final sequence = completedRows.first['sequence_number']! as int;
       final rows = await transaction.rawQuery(
         '''
@@ -211,13 +211,13 @@ class ScheduleRepository {
         JOIN workout_prescriptions p ON p.id = a.workout_id
         WHERE a.program_id = ?
           AND p.sequence_number > ?
-          AND a.status IN ('planned', 'unconfirmed')
+          AND a.status IN ('planned', 'unconfirmed', 'in_progress')
         ORDER BY p.sequence_number
         LIMIT 1
         ''',
         [programId, sequence],
       );
-      if (rows.isEmpty) return;
+      if (rows.isEmpty) return null;
       final prior = rows.first;
       final date = DateTime.parse(prior['assigned_date']! as String);
       final earlier = date.subtract(const Duration(days: 1));
@@ -245,6 +245,7 @@ class ScheduleRepository {
         prior: [prior],
         resulting: [resulting],
       );
+      return earlier;
     });
   }
 
