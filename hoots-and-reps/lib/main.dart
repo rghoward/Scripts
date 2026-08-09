@@ -1836,12 +1836,16 @@ class _WorkoutHomeState extends State<WorkoutHome>
           headingFor: _sectionHeading,
           bodyFor: (index) => _sectionBody(workout, sections[index], index),
           isComplete: (index) => _sectionState[_key(workout, index)] == true,
+          canSwap: (index) =>
+              _substitutions.detectedMovements(sections[index].body).isNotEmpty,
           externalDisplayAvailable: _externalDisplayAvailable,
           castConnected: _castConnected,
           onShowExternal: (index) =>
               _showOnExternalDisplay(workout, sections[index], index),
           onShowCast: (index) =>
               _showOnChromecast(workout, sections[index], index),
+          onSwap: (index) =>
+              _chooseMovementSwap(workout, sections[index], index),
           onSelect: (index) =>
               _openGuidedSection(workout, index, scrollIntoView: false),
           onComplete: (index) =>
@@ -6144,19 +6148,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                             trainingSubsections[subsectionIndex],
                           ),
                         ),
-                      if (canSwap && !completed) ...[
-                        const SizedBox(height: 14),
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              _chooseMovementSwap(workout, section, index),
-                          icon: const Icon(Icons.swap_horiz),
-                          label: Text(
-                            substitutions.isEmpty
-                                ? 'SWAP A MOVEMENT'
-                                : 'MANAGE SUBSTITUTIONS',
-                          ),
-                        ),
-                      ],
                       if (isConditioning) ...[
                         const SizedBox(height: 14),
                         if (result != null)
@@ -6494,10 +6485,12 @@ class GuidedWorkoutPage extends StatefulWidget {
     required this.headingFor,
     required this.bodyFor,
     required this.isComplete,
+    required this.canSwap,
     required this.externalDisplayAvailable,
     required this.castConnected,
     required this.onShowExternal,
     required this.onShowCast,
+    required this.onSwap,
     required this.onSelect,
     required this.onComplete,
   });
@@ -6508,10 +6501,12 @@ class GuidedWorkoutPage extends StatefulWidget {
   final String Function(String title) headingFor;
   final String Function(int index) bodyFor;
   final bool Function(int index) isComplete;
+  final bool Function(int index) canSwap;
   final bool externalDisplayAvailable;
   final bool castConnected;
   final Future<void> Function(int index) onShowExternal;
   final Future<void> Function(int index) onShowCast;
+  final Future<void> Function(int index) onSwap;
   final Future<void> Function(int index) onSelect;
   final Future<({bool proceeded, int? nextIndex})> Function(int index)
   onComplete;
@@ -6649,28 +6644,34 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
               ),
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (widget.externalDisplayAvailable) ...[
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => widget.onShowExternal(_index),
-                        icon: const Icon(Icons.tv_outlined),
-                        label: const Text('DISPLAY'),
-                      ),
+                  if (widget.externalDisplayAvailable)
+                    IconButton(
+                      tooltip: 'Show this card on the external display',
+                      onPressed: () => widget.onShowExternal(_index),
+                      icon: const Icon(Icons.tv_outlined),
+                      color: cyan,
                     ),
-                    const SizedBox(width: 10),
-                  ],
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => widget.onShowCast(_index),
-                      icon: Icon(
-                        widget.castConnected
-                            ? Icons.cast_connected_rounded
-                            : Icons.cast_rounded,
-                      ),
-                      label: Text(widget.castConnected ? 'CASTING' : 'CAST'),
+                  IconButton(
+                    tooltip: widget.castConnected
+                        ? 'Update Chromecast with this card'
+                        : 'Cast this card to a Chromecast',
+                    onPressed: () => widget.onShowCast(_index),
+                    icon: Icon(
+                      widget.castConnected
+                          ? Icons.cast_connected_rounded
+                          : Icons.cast_rounded,
                     ),
+                    color: cyan,
                   ),
+                  if (!completed && widget.canSwap(_index))
+                    IconButton(
+                      tooltip: 'Swap a movement',
+                      onPressed: () => widget.onSwap(_index),
+                      icon: const Icon(Icons.swap_horiz),
+                      color: cyan,
+                    ),
                 ],
               ),
               const SizedBox(height: 10),
