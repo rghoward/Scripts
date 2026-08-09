@@ -1682,7 +1682,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
   }
 
-  Future<void> _guidedCompleteSection(WorkoutDay workout, int index) async {
+  Future<({bool proceeded, int? nextIndex})> _guidedCompleteSection(
+    WorkoutDay workout,
+    int index, {
+    bool openNext = true,
+  }) async {
     final sections = _visibleSections(workout);
     final section = sections[index];
     final nextIndex = _nextRequiredIncompleteIndex(
@@ -1743,7 +1747,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         ),
       ),
     );
-    if (!mounted) return;
+    if (!mounted) return (proceeded: false, nextIndex: null);
     if (section.title.startsWith('CONDITIONING')) {
       await _recordConditioningResult(workout);
     }
@@ -1754,9 +1758,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
       );
     }
     await _completeSection(workout, index);
-    if (proceed == true && nextIndex != null && mounted) {
+    if (proceed == true && nextIndex != null && mounted && openNext) {
       await _openGuidedSection(workout, nextIndex);
     }
+    return (proceeded: proceed == true, nextIndex: nextIndex);
   }
 
   int? _nextRequiredIncompleteIndex(
@@ -1775,7 +1780,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
     return null;
   }
 
-  Future<void> _openGuidedSection(WorkoutDay workout, int index) async {
+  Future<void> _openGuidedSection(
+    WorkoutDay workout,
+    int index, {
+    bool scrollIntoView = true,
+  }) async {
     final sections = _visibleSections(workout);
     if (index < 0 || index >= sections.length) return;
     final assignment = _assignmentFor(_selected);
@@ -1790,16 +1799,18 @@ class _WorkoutHomeState extends State<WorkoutHome>
     setState(() {
       _sectionExpanded[sectionKey] = true;
     });
-    await Future<void>.delayed(const Duration(milliseconds: 80));
-    if (!mounted) return;
-    final target = _sectionCardKeys[sectionKey]?.currentContext;
-    if (target != null && target.mounted) {
-      await Scrollable.ensureVisible(
-        target,
-        alignment: .08,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
+    if (scrollIntoView) {
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+      if (!mounted) return;
+      final target = _sectionCardKeys[sectionKey]?.currentContext;
+      if (target != null && target.mounted) {
+        await Scrollable.ensureVisible(
+          target,
+          alignment: .08,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
+        );
+      }
     }
     if (!mounted) return;
     if (_castConnected) {
@@ -1807,6 +1818,31 @@ class _WorkoutHomeState extends State<WorkoutHome>
     } else if (_externalDisplayAvailable) {
       await _showOnExternalDisplay(workout, sections[index], index);
     }
+  }
+
+  Future<void> _startGuidedWorkout(WorkoutDay workout) async {
+    final initialIndex = _nextRequiredIncompleteIndex(workout);
+    if (initialIndex == null) return;
+    await _openGuidedSection(workout, initialIndex, scrollIntoView: false);
+    if (!mounted) return;
+    final sections = _visibleSections(workout);
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => GuidedWorkoutPage(
+          workout: workout,
+          sections: sections,
+          initialIndex: initialIndex,
+          headingFor: _sectionHeading,
+          bodyFor: (index) => _sectionBody(workout, sections[index], index),
+          isComplete: (index) => _sectionState[_key(workout, index)] == true,
+          onSelect: (index) =>
+              _openGuidedSection(workout, index, scrollIntoView: false),
+          onComplete: (index) =>
+              _guidedCompleteSection(workout, index, openNext: false),
+        ),
+      ),
+    );
   }
 
   Future<void> _markWorkoutComplete(WorkoutDay workout) async {
@@ -4409,8 +4445,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
             const SizedBox(height: 14),
             FilledButton.icon(
               onPressed: () async {
-                final next = _nextRequiredIncompleteIndex(workout);
-                if (next != null) await _openGuidedSection(workout, next);
+                await _startGuidedWorkout(workout);
               },
               icon: Icon(
                 anySectionDone ? Icons.play_arrow_rounded : Icons.bolt_rounded,
@@ -6436,6 +6471,189 @@ class _WorkoutHomeState extends State<WorkoutHome>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Focused, one-card-at-a-time route for the guided workout flow. The normal
+/// day view remains available underneath for athletes who prefer manual cards.
+class GuidedWorkoutPage extends StatefulWidget {
+  const GuidedWorkoutPage({
+    super.key,
+    required this.workout,
+    required this.sections,
+    required this.initialIndex,
+    required this.headingFor,
+    required this.bodyFor,
+    required this.isComplete,
+    required this.onSelect,
+    required this.onComplete,
+  });
+
+  final WorkoutDay workout;
+  final List<WorkoutSection> sections;
+  final int initialIndex;
+  final String Function(String title) headingFor;
+  final String Function(int index) bodyFor;
+  final bool Function(int index) isComplete;
+  final Future<void> Function(int index) onSelect;
+  final Future<({bool proceeded, int? nextIndex})> Function(int index)
+  onComplete;
+
+  @override
+  State<GuidedWorkoutPage> createState() => _GuidedWorkoutPageState();
+}
+
+class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
+  late int _index = widget.initialIndex;
+
+  List<int> get _required => [
+    for (var index = 0; index < widget.sections.length; index++)
+      if (!widget.sections[index].optional) index,
+  ];
+
+  int? get _nextIndex {
+    for (final index in _required) {
+      if (index > _index && !widget.isComplete(index)) return index;
+    }
+    return null;
+  }
+
+  Future<void> _show(int index) async {
+    await widget.onSelect(index);
+    if (mounted) setState(() => _index = index);
+  }
+
+  Future<void> _complete() async {
+    final outcome = await widget.onComplete(_index);
+    if (!mounted) return;
+    if (outcome.proceeded && outcome.nextIndex != null) {
+      await _show(outcome.nextIndex!);
+    } else {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final section = widget.sections[_index];
+    final completed = widget.isComplete(_index);
+    final progress = _required.indexOf(_index) + 1;
+    final next = _nextIndex;
+    return Scaffold(
+      backgroundColor: paper,
+      appBar: AppBar(
+        backgroundColor: paper,
+        foregroundColor: ink,
+        elevation: 0,
+        title: const Text(
+          'GUIDED WORKOUT',
+          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close, size: 18),
+            label: const Text('EXIT'),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                widget.workout.title,
+                style: const TextStyle(
+                  color: muted,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$progress / ${_required.length} REQUIRED SECTIONS',
+                style: const TextStyle(
+                  color: cyan,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: .8,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: graphite,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: completed ? success : border,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          completed ? 'COMPLETE' : 'CURRENT SECTION',
+                          style: TextStyle(
+                            color: completed ? success : ember,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.headingFor(section.title),
+                          style: const TextStyle(
+                            color: ink,
+                            fontSize: 29,
+                            fontWeight: FontWeight.w900,
+                            height: 1.05,
+                          ),
+                        ),
+                        const Divider(color: border, height: 32),
+                        Text(
+                          widget.bodyFor(_index),
+                          style: const TextStyle(
+                            color: ink,
+                            fontSize: 18,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (!completed)
+                FilledButton.icon(
+                  onPressed: _complete,
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('COMPLETE SECTION'),
+                )
+              else if (next != null)
+                FilledButton.icon(
+                  onPressed: () => _show(next),
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: const Text('SHOW NEXT SECTION'),
+                )
+              else
+                FilledButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.celebration_outlined),
+                  label: const Text('FINISH WORKOUT'),
+                ),
+            ],
+          ),
         ),
       ),
     );
