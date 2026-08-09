@@ -11,6 +11,10 @@ import android.os.Bundle
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.net.Uri
 import android.util.TypedValue
 import android.view.Display
 import android.view.Gravity
@@ -33,6 +37,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import kotlin.math.ceil
 
 class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, SessionManagerListener<CastSession> {
     companion object {
@@ -56,6 +61,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
     private var shownBody: String? = null
     private var shownSectionNumber = 0
     private var shownSectionCount = 0
+    private var shownTimer: org.json.JSONObject? = null
     private var castCardPayload: String? = null
     private var castButton: MediaRouteButton? = null
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -107,6 +113,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
                 shownBody = call.argument<String>("body")
                 shownSectionNumber = call.argument<Int>("sectionNumber") ?: 0
                 shownSectionCount = call.argument<Int>("sectionCount") ?: 0
+                shownTimer = timerPayload(call.argument<Map<*, *>>("timer"))
                 val display = presentationDisplay()
                 if (display == null) {
                     result.success(false)
@@ -145,6 +152,14 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
                     castCardPayload = updated.toString()
                     currentCastSession()?.let(::sendCastCard)
                 }
+                result.success(null)
+            }
+            "updateTimer" -> {
+                // HDMI uses the exact timer envelope that is sent to Cast.
+                // Keeping this separate from `show` lets an already-visible
+                // presentation respond to start, pause, resume, and reset.
+                shownTimer = timerPayload(call.argument<Map<*, *>>("timer"))
+                presentation?.updateTimer(shownTimer)
                 result.success(null)
             }
             "stopCasting" -> {
@@ -264,7 +279,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             if (presentation?.isShowing != true) presentation?.show()
             presentation?.update(
                 shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty(),
-                shownSectionNumber, shownSectionCount,
+                shownSectionNumber, shownSectionCount, shownTimer,
             )
             setExternalDisplayAwake(true)
             return true
@@ -317,7 +332,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             // a real HDMI surface black even though the cable remains present.
             presentation?.refresh(
                 shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty(),
-                shownSectionNumber, shownSectionCount,
+                shownSectionNumber, shownSectionCount, shownTimer,
             )
         } else {
             restorePresentation()
@@ -335,7 +350,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
                 presentation?.isShowing == true) {
                 presentation?.refresh(
                     shownTitle.orEmpty(), shownSection.orEmpty(), shownBody.orEmpty(),
-                    shownSectionNumber, shownSectionCount,
+                    shownSectionNumber, shownSectionCount, shownTimer,
                 )
                 return@postDelayed
             }
@@ -351,6 +366,25 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
         private lateinit var section: TextView
         private lateinit var body: TextView
         private lateinit var footer: TextView
+        private lateinit var timerStage: TextView
+        private lateinit var timerCount: TextView
+        private lateinit var timerLabel: TextView
+        private val timerHandler = Handler(Looper.getMainLooper())
+        private var activePlan: org.json.JSONObject? = null
+        private var activePlanId = ""
+        private var phaseIndex = 0
+        private var phaseStartedAt = 0L
+        private var pausedAt = 0L
+        private var pausedElapsedMs = 0L
+        private var finished = false
+        private var lastPhaseId = ""
+        private val cueBank = CueBank(context.applicationContext)
+        private val timerTicker = object : Runnable {
+            override fun run() {
+                renderTimer()
+                if (activePlan != null && !finished) timerHandler.postDelayed(this, 100)
+            }
+        }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -378,6 +412,21 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
                 ellipsize = android.text.TextUtils.TruncateAt.END
                 setPadding(0, px(15), 0, px(14))
             }
+            val timerPanel = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(px(18), px(10), px(18), px(12))
+                setBackgroundColor(0xee100d25.toInt())
+            }
+            timerStage = label(16f, INK, true).apply { gravity = Gravity.CENTER; letterSpacing = .08f }
+            timerCount = label(54f, 0xff58e5ff.toInt(), true).apply {
+                gravity = Gravity.CENTER
+                setShadowLayer(px(4).toFloat(), 0f, px(2).toFloat(), Color.BLACK)
+            }
+            timerLabel = label(19f, EMBER, true).apply { gravity = Gravity.CENTER; maxLines = 2 }
+            timerPanel.addView(timerStage)
+            timerPanel.addView(timerCount)
+            timerPanel.addView(timerLabel)
             fun divider(top: Int = 0, bottom: Int = 0) = View(context).apply {
                 setBackgroundColor(BORDER)
                 layoutParams = LinearLayout.LayoutParams(
@@ -418,7 +467,8 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             root.addView(workout)
             root.addView(divider(top = 10, bottom = 2))
             root.addView(section)
-            root.addView(divider(bottom = 16))
+            root.addView(timerPanel, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { bottomMargin = px(12) })
+            root.addView(divider(bottom = 12))
             root.addView(body)
             root.addView(divider(top = 12))
             root.addView(footer)
@@ -428,17 +478,25 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             setContentView(frame)
         }
 
+        override fun onStop() {
+            timerHandler.removeCallbacksAndMessages(null)
+            cueBank.release()
+            super.onStop()
+        }
+
         fun update(
             workoutTitle: String,
             sectionTitle: String,
             sectionBody: String,
             sectionNumber: Int,
             sectionCount: Int,
+            timer: org.json.JSONObject? = null,
         ) {
             if (!::workout.isInitialized) return
             workout.text = workoutTitle.uppercase()
             section.text = sectionTitle
             body.text = emphasizedLoads(sectionBody)
+            updateTimer(timer)
             footer.text = if (sectionNumber > 0 && sectionCount > 0) {
                 "DAY CARD $sectionNumber / $sectionCount  •  HOOTS & REPS"
             } else {
@@ -465,12 +523,145 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             sectionBody: String,
             sectionNumber: Int,
             sectionCount: Int,
+            timer: org.json.JSONObject? = null,
         ) {
-            update(workoutTitle, sectionTitle, sectionBody, sectionNumber, sectionCount)
+            update(workoutTitle, sectionTitle, sectionBody, sectionNumber, sectionCount, timer)
             window?.decorView?.apply {
                 requestLayout()
                 invalidate()
             }
+        }
+
+        fun updateTimer(timer: org.json.JSONObject?) {
+            if (!::timerStage.isInitialized) return
+            if (timer == null) {
+                activePlan = null
+                timerHandler.removeCallbacks(timerTicker)
+                timerStage.visibility = View.GONE
+                timerCount.visibility = View.GONE
+                timerLabel.visibility = View.GONE
+                return
+            }
+            val plan = timer.optJSONObject("plan")
+            if (plan != null && (plan.optString("id") != activePlanId || timer.optString("command") == "reset")) {
+                startPlan(plan)
+            }
+            when (timer.optString("command")) {
+                "pause" -> if (activePlan != null && pausedAt == 0L) {
+                    pausedElapsedMs = elapsedMs()
+                    pausedAt = SystemClock.elapsedRealtime()
+                }
+                "resume", "start" -> if (activePlan != null && pausedAt != 0L) {
+                    phaseStartedAt = SystemClock.elapsedRealtime() - pausedElapsedMs
+                    pausedAt = 0L
+                }
+            }
+            renderTimer()
+        }
+
+        private fun startPlan(plan: org.json.JSONObject) {
+            activePlan = plan
+            activePlanId = plan.optString("id")
+            phaseIndex = 0
+            var offset = plan.optDouble("startOffsetSeconds", 0.0)
+            val phases = plan.optJSONArray("phases") ?: return
+            while (phaseIndex < phases.length() - 1) {
+                val duration = phases.optJSONObject(phaseIndex)?.optDouble("durationSeconds", 0.0) ?: 0.0
+                if (offset < duration) break
+                offset -= duration
+                phaseIndex++
+            }
+            phaseStartedAt = SystemClock.elapsedRealtime() - (offset * 1000).toLong()
+            pausedAt = 0L
+            pausedElapsedMs = 0L
+            finished = false
+            lastPhaseId = ""
+            cueBank.preload()
+            timerHandler.removeCallbacks(timerTicker)
+            timerHandler.post(timerTicker)
+        }
+
+        private fun currentPhase(): org.json.JSONObject? = activePlan
+            ?.optJSONArray("phases")?.optJSONObject(phaseIndex)
+
+        private fun elapsedMs(): Long = if (pausedAt != 0L) pausedElapsedMs else
+            (SystemClock.elapsedRealtime() - phaseStartedAt).coerceAtLeast(0L)
+
+        private fun renderTimer() {
+            val phase = currentPhase() ?: return
+            var current = phase
+            while (pausedAt == 0L && elapsedMs() >= (current.optDouble("durationSeconds") * 1000).toLong() && !finished) {
+                val carry = elapsedMs() - (current.optDouble("durationSeconds") * 1000).toLong()
+                phaseIndex++
+                current = currentPhase() ?: run {
+                    finished = true
+                    cueBank.play(activePlan?.optString("completionCue", "complete") ?: "complete")
+                    timerStage.text = "COMPLETE"
+                    timerCount.text = "✓"
+                    timerLabel.text = activePlan?.optString("completionLabel", "TIMER COMPLETE")
+                    return
+                }
+                phaseStartedAt = SystemClock.elapsedRealtime() - carry.coerceAtLeast(0L)
+                pausedElapsedMs = 0L
+            }
+            val remaining = ((current.optDouble("durationSeconds") * 1000 - elapsedMs()).coerceAtLeast(0.0) / 1000.0)
+            val kind = current.optString("kind")
+            timerStage.text = when {
+                pausedAt != 0L -> "PAUSED"
+                kind == "ready" -> "GET READY"
+                kind == "transition" -> "TRANSITION"
+                kind == "sideChange" -> "SWITCH SIDES"
+                kind == "emom" -> "ROUND ${current.optInt("round")} / ${current.optInt("roundCount")}"
+                kind == "work" -> "WORK"
+                kind == "rest" -> "REST"
+                else -> "TIMER RUNNING"
+            }
+            val seconds = ceil(remaining).toInt()
+            timerCount.text = "%d:%02d".format(seconds / 60, seconds % 60)
+            timerLabel.text = if (kind == "emom" || kind == "active" || kind == "sideChange")
+                "NOW • ${current.optString("label")}" else current.optString("label")
+            val phaseId = current.optString("id")
+            if (phaseId != lastPhaseId && pausedAt == 0L) {
+                lastPhaseId = phaseId
+                when (kind) {
+                    "transition" -> cueBank.play("transition")
+                    "sideChange" -> cueBank.play("switch-sides")
+                    "ready" -> Unit
+                    else -> cueBank.play("go")
+                }
+            }
+            // The 3-2-1 recording is started exactly at the visible three.
+            if (kind == "ready" && seconds == 3 && pausedAt == 0L) cueBank.play("ready-countdown")
+        }
+
+        private class CueBank(private val context: Context) {
+            private val base = "https://noisy-fog-413c.rghoward1988.workers.dev/"
+            private val players = mutableMapOf<String, MediaPlayer>()
+            private val prepared = mutableSetOf<String>()
+            private var lastReadyAt = 0L
+            fun preload() = listOf("go", "transition", "switch-sides", "ready-countdown", "emom-countdown", "complete", "conditioning-complete", "strength-complete", "skills-complete", "accessory-complete", "warmup-complete", "stretches-complete").forEach(::load)
+            private fun load(name: String) {
+                if (players.containsKey(name)) return
+                runCatching {
+                    MediaPlayer().apply {
+                        setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+                        setDataSource(context, Uri.parse("${base}timer-$name.mp3"))
+                        setOnPreparedListener { prepared.add(name) }
+                        prepareAsync()
+                        players[name] = this
+                    }
+                }
+            }
+            fun play(name: String) {
+                if (name == "ready-countdown") {
+                    val now = SystemClock.elapsedRealtime(); if (now - lastReadyAt < 4000) return; lastReadyAt = now
+                }
+                load(name)
+                val player = players[name] ?: return
+                if (!prepared.contains(name) || player.isPlaying) return
+                runCatching { player.seekTo(0); player.start() }
+            }
+            fun release() { players.values.forEach { runCatching { it.release() } }; players.clear(); prepared.clear() }
         }
 
         /**

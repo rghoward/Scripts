@@ -116,6 +116,7 @@ class ExternalWorkoutDisplay {
     required String body,
     required int sectionNumber,
     required int sectionCount,
+    Map<String, dynamic>? timer,
   }) async {
     try {
       return await _channel.invokeMethod<bool>('show', {
@@ -124,6 +125,7 @@ class ExternalWorkoutDisplay {
             'body': body,
             'sectionNumber': sectionNumber,
             'sectionCount': sectionCount,
+            'timer': ?timer,
           }) ??
           false;
     } on MissingPluginException {
@@ -169,6 +171,16 @@ class ExternalWorkoutDisplay {
       await _channel.invokeMethod<void>('updateCastTimer', {'timer': timer});
     } on MissingPluginException {
       // Timers still work locally when Cast is unavailable.
+    }
+  }
+
+  /// Updates the native HDMI presentation without rebuilding its workout card.
+  /// The presentation owns the running clock after receiving this shared plan.
+  static Future<void> updateExternalTimer(Map<String, dynamic>? timer) async {
+    try {
+      await _channel.invokeMethod<void>('updateTimer', {'timer': timer});
+    } on MissingPluginException {
+      // HDMI presentation is Android-only.
     }
   }
 
@@ -5616,17 +5628,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   void _sendTimerToCast({String command = 'start', bool includePlan = false}) {
     final timer = _cardTimer;
-    if (!_castConnected ||
-        timer == null ||
-        _projectedSectionKey != timer.sectionKey) {
+    if (timer == null || _projectedSectionKey != timer.sectionKey) {
       return;
     }
-    unawaited(
-      ExternalWorkoutDisplay.updateCastTimer({
-        'command': command,
-        if (includePlan) 'plan': timer.castPlan,
-      }),
-    );
+    final payload = <String, dynamic>{
+      'command': command,
+      if (includePlan) 'plan': timer.castPlan,
+    };
+    // An HDMI display receives precisely the same plan and controls as Cast.
+    unawaited(ExternalWorkoutDisplay.updateExternalTimer(payload));
+    if (!_castConnected) return;
+    unawaited(ExternalWorkoutDisplay.updateCastTimer(payload));
   }
 
   Future<void> _showOnExternalDisplay(
@@ -5641,6 +5653,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       body: _externalSectionBody(workout, section, index),
       sectionNumber: index + 1,
       sectionCount: _visibleSections(workout).length,
+      timer: _timerPayloadForSection(_key(workout, index)),
     );
     if (!mounted) return;
     setState(() {
