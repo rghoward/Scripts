@@ -378,6 +378,8 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
         private var pausedElapsedMs = 0L
         private var finished = false
         private var lastPhaseId = ""
+        private var lastEmomCountdownPhase = ""
+        private var suppressNextGo = false
         private val cueBank = CueBank(context.applicationContext)
         private val timerTicker = object : Runnable {
             override fun run() {
@@ -576,6 +578,8 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             pausedElapsedMs = 0L
             finished = false
             lastPhaseId = ""
+            lastEmomCountdownPhase = ""
+            suppressNextGo = false
             cueBank.preload()
             timerHandler.removeCallbacks(timerTicker)
             timerHandler.post(timerTicker)
@@ -627,11 +631,22 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
                     "transition" -> cueBank.play("transition")
                     "sideChange" -> cueBank.play("switch-sides")
                     "ready" -> Unit
-                    else -> cueBank.play("go")
+                    else -> if (suppressNextGo) suppressNextGo = false else cueBank.play("go")
                 }
             }
             // The 3-2-1 recording is started exactly at the visible three.
-            if (kind == "ready" && seconds == 3 && pausedAt == 0L) cueBank.play("ready-countdown")
+            if (kind == "ready" && seconds == 3 && pausedAt == 0L) {
+                suppressNextGo = true
+                cueBank.play("ready-countdown")
+            }
+            // The EMOM sprite says “3–2–1, Next Station.” Start it only once
+            // for each non-final round and suppress the following generic Go.
+            if (kind == "emom" && current.optInt("round") < current.optInt("roundCount") &&
+                seconds == 3 && lastEmomCountdownPhase != phaseId && pausedAt == 0L) {
+                lastEmomCountdownPhase = phaseId
+                suppressNextGo = true
+                cueBank.play("emom-countdown")
+            }
         }
 
         private class CueBank(private val context: Context) {
