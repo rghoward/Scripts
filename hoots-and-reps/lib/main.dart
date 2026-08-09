@@ -4453,42 +4453,56 @@ class _WorkoutHomeState extends State<WorkoutHome>
           _variantTabs(workout),
           if (!completed) ...[
             const SizedBox(height: 14),
-            FilledButton.icon(
-              onPressed: () async {
-                await _startGuidedWorkout(workout);
-              },
-              icon: Icon(
-                anySectionDone ? Icons.play_arrow_rounded : Icons.bolt_rounded,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xff122b43),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: border),
               ),
-              label: Text(
-                anySectionDone
-                    ? 'RESUME WORKOUT • $done / $required'
-                    : 'START WORKOUT • $done / $required',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'GUIDED • $done / $required',
+                      style: const TextStyle(
+                        color: cyan,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: anySectionDone
+                        ? 'Resume guided workout'
+                        : 'Start guided workout',
+                    onPressed: () => _startGuidedWorkout(workout),
+                    icon: Icon(
+                      anySectionDone
+                          ? Icons.play_arrow_rounded
+                          : Icons.bolt_rounded,
+                    ),
+                    color: ember,
+                  ),
+                  IconButton(
+                    tooltip: 'Move workout forward',
+                    onPressed: _deferSelectedWorkout,
+                    icon: const Icon(Icons.redo),
+                    color: cyan,
+                  ),
+                  IconButton(
+                    tooltip: 'Skip workout',
+                    onPressed: _skipSelectedWorkout,
+                    icon: const Icon(Icons.skip_next_rounded),
+                    color: muted,
+                  ),
+                ],
               ),
             ),
           ],
           if (!completed && _workoutChanges(workout, sections).isNotEmpty) ...[
             const SizedBox(height: 16),
             _workoutChangesCard(workout, sections),
-          ],
-          if (!completed) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _deferSelectedWorkout,
-                    icon: const Icon(Icons.redo),
-                    label: const Text('MOVE FORWARD'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: _skipSelectedWorkout,
-                  child: const Text('SKIP'),
-                ),
-              ],
-            ),
           ],
           const SizedBox(height: 24),
           const Divider(color: border),
