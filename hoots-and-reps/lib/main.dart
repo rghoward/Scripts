@@ -678,6 +678,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
     )) {
       await scheduleRepository.complete(assignment.assignmentId);
     }
+    // User-requested schedule repair: keep the first three completed days
+    // intact, restart Day 4 on Sunday, August 9, and preserve one workout per
+    // day for every unfinished assignment after it.
+    const scheduleRepairKey = 'schedule_repair_day4_2026_08_09';
+    if (!(await store.getBool(scheduleRepairKey) ?? false)) {
+      await scheduleRepository.rescheduleUnfinishedFrom(
+        4,
+        DateTime(2026, 8, 9),
+      );
+      await store.setBool(scheduleRepairKey, true);
+    }
     await scheduleRepository.markPastUnresolved(
       DateUtils.dateOnly(DateTime.now()),
     );

@@ -223,6 +223,62 @@ class ScheduleRepository {
     });
   }
 
+  /// One-time athlete schedule repair: preserve completed work before
+  /// [sequence] and place that sequence on [startsOn], then give each later
+  /// unfinished workout its own following training day.
+  Future<void> rescheduleUnfinishedFrom(int sequence, DateTime startsOn) async {
+    await database.transaction((transaction) async {
+      final rows = await transaction.rawQuery(
+        '''
+        SELECT a.id, a.revision
+        FROM schedule_assignments a
+        JOIN workout_prescriptions p ON p.id = a.workout_id
+        WHERE a.program_id = ?
+          AND p.sequence_number >= ?
+          AND a.status IN ('planned', 'unconfirmed', 'in_progress')
+        ORDER BY p.sequence_number
+        ''',
+        [programId, sequence],
+      );
+      if (rows.isEmpty) return;
+      final prior = await transaction.rawQuery(
+        '''
+        SELECT a.id, a.assigned_date, a.status, a.revision
+        FROM schedule_assignments a
+        JOIN workout_prescriptions p ON p.id = a.workout_id
+        WHERE a.program_id = ?
+          AND p.sequence_number >= ?
+          AND a.status IN ('planned', 'unconfirmed', 'in_progress')
+        ORDER BY p.sequence_number
+        ''',
+        [programId, sequence],
+      );
+      var date = DateTime(startsOn.year, startsOn.month, startsOn.day);
+      final now = DateTime.now().toUtc().toIso8601String();
+      for (final row in rows) {
+        await transaction.update(
+          'schedule_assignments',
+          {
+            'assigned_date': _day(date),
+            'status': 'planned',
+            'revision': (row['revision']! as int) + 1,
+            'updated_at': now,
+          },
+          where: 'id = ?',
+          whereArgs: [row['id']! as String],
+        );
+        date = _followingTrainingDate(date);
+      }
+      await _event(
+        transaction,
+        type: 'repair_schedule',
+        assignmentId: null,
+        prior: prior,
+        resulting: await _pendingSnapshot(transaction),
+      );
+    });
+  }
+
   /// Pulls the next unfinished workout one calendar day earlier after an
   /// athlete completes today's work ahead of schedule.
   Future<DateTime?> moveNextPendingEarlier(String assignmentId) async {
