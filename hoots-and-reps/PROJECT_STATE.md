@@ -1,6 +1,6 @@
 # Hoots & Reps — Project State
 
-Last updated: August 4, 2026
+Last updated: August 9, 2026
 
 ## Purpose
 
@@ -13,11 +13,29 @@ private third-party programming.
 This file is the compact starting point for a new Codex task. Read it first,
 then open only the detailed document needed for the requested feature.
 
+## Current delivery snapshot — August 9, 2026
+
+The current Android build is `1.0.25 (6033)`. Recent daily-loop work is
+complete: Guided Workout, structured conditioning scores, direct percentage-lift
+PR editing, card route navigation/resume/focus, compact card summaries, and the
+workout-completion recap. Chromecast parity is implemented and its deployed
+receiver matches the checked-in source. HDMI still needs physical field testing.
+
+The pre-card-navigation restore point is the pushed Git tag
+`hoots-reps-before-card-navigation-1.0.24`.
+
+The owner-confirmed next initiatives are cloud data/device switching plus
+manual workout editing, a watch companion, iOS feature parity, and a rigorous
+workout-engine audit. See [`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md)
+for scope and recommended order.
+
 ## Canonical documents
 
 - Programming roadmap and release gates:
   [`docs/FEATURE_PROGRAMMING_ENGINE.md`](docs/FEATURE_PROGRAMMING_ENGINE.md)
   (including the current shipped/partial/planned roadmap tracker)
+- Product priorities and current-delivery record:
+  [`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md)
 - Local/hosted data plan:
   [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md)
 - Current generated 12-week phase:
