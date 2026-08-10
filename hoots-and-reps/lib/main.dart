@@ -1746,6 +1746,28 @@ class _WorkoutHomeState extends State<WorkoutHome>
     return (proceeded: proceed == true, nextIndex: nextIndex);
   }
 
+  Future<void> _undoGuidedSection(WorkoutDay workout, int index) async {
+    final key = _key(workout, index);
+    if (_sectionState[key] != true) return;
+    final hadFinishedWorkout = _completedWorkouts.contains(workout.sequence);
+    setState(() {
+      _sectionState.remove(key);
+      _fractureSeeds.remove(key);
+      if (hadFinishedWorkout) {
+        _completedWorkouts.remove(workout.sequence);
+        _partialWorkouts.remove(workout.sequence);
+      }
+    });
+    if (hadFinishedWorkout) {
+      final assignment = _assignmentFor(_selected);
+      if (assignment != null) {
+        await _scheduleRepository?.reopen(assignment.assignmentId);
+      }
+    }
+    await _saveProgress();
+    await _reloadSchedule();
+  }
+
   int? _nextRequiredIncompleteIndex(
     WorkoutDay workout, {
     int afterIndex = -1,
@@ -1852,6 +1874,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
               _startSectionTimer(workout, sections[index], index),
           onToggleTimer: _toggleCardTimer,
           onResetTimer: _resetCardTimer,
+          onUndo: (index) async {
+            await _undoGuidedSection(workout, index);
+            await _openGuidedSection(workout, index, scrollIntoView: false);
+          },
           onSelect: (index) =>
               _openGuidedSection(workout, index, scrollIntoView: false),
           onComplete: (index) =>
@@ -6508,6 +6534,7 @@ class GuidedWorkoutPage extends StatefulWidget {
     required this.onStartTimer,
     required this.onToggleTimer,
     required this.onResetTimer,
+    required this.onUndo,
     required this.onSelect,
     required this.onComplete,
   });
@@ -6529,6 +6556,7 @@ class GuidedWorkoutPage extends StatefulWidget {
   final void Function(int index) onStartTimer;
   final VoidCallback onToggleTimer;
   final VoidCallback onResetTimer;
+  final Future<void> Function(int index) onUndo;
   final Future<void> Function(int index) onSelect;
   final Future<({bool proceeded, int? nextIndex})> Function(int index)
   onComplete;
@@ -6710,6 +6738,16 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
                       onPressed: () => widget.onSwap(_index),
                       icon: const Icon(Icons.swap_horiz),
                       color: cyan,
+                    ),
+                  if (completed)
+                    IconButton(
+                      tooltip: 'Undo section completion',
+                      onPressed: () async {
+                        await widget.onUndo(_index);
+                        if (mounted) setState(() {});
+                      },
+                      icon: const Icon(Icons.undo_rounded),
+                      color: ember,
                     ),
                 ],
               ),
