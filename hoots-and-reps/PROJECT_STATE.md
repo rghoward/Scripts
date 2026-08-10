@@ -24,10 +24,11 @@ receiver matches the checked-in source. HDMI still needs physical field testing.
 The pre-card-navigation restore point is the pushed Git tag
 `hoots-reps-before-card-navigation-1.0.24`.
 
-The owner-confirmed next initiatives are cloud data/device switching plus
-manual workout editing, a watch companion, iOS feature parity, and a rigorous
-workout-engine audit. See [`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md)
-for scope and recommended order.
+The owner-confirmed next initiatives are accounts plus cloud data/device
+switching and manual workout editing, a watch companion, iOS feature parity, a
+rigorous workout-engine audit, and optional account-based leaderboards. See
+[`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md) for scope and recommended
+order.
 
 ## Canonical documents
 
@@ -57,9 +58,10 @@ roadmap together as part of the feature being changed.
 ### Current work order
 
 The core daily loop is now shipped. The current owner-confirmed order is in
-[`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md): cloud data/device
-switching plus manual workout editing first, with a workout-engine audit early
-in that planning; then iOS parity and a watch companion.
+[`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md): accounts plus cloud
+data/device switching and manual workout editing first, with a workout-engine
+audit early in that planning; then iOS parity, a watch companion, and optional
+leaderboards.
 
 The programming-specific open work remains item 14 onboarding, independently
 reviewed per-level conditioning prescriptions (items 39–40), original
