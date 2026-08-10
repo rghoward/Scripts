@@ -551,6 +551,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   WorkoutDay? _activeTimerWorkout;
   int? _activeTimerSectionIndex;
   final Map<String, bool> _sectionExpanded = {};
+  final Map<String, bool> _timerPanelExpanded = {};
   final Map<String, GlobalKey> _sectionCardKeys = {};
   int _pageIndex = 0;
   int _workoutTransitionDirection = 1;
@@ -6342,6 +6343,25 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         size: 21,
                       ),
                     ),
+                    IconButton(
+                      tooltip: (_timerPanelExpanded[sectionKey] ?? false)
+                          ? 'Hide timer controls'
+                          : 'Show timer controls',
+                      onPressed: () => setState(
+                        () => _timerPanelExpanded[sectionKey] =
+                            !(_timerPanelExpanded[sectionKey] ?? false),
+                      ),
+                      icon: Icon(
+                        _cardTimer?.sectionKey == sectionKey &&
+                                _cardTimer?.stage != _CardTimerStage.finished
+                            ? Icons.timer_rounded
+                            : Icons.timer_outlined,
+                        color: _timerPanelExpanded[sectionKey] ?? false
+                            ? cyan
+                            : muted,
+                        size: 21,
+                      ),
+                    ),
                     InkWell(
                       onTap: trainingSubsections.isEmpty
                           ? completed
@@ -6390,8 +6410,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         ),
                         const SizedBox(height: 14),
                       ],
-                      _sectionTimerControls(workout, section, index),
-                      const SizedBox(height: 14),
+                      if (_timerPanelExpanded[sectionKey] ?? false) ...[
+                        _sectionTimerControls(workout, section, index),
+                        const SizedBox(height: 14),
+                      ],
                       if (trainingSubsections.isEmpty)
                         Text(
                           _sectionBody(workout, section, index),
