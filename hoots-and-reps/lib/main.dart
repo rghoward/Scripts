@@ -1828,6 +1828,30 @@ class _WorkoutHomeState extends State<WorkoutHome>
               _showOnChromecast(workout, sections[index], index),
           onSwap: (index) =>
               _chooseMovementSwap(workout, sections[index], index),
+          timerFor: (index) {
+            final timer = _cardTimer;
+            if (timer == null ||
+                timer.sectionKey != _key(workout, index) ||
+                timer.stage == _CardTimerStage.finished) {
+              return null;
+            }
+            final stage = switch (timer.stage) {
+              _CardTimerStage.ready => 'GET READY',
+              _CardTimerStage.running => 'RUNNING',
+              _CardTimerStage.paused => 'PAUSED',
+              _CardTimerStage.transition => 'TRANSITION',
+              _CardTimerStage.finished => 'COMPLETE',
+            };
+            return (
+              time: _formatTimer(timer.remainingSeconds),
+              stage: stage,
+              paused: timer.stage == _CardTimerStage.paused,
+            );
+          },
+          onStartTimer: (index) =>
+              _startSectionTimer(workout, sections[index], index),
+          onToggleTimer: _toggleCardTimer,
+          onResetTimer: _resetCardTimer,
           onSelect: (index) =>
               _openGuidedSection(workout, index, scrollIntoView: false),
           onComplete: (index) =>
@@ -6480,6 +6504,10 @@ class GuidedWorkoutPage extends StatefulWidget {
     required this.onShowExternal,
     required this.onShowCast,
     required this.onSwap,
+    required this.timerFor,
+    required this.onStartTimer,
+    required this.onToggleTimer,
+    required this.onResetTimer,
     required this.onSelect,
     required this.onComplete,
   });
@@ -6496,6 +6524,11 @@ class GuidedWorkoutPage extends StatefulWidget {
   final Future<void> Function(int index) onShowExternal;
   final Future<void> Function(int index) onShowCast;
   final Future<void> Function(int index) onSwap;
+  final ({String time, String stage, bool paused})? Function(int index)
+  timerFor;
+  final void Function(int index) onStartTimer;
+  final VoidCallback onToggleTimer;
+  final VoidCallback onResetTimer;
   final Future<void> Function(int index) onSelect;
   final Future<({bool proceeded, int? nextIndex})> Function(int index)
   onComplete;
@@ -6506,6 +6539,21 @@ class GuidedWorkoutPage extends StatefulWidget {
 
 class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
   late int _index = widget.initialIndex;
+  Timer? _timerRefresh;
+
+  @override
+  void initState() {
+    super.initState();
+    _timerRefresh = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerRefresh?.cancel();
+    super.dispose();
+  }
 
   List<int> get _required => [
     for (var index = 0; index < widget.sections.length; index++)
@@ -6617,6 +6665,8 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
                             height: 1.05,
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        _guidedTimerControls(),
                         const Divider(color: border, height: 32),
                         Text(
                           widget.bodyFor(_index),
@@ -6685,6 +6735,55 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _guidedTimerControls() {
+    final timer = widget.timerFor(_index);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xff122b43),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cyan),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              timer == null ? 'TIMER READY' : '${timer.stage} • ${timer.time}',
+              style: const TextStyle(
+                color: cyan,
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: timer == null
+                ? 'Start timer'
+                : timer.paused
+                ? 'Resume timer'
+                : 'Pause timer',
+            onPressed: timer == null
+                ? () => widget.onStartTimer(_index)
+                : widget.onToggleTimer,
+            icon: Icon(
+              timer == null || timer.paused
+                  ? Icons.play_arrow_rounded
+                  : Icons.pause_rounded,
+            ),
+            color: ember,
+          ),
+          if (timer != null)
+            IconButton(
+              tooltip: 'Reset timer',
+              onPressed: widget.onResetTimer,
+              icon: const Icon(Icons.restart_alt_rounded),
+              color: ink,
+            ),
+        ],
       ),
     );
   }
