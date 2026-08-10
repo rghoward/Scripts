@@ -6083,14 +6083,14 @@ class _WorkoutHomeState extends State<WorkoutHome>
       final isCooldown = section.title.toLowerCase().contains('stretch');
       return Align(
         alignment: Alignment.centerLeft,
-        child: IconButton(
-          tooltip: isCooldown
-              ? 'Start guided cooldown with a 10-second countdown'
-              : 'Start ${_formatTimer(target)} timer with a 10-second countdown',
+        child: OutlinedButton.icon(
           onPressed: () => _startSectionTimer(workout, section, index),
-          icon: const Icon(Icons.play_circle_outline_rounded),
-          color: cyan,
-          iconSize: 30,
+          icon: const Icon(Icons.play_arrow_rounded, size: 18),
+          label: Text(
+            isCooldown
+                ? 'START COOLDOWN'
+                : 'START ${_formatTimer(target)} TIMER',
+          ),
         ),
       );
     }
