@@ -1624,6 +1624,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
           _sectionState[_key(workout, index)] == true,
     ).every((done) => done);
     if (finished) await _markWorkoutComplete(workout);
+    if (!finished) {
+      await _focusNextRequiredSection(workout, afterIndex: sectionIndex);
+    }
   }
 
   Future<void> _completeSection(WorkoutDay workout, int index) async {
@@ -1668,6 +1671,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
     await _saveProgress();
     await _reloadSchedule();
+    if (!finished) {
+      await _focusNextRequiredSection(workout, afterIndex: index);
+    } else {
+      _collapseSectionCards(workout);
+    }
     if (_showCompletionStrikeAnimation) {
       await _strike.forward(from: 0);
       if (mounted) setState(() => _strikingSection = null);
@@ -1884,6 +1892,51 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
   }
 
+  Future<void> _focusNextRequiredSection(
+    WorkoutDay workout, {
+    int afterIndex = -1,
+  }) async {
+    final nextIndex = _nextRequiredIncompleteIndex(
+      workout,
+      afterIndex: afterIndex,
+    );
+    if (nextIndex == null || !mounted) return;
+    await _focusSectionCard(workout, nextIndex);
+  }
+
+  Future<void> _focusSectionCard(WorkoutDay workout, int index) async {
+    final sectionKey = _key(workout, index);
+    setState(() {
+      for (
+        var sectionIndex = 0;
+        sectionIndex < _visibleSections(workout).length;
+        sectionIndex++
+      ) {
+        _sectionExpanded[_key(workout, sectionIndex)] = sectionIndex == index;
+      }
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    if (!mounted) return;
+    final target = _sectionCardKeys[sectionKey]?.currentContext;
+    if (target != null && target.mounted) {
+      await Scrollable.ensureVisible(
+        target,
+        alignment: .08,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
+  void _collapseSectionCards(WorkoutDay workout) {
+    if (!mounted) return;
+    setState(() {
+      for (var index = 0; index < _visibleSections(workout).length; index++) {
+        _sectionExpanded[_key(workout, index)] = false;
+      }
+    });
+  }
+
   Future<void> _startGuidedWorkout(WorkoutDay workout) async {
     final initialIndex = _nextRequiredIncompleteIndex(workout);
     if (initialIndex == null) return;
@@ -1982,6 +2035,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
     await _saveProgress();
     await _reloadSchedule();
+    _collapseSectionCards(workout);
     if (workout.benchmark != null &&
         (workout.benchmark!.isRetest ||
             !_hasBenchmarkResult(workout.benchmark!))) {
@@ -4624,6 +4678,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final anySectionDone = sections.asMap().keys.any(
       (index) => _sectionState[_key(workout, index)] == true,
     );
+    final currentIndex = _nextRequiredIncompleteIndex(workout);
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -4742,6 +4797,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
                 ],
               ),
             ),
+            if (currentIndex != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _focusSectionCard(workout, currentIndex),
+                  icon: const Icon(Icons.my_location_outlined, size: 17),
+                  label: Text(
+                    'RESUME • ${_sectionHeading(sections[currentIndex].title)}',
+                  ),
+                ),
+              ),
           ],
           if (!completed && _workoutChanges(workout, sections).isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -4759,6 +4825,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
             ),
           ),
           const SizedBox(height: 12),
+          _workoutRoute(workout, sections, currentIndex),
+          const SizedBox(height: 16),
           ...List.generate(
             sections.length,
             (i) => _sectionCard(workout, sections[i], i),
@@ -4806,6 +4874,71 @@ class _WorkoutHomeState extends State<WorkoutHome>
       ),
     );
   }
+
+  Widget _workoutRoute(
+    WorkoutDay workout,
+    List<WorkoutSection> sections,
+    int? currentIndex,
+  ) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      children: [
+        for (var index = 0; index < sections.length; index++) ...[
+          if (index > 0) Container(width: 14, height: 1, color: border),
+          InkWell(
+            onTap: () => _focusSectionCard(workout, index),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 66),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+              decoration: BoxDecoration(
+                color: index == currentIndex
+                    ? const Color(0xff122b43)
+                    : const Color(0xff19142e),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _sectionState[_key(workout, index)] == true
+                      ? success
+                      : index == currentIndex
+                      ? cyan
+                      : border,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _sectionState[_key(workout, index)] == true
+                        ? Icons.check_circle_rounded
+                        : index == currentIndex
+                        ? Icons.radio_button_checked_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: _sectionState[_key(workout, index)] == true
+                        ? success
+                        : index == currentIndex
+                        ? cyan
+                        : muted,
+                    size: 16,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _sectionHeading(sections[index].title).toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: ink,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 
   List<(String, String)> _workoutChanges(
     WorkoutDay workout,
@@ -6169,7 +6302,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final sectionKey = _key(workout, index);
     final completed = _sectionState[sectionKey] == true;
     final projected = _projectedSectionKey == sectionKey;
-    final expanded = _sectionExpanded[sectionKey] ?? (index == 0 && !completed);
+    final currentIndex = _nextRequiredIncompleteIndex(workout);
+    final expanded =
+        _sectionExpanded[sectionKey] ?? (index == currentIndex && !completed);
     final trainingSubsections = _trainingSubsections(section);
     final completedTrainingSubsections = List.generate(
       trainingSubsections.length,
@@ -6394,6 +6529,19 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                   ],
                 ),
+                if (!expanded) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _collapsedSectionSummary(workout, section, index),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: muted,
+                      fontSize: 12,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
               ],
             ),
             children: [
@@ -6492,6 +6640,34 @@ class _WorkoutHomeState extends State<WorkoutHome>
         ],
       ),
     );
+  }
+
+  String _collapsedSectionSummary(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+  ) {
+    final conditioning = _conditioningFor(workout);
+    final result = _conditioningResults[workout.sequence];
+    if (conditioning != null &&
+        section.title.startsWith('CONDITIONING') &&
+        result != null) {
+      return 'SCORE • ${result.summary}';
+    }
+    final subsections = _trainingSubsections(section);
+    if (subsections.isNotEmpty) {
+      return subsections.map((subsection) => subsection.title).join(' • ');
+    }
+    return _sectionBody(workout, section, index)
+        .split('\n')
+        .map((line) => line.trim())
+        .where(
+          (line) =>
+              line.isNotEmpty &&
+              !line.startsWith('Move with consistent technique'),
+        )
+        .take(2)
+        .join(' • ');
   }
 
   String _sectionHeading(String title) => title.split(' • ').first;
