@@ -1668,6 +1668,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     WorkoutDay workout,
     int index, {
     bool openNext = true,
+    bool showNextChoice = true,
   }) async {
     final sections = _visibleSections(workout);
     final section = sections[index];
@@ -1676,7 +1677,14 @@ class _WorkoutHomeState extends State<WorkoutHome>
       afterIndex: index,
       treatingIndexAsComplete: index,
     );
-    final note = TextEditingController();
+    final note = TextEditingController(
+      text:
+          await _store?.getString('section_note_${_key(workout, index)}') ?? '',
+    );
+    if (!mounted) {
+      _releaseSheetTextControllers([note]);
+      return (proceeded: false, nextIndex: null);
+    }
     final proceed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -1700,11 +1708,13 @@ class _WorkoutHomeState extends State<WorkoutHome>
                 fontSize: 18,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Add anything worth keeping, then continue when you are ready.',
-              style: TextStyle(color: muted),
-            ),
+            if (showNextChoice) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Add anything worth keeping, then continue when you are ready.',
+                style: TextStyle(color: muted),
+              ),
+            ],
             const SizedBox(height: 14),
             TextField(
               controller: note,
@@ -1718,18 +1728,30 @@ class _WorkoutHomeState extends State<WorkoutHome>
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
-                nextIndex == null ? 'FINISH WORKOUT' : 'SAVE & SHOW NEXT',
+                showNextChoice
+                    ? (nextIndex == null
+                          ? 'FINISH WORKOUT'
+                          : 'SAVE & SHOW NEXT')
+                    : 'SAVE COMPLETION',
               ),
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('SAVE & STAY HERE'),
-            ),
+            if (showNextChoice)
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('SAVE & STAY HERE'),
+              ),
           ],
         ),
       ),
     );
-    if (!mounted) return (proceeded: false, nextIndex: null);
+    if (!mounted) {
+      _releaseSheetTextControllers([note]);
+      return (proceeded: false, nextIndex: null);
+    }
+    if (!showNextChoice && proceed != true) {
+      _releaseSheetTextControllers([note]);
+      return (proceeded: false, nextIndex: null);
+    }
     if (section.title.startsWith('CONDITIONING')) {
       await _recordConditioningResult(workout);
     }
@@ -1740,7 +1762,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
       );
     }
     await _completeSection(workout, index);
-    if (proceed == true && nextIndex != null && mounted && openNext) {
+    _releaseSheetTextControllers([note]);
+    if (proceed == true &&
+        nextIndex != null &&
+        mounted &&
+        openNext &&
+        showNextChoice) {
       await _openGuidedSection(workout, nextIndex);
     }
     return (proceeded: proceed == true, nextIndex: nextIndex);
@@ -2707,10 +2734,38 @@ class _WorkoutHomeState extends State<WorkoutHome>
       await _recordCountBenchmark(workout);
       return;
     }
-    final firstMinutes = TextEditingController();
-    final firstSeconds = TextEditingController();
-    final secondMinutes = TextEditingController();
-    final secondSeconds = TextEditingController();
+    final existing = benchmark.isRetest
+        ? null
+        : _benchmarkHistory
+              .where((event) => event.benchmarkId == benchmark.id)
+              .firstOrNull;
+    double? enteredValue(int index) {
+      final stored = existing?.values[benchmark.resultKeys[index]];
+      if (stored == null) return null;
+      return switch (benchmark.kind) {
+        WorkoutBenchmarkKind.rowShortPower when index == 0 => stored / 2.5,
+        WorkoutBenchmarkKind.rowTwoThousand => stored * 4,
+        WorkoutBenchmarkKind.skiSevenFifty => stored * 1.5,
+        _ => stored,
+      };
+    }
+
+    String timePart(double value) => value == value.roundToDouble()
+        ? value.round().toString()
+        : value.toStringAsFixed(1);
+    TextEditingController minutesFor(double? value) => TextEditingController(
+      text: value == null ? '' : (value ~/ 60).toString(),
+    );
+    TextEditingController secondsFor(double? value) =>
+        TextEditingController(text: value == null ? '' : timePart(value % 60));
+    final firstValue = enteredValue(0);
+    final secondValue = benchmark.kind == WorkoutBenchmarkKind.rowShortPower
+        ? enteredValue(1)
+        : null;
+    final firstMinutes = minutesFor(firstValue);
+    final firstSeconds = secondsFor(firstValue);
+    final secondMinutes = minutesFor(secondValue);
+    final secondSeconds = secondsFor(secondValue);
     String? error;
     final saved = await showModalBottomSheet<bool>(
       context: context,
@@ -2877,7 +2932,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final labels = isBike
         ? const ['TOTAL CALORIES']
         : const ['STRICT PULL-UPS', 'PUSH-UPS', 'TOES-TO-BAR', 'DOUBLE-UNDERS'];
-    final controllers = [for (final _ in labels) TextEditingController()];
+    final existing = benchmark.isRetest
+        ? null
+        : _benchmarkHistory
+              .where((event) => event.benchmarkId == benchmark.id)
+              .firstOrNull;
+    String valueText(double? value) => value == null
+        ? ''
+        : value == value.roundToDouble()
+        ? value.round().toString()
+        : value.toString();
+    final controllers = [
+      for (var index = 0; index < labels.length; index++)
+        TextEditingController(
+          text: valueText(existing?.values[benchmark.resultKeys[index]]),
+        ),
+    ];
     String? error;
     final saved = await showModalBottomSheet<bool>(
       context: context,
@@ -6125,7 +6195,13 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                     InkWell(
                       onTap: trainingSubsections.isEmpty
-                          ? () => _guidedCompleteSection(workout, index)
+                          ? completed
+                                ? () => _undoGuidedSection(workout, index)
+                                : () => _guidedCompleteSection(
+                                    workout,
+                                    index,
+                                    showNextChoice: false,
+                                  )
                           : null,
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
