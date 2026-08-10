@@ -360,6 +360,7 @@ class AthleteProfilePage extends StatefulWidget {
     required this.initial,
     this.movementOnly = false,
     this.strengthOnly = false,
+    this.focusLiftKey,
     this.skillsOnly = false,
     this.benchmarksOnly = false,
     this.benchmarkHistory = const [],
@@ -370,6 +371,7 @@ class AthleteProfilePage extends StatefulWidget {
   final AthleteSettings initial;
   final bool movementOnly;
   final bool strengthOnly;
+  final String? focusLiftKey;
   final bool skillsOnly;
   final bool benchmarksOnly;
   final List<BenchmarkResultEvent> benchmarkHistory;
@@ -383,6 +385,8 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _pr = <String, TextEditingController>{};
   final _trainingMax = <String, TextEditingController>{};
+  final _prFocus = <String, FocusNode>{};
+  final _liftCardKeys = <String, GlobalKey>{};
   late WeightUnit _unit;
   late Map<String, MovementPreference> _movementPreferences;
   late Set<String> _restrictedPatterns;
@@ -409,6 +413,20 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
     _movementSearch = TextEditingController();
     _benchmarkHistory = [...widget.benchmarkHistory];
     _populateControllers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final liftKey = widget.focusLiftKey;
+      final target = liftKey == null
+          ? null
+          : _liftCardKeys[liftKey]?.currentContext;
+      if (target == null || !mounted) return;
+      Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOut,
+        alignment: .2,
+      );
+      _prFocus[liftKey]?.requestFocus();
+    });
   }
 
   void _populateControllers() {
@@ -419,6 +437,8 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
       _trainingMax[lift.key] = TextEditingController(
         text: _display(widget.initial.trainingMaxesLb[lift.key]),
       );
+      _prFocus[lift.key] = FocusNode();
+      _liftCardKeys[lift.key] = GlobalKey();
     }
   }
 
@@ -551,6 +571,9 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
   void dispose() {
     for (final controller in [..._pr.values, ..._trainingMax.values]) {
       controller.dispose();
+    }
+    for (final focusNode in _prFocus.values) {
+      focusNode.dispose();
     }
     _injuryNotes.dispose();
     _movementSearch.dispose();
@@ -899,6 +922,7 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
     ),
   );
   Widget _liftCard(LiftDefinition lift) => Container(
+    key: _liftCardKeys[lift.key],
     margin: const EdgeInsets.only(bottom: 10),
     decoration: BoxDecoration(
       color: _card,
@@ -922,7 +946,12 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
           Row(
             children: [
               Expanded(
-                child: _numberField(_pr[lift.key]!, 'PR', allowEmpty: true),
+                child: _numberField(
+                  _pr[lift.key]!,
+                  'PR',
+                  allowEmpty: true,
+                  focusNode: _prFocus[lift.key],
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1409,8 +1438,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
     TextEditingController controller,
     String label, {
     bool allowEmpty = false,
+    FocusNode? focusNode,
   }) => TextFormField(
     controller: controller,
+    focusNode: focusNode,
     keyboardType: const TextInputType.numberWithOptions(decimal: true),
     decoration: InputDecoration(
       labelText: '$label (${_unit == WeightUnit.pounds ? 'lb' : 'kg'})',

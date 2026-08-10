@@ -925,6 +925,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   Future<void> _openAthleteProfile({
     bool movementOnly = false,
     bool strengthOnly = false,
+    String? strengthLiftKey,
     bool skillsOnly = false,
     bool benchmarksOnly = false,
   }) async {
@@ -937,6 +938,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
           initial: _athleteSettings,
           movementOnly: movementOnly,
           strengthOnly: strengthOnly,
+          focusLiftKey: strengthLiftKey,
           skillsOnly: skillsOnly,
           benchmarksOnly: benchmarksOnly,
           benchmarkHistory: movementOnly ? const [] : _benchmarkHistory,
@@ -1672,6 +1674,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
   }) async {
     final sections = _visibleSections(workout);
     final section = sections[index];
+    if (!showNextChoice && section.title.startsWith('CONDITIONING')) {
+      final saved = await _recordConditioningResult(workout);
+      if (!saved || !mounted) return (proceeded: false, nextIndex: null);
+      await _completeSection(workout, index);
+      return (proceeded: true, nextIndex: null);
+    }
     final nextIndex = _nextRequiredIncompleteIndex(
       workout,
       afterIndex: index,
@@ -1753,7 +1761,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
       return (proceeded: false, nextIndex: null);
     }
     if (section.title.startsWith('CONDITIONING')) {
-      await _recordConditioningResult(workout);
+      final saved = await _recordConditioningResult(workout);
+      if (!saved) {
+        _releaseSheetTextControllers([note]);
+        return (proceeded: false, nextIndex: null);
+      }
     }
     if (note.text.trim().isNotEmpty) {
       await _store?.setString(
@@ -2449,10 +2461,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     return 'repetitions';
   }
 
-  Future<void> _recordConditioningResult(WorkoutDay workout) async {
+  Future<bool> _recordConditioningResult(WorkoutDay workout) async {
     final conditioning = _conditioningFor(workout);
     final store = _store;
-    if (conditioning == null || store == null) return;
+    if (conditioning == null || store == null) return false;
     final existing = _conditioningResults[workout.sequence];
     final selection = _conditioningSelection(workout);
     final performedPrescription = _conditioningPrescription(
@@ -2704,15 +2716,16 @@ class _WorkoutHomeState extends State<WorkoutHome>
       note,
       ...splitControllers,
     ]);
-    if (saved == null) return;
+    if (saved == null) return false;
     await ConditioningResultsRepository(store).save(saved);
-    if (!mounted) return;
+    if (!mounted) return false;
     setState(
       () => _conditioningResults = {
         ..._conditioningResults,
         workout.sequence: saved,
       },
     );
+    return true;
   }
 
   Widget _resultField(TextEditingController controller, String label) =>
@@ -6392,6 +6405,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
   ) {
     final key = _trainingSubsectionKey(workout, sectionIndex, subsectionIndex);
     final completed = _sectionState[key] == true;
+    final prLiftKey = _prLiftKeyFor(subsection.title);
+    final hasPercentagePrescription = RegExp(
+      r'\bat\s+\d+(?:\.\d+)?%',
+    ).hasMatch(subsection.body);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
@@ -6407,13 +6424,38 @@ class _WorkoutHomeState extends State<WorkoutHome>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  subsection.title,
-                  style: const TextStyle(
-                    color: ink,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 15,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        subsection.title,
+                        style: const TextStyle(
+                          color: ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    if (prLiftKey != null && hasPercentagePrescription)
+                      IconButton(
+                        tooltip: 'Edit ${subsection.title} PR',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: 30,
+                          height: 30,
+                        ),
+                        onPressed: () => _openAthleteProfile(
+                          strengthOnly: true,
+                          strengthLiftKey: prLiftKey,
+                        ),
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: cyan,
+                          size: 18,
+                        ),
+                      ),
+                  ],
                 ),
                 if (subsection.body.isNotEmpty) ...[
                   const SizedBox(height: 6),
@@ -6455,6 +6497,25 @@ class _WorkoutHomeState extends State<WorkoutHome>
         ],
       ),
     );
+  }
+
+  String? _prLiftKeyFor(String title) {
+    final value = title.toLowerCase();
+    if (value.contains('clean') &&
+        (value.contains('jerk') || value.contains('split'))) {
+      return 'clean_and_jerk';
+    }
+    if (value.contains('back squat')) return 'back_squat';
+    if (value.contains('front squat')) return 'front_squat';
+    if (value.contains('overhead squat')) return 'overhead_squat';
+    if (value.contains('deadlift')) return 'deadlift';
+    if (value.contains('bench press')) return 'bench_press';
+    if (value.contains('press')) return 'strict_press';
+    if (value.contains('barbell row')) return 'barbell_row';
+    if (value.contains('snatch')) return 'snatch';
+    if (value.contains('clean')) return 'clean';
+    if (value.contains('split squat')) return 'split_squat';
+    return null;
   }
 
   String _duration(WorkoutDay workout, WorkoutSection section) {
