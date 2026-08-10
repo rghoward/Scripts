@@ -158,7 +158,7 @@ explicit safety, backend, or product gap; **Planned** has not started; and
 | Item | Status | Current position / remaining definition of done |
 | --- | --- | --- |
 | 1–3 | Shipped | Authored libraries, full prescriptions, and compatibility validation. |
-| 4 | Partial | Skill/equipment/movement transforms exist; complete substitution revalidation remains. |
+| 4 | Shipped | Skill, equipment, impact, preference, and limitation-aware transforms ship. The publisher revalidates every direct reviewed strength/skill substitution edge against the full phase; runtime screens athlete-specific equipment and boundaries. |
 | 5–8 | Shipped | Dose/fatigue budgets, phase validation, load rounding, and readiness paths. |
 | 9–10 | Shipped | Flexible schedule plus Full/60/Recovery variants. |
 | 11–13 | Partial | Private analysis and public-content separation exist; keep auditing public boundaries. |
@@ -186,6 +186,16 @@ explicit safety, backend, or product gap; **Planned** has not started; and
 | 42 | Shipped | Program position, deferral, pause, retroactive resolution, and scheduling safeguards. |
 | 43 | Partial | Offline published snapshots, cache, local transforms, and rationale ship; server-authoritative delivery remains. |
 
+### Recent daily-loop delivery — August 9, 2026
+
+The following work is complete within existing roadmap items rather than a new
+programming-engine item: Guided Workout; structured conditioning score entry
+and on-card score summaries; direct percentage-lift PR editing; a workout
+completion recap; and main-card route navigation, resume, automatic next-card
+focus, and compact completed-card summaries. These extend the already-shipped
+delivery represented by items 15–16, 33, 36–37, and 42. HDMI still needs a
+physical field test; the deployed Chromecast receiver matches the source.
+
 ### Deferred product decision — Inertius
 
 The Inertius weekly-progress banner and workout-card encounter language are
@@ -193,14 +203,11 @@ currently disabled in the app, with their implementation retained. Before they
 return, revisit the feature's purpose, athlete value, success criteria, and
 whether it belongs in the daily training flow at all.
 
-**Current engineering order:** local product first: finish item 14 training
-days/calendar behavior; make conditioning levels athlete-selectable and persist
-the selected prescription/result (items 39–40); then make the item
-4/35a/35c/39–40 publisher checks produce the shipped asset. Complete item 18
-identity polish and optionally item 41 afterward. Defer items 20/21/38/43
-(accounts, delivery, subscriptions, leaderboards, and launch work). Item 17
-remains on hold. Items 19 and 32 are human-review and field-test gates, not the
-next coding projects.
+**Current engineering order:** see
+[`PRODUCT_ROADMAP.md`](PRODUCT_ROADMAP.md). The owner has moved cloud
+data/device switching plus manual workout editing to the next major initiative,
+with an engine audit early in that planning. Item 14 remains partial; items
+18, 19, 32, and 39–40 retain their stated open work. Item 17 remains on hold.
 
 1. Build the original exercise, warmup, accessory, aerobic, interval, and
    metcon-template libraries.

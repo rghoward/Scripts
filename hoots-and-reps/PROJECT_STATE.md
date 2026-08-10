@@ -54,36 +54,18 @@ roadmap together as part of the feature being changed.
 
 ## Current product state
 
-### Agreed next-work order — local product first
+### Current work order
 
-Do not begin growth/platform work until the single-athlete experience is where
-the owner wants it. Deferred for now: accounts, cloud sync, subscriptions,
-leaderboards/friends/public competition, legal-launch work, and production
-delivery infrastructure.
+The core daily loop is now shipped. The current owner-confirmed order is in
+[`docs/PRODUCT_ROADMAP.md`](docs/PRODUCT_ROADMAP.md): cloud data/device
+switching plus manual workout editing first, with a workout-engine audit early
+in that planning; then iOS parity and a watch companion.
 
-1. **Finish item 14:** let setup collect training days, 60/90-minute default,
-   equipment, skills, an optional self-selected sex category (male, female, or
-   prefer not to answer), and a default prescription level
-   (Ember/Forge/Ascendant-RX/Freeblade). Use selected training days when
-   placing workouts on the calendar; keep every choice editable from Profile.
-2. **Finish conditioning levels (items 35c, 39–40):** athlete-selectable
-   Ember, Forge, Ascendant/RX, and Freeblade prescriptions now appear in the
-   workout view; custom entries and results retain the actual prescription.
-   Next, replace the current authored level tables with complete per-movement
-   reviewed prescriptions in the published snapshot.
-3. **Finish publishing reliability (items 4, 35a, 35c, 39–40):** resolve the
-   offline snapshot-export execution path so the existing substitution and
-   standards audits actually regenerate the shipped asset.
-4. **Item 18:** run the original identity/polish audit across copy, visual
-   language, empty states, and workout flow.
-5. **Item 41:** optional avatar/cosmetics, only after the core daily loop is
-   polished.
-6. **Deferred product decision — Inertius:** its weekly-progress banner and
-   workout-card encounter language are hidden while the code remains in place.
-   Revisit its athlete value and purpose before re-enabling it.
-
-Item 17 remains on hold. Items 19 and 32 are future human-review/field-test
-gates, not the next coding projects.
+The programming-specific open work remains item 14 onboarding, independently
+reviewed per-level conditioning prescriptions (items 39–40), original
+identity/public-reference polish (item 18), and the human-review/field-test
+gates (items 19 and 32). Item 17 remains on hold. Inertius remains hidden
+pending a separate product decision.
 
 - Flutter app targeting Android now, with future iOS portability retained.
 - Bottom navigation for training, chronicle, and athlete/profile areas.
