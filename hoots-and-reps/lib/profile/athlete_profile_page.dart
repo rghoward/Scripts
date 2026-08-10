@@ -172,13 +172,29 @@ const liftDefinitions = [
   LiftDefinition('front_squat', 'Front Squat'),
   LiftDefinition('overhead_squat', 'Overhead Squat'),
   LiftDefinition('deadlift', 'Deadlift'),
+  LiftDefinition('romanian_deadlift', 'Romanian Deadlift'),
   LiftDefinition('bench_press', 'Bench Press'),
+  LiftDefinition('dumbbell_bench_press', 'Dumbbell Bench Press'),
   LiftDefinition('strict_press', 'Strict Press'),
+  LiftDefinition('push_press', 'Push Press'),
+  LiftDefinition('landmine_press', 'Landmine Press'),
+  LiftDefinition(
+    'half_kneeling_dumbbell_press',
+    'Half-Kneeling Dumbbell Press',
+  ),
   LiftDefinition('barbell_row', 'Barbell Row'),
   LiftDefinition('clean', 'Clean'),
   LiftDefinition('clean_and_jerk', 'Clean & Jerk'),
+  LiftDefinition('push_press_split_jerk', 'Push Press + Split Jerk'),
   LiftDefinition('snatch', 'Snatch'),
-  LiftDefinition('split_squat', 'Split Squat'),
+  LiftDefinition('bulgarian_split_squat', 'Bulgarian Split Squat'),
+  LiftDefinition(
+    'rear_foot_elevated_split_squat',
+    'Rear-Foot-Elevated Split Squat',
+  ),
+  LiftDefinition('front_rack_reverse_lunge', 'Front-Rack Reverse Lunge'),
+  LiftDefinition('walking_lunge', 'Walking Lunge'),
+  LiftDefinition('dumbbell_step_up', 'Dumbbell Step-Up'),
 ];
 
 class AthleteSettings {

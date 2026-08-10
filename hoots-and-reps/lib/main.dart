@@ -31,6 +31,57 @@ const projectedBorder = Color(0xff2a6f9b);
 const success = Color(0xff54ffae);
 const generatedPhaseWeeks = 12;
 
+/// Every load-bearing strength or Olympic movement that can be prescribed as a
+/// percentage has its own athlete reference. Keep the most specific labels
+/// first: a Romanian deadlift must not silently borrow a conventional deadlift.
+const percentageLiftKeys = <(String, String)>[
+  ('Push Press + Split Jerk', 'push_press_split_jerk'),
+  ('Power Clean + Split Jerk', 'clean_and_jerk'),
+  ('Power Clean + Jerk', 'clean_and_jerk'),
+  ('Clean + Split Jerk', 'clean_and_jerk'),
+  ('Squat Clean + Push Jerk', 'clean_and_jerk'),
+  ('Clean + Push Jerk', 'clean_and_jerk'),
+  ('Clean and Jerk', 'clean_and_jerk'),
+  ('Half-Kneeling Dumbbell Press', 'half_kneeling_dumbbell_press'),
+  ('Dumbbell Bench Press', 'dumbbell_bench_press'),
+  ('Dumbbell Step-Up', 'dumbbell_step_up'),
+  ('Front-Rack Reverse Lunge', 'front_rack_reverse_lunge'),
+  ('Rear-Foot-Elevated Split Squat', 'rear_foot_elevated_split_squat'),
+  ('Bulgarian Split Squat', 'bulgarian_split_squat'),
+  ('Hang Clean + Power Clean Technique', 'clean'),
+  ('Hang Power Snatch + Overhead Squat', 'snatch'),
+  ('Muscle Snatch + Power Snatch Technique', 'snatch'),
+  ('Power Clean + Jerk', 'clean_and_jerk'),
+  ('Landmine Press', 'landmine_press'),
+  ('Romanian Deadlift', 'romanian_deadlift'),
+  ('Dumbbell Bench Press', 'dumbbell_bench_press'),
+  ('Dumbbell Step-Up', 'dumbbell_step_up'),
+  ('Power Clean', 'clean'),
+  ('Squat Clean', 'clean'),
+  ('Clean Pull', 'clean'),
+  ('Clean', 'clean'),
+  ('Power Snatch', 'snatch'),
+  ('Hang Power Snatch', 'snatch'),
+  ('Muscle Snatch', 'snatch'),
+  ('Squat Snatch', 'snatch'),
+  ('Snatch Pull', 'snatch'),
+  ('Snatch', 'snatch'),
+  ('Back Squat', 'back_squat'),
+  ('Front Squat', 'front_squat'),
+  ('Overhead Squat', 'overhead_squat'),
+  ('Bench Press', 'bench_press'),
+  ('Strict Press', 'strict_press'),
+  ('Push Press', 'push_press'),
+  ('Deadlift', 'deadlift'),
+  ('Barbell Row', 'barbell_row'),
+  ('Walking Lunge', 'walking_lunge'),
+];
+
+String? percentageLiftKeyFor(String movement) => percentageLiftKeys
+    .where((entry) => movement.toLowerCase().contains(entry.$1.toLowerCase()))
+    .map((entry) => entry.$2)
+    .firstOrNull;
+
 /// Adds the athlete-specific, rounded barbell load to percentage prescriptions
 /// in published workout text. Published snapshots use the typographic
 /// multiplication sign (`×`), while older generated text may use `x`, so both
@@ -39,35 +90,6 @@ String resolvePercentageLoads(
   String body,
   Map<String, double> trainingMaxesLb,
 ) {
-  const liftKeys = <(String, String)>[
-    ('Clean + Split Jerk', 'clean_and_jerk'),
-    ('Clean + Push Jerk', 'clean_and_jerk'),
-    ('Clean and Jerk', 'clean_and_jerk'),
-    ('Power Clean + Jerk', 'clean'),
-    ('Power Clean + Split Jerk', 'clean'),
-    ('Power Clean', 'clean'),
-    ('Hang Clean', 'clean'),
-    ('Squat Clean', 'clean'),
-    ('Clean Pull', 'clean'),
-    ('Clean', 'clean'),
-    ('Power Snatch', 'snatch'),
-    ('Hang Power Snatch', 'snatch'),
-    ('Muscle Snatch', 'snatch'),
-    ('Squat Snatch', 'snatch'),
-    ('Snatch Pull', 'snatch'),
-    ('Snatch', 'snatch'),
-    ('Back Squat', 'back_squat'),
-    ('Front Squat', 'front_squat'),
-    ('Overhead Squat', 'overhead_squat'),
-    ('Dumbbell Bench Press', 'bench_press'),
-    ('Bench Press', 'bench_press'),
-    ('Strict Press', 'strict_press'),
-    ('Push Press', 'strict_press'),
-    ('Romanian Deadlift', 'deadlift'),
-    ('Deadlift', 'deadlift'),
-    ('Barbell Row', 'barbell_row'),
-    ('Split Squat', 'split_squat'),
-  ];
   final lines = <String>[];
   String? liftKey;
   final expression = RegExp(
@@ -76,10 +98,7 @@ String resolvePercentageLoads(
   );
   for (final rawLine in body.split('\n')) {
     final line = rawLine.trim();
-    final matchingLift = liftKeys
-        .where((entry) => line.toLowerCase().contains(entry.$1.toLowerCase()))
-        .map((entry) => entry.$2)
-        .firstOrNull;
+    final matchingLift = percentageLiftKeyFor(line);
     if (matchingLift != null) liftKey = matchingLift;
 
     final match = expression.firstMatch(line);
@@ -6405,10 +6424,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   ) {
     final key = _trainingSubsectionKey(workout, sectionIndex, subsectionIndex);
     final completed = _sectionState[key] == true;
-    final prLiftKey = _prLiftKeyFor(subsection.title);
-    final hasPercentagePrescription = RegExp(
-      r'\bat\s+\d+(?:\.\d+)?%',
-    ).hasMatch(subsection.body);
+    final prLiftKey = percentageLiftKeyFor(subsection.title);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
@@ -6436,7 +6452,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         ),
                       ),
                     ),
-                    if (prLiftKey != null && hasPercentagePrescription)
+                    if (prLiftKey != null)
                       IconButton(
                         tooltip: 'Edit ${subsection.title} PR',
                         visualDensity: VisualDensity.compact,
@@ -6497,25 +6513,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
         ],
       ),
     );
-  }
-
-  String? _prLiftKeyFor(String title) {
-    final value = title.toLowerCase();
-    if (value.contains('clean') &&
-        (value.contains('jerk') || value.contains('split'))) {
-      return 'clean_and_jerk';
-    }
-    if (value.contains('back squat')) return 'back_squat';
-    if (value.contains('front squat')) return 'front_squat';
-    if (value.contains('overhead squat')) return 'overhead_squat';
-    if (value.contains('deadlift')) return 'deadlift';
-    if (value.contains('bench press')) return 'bench_press';
-    if (value.contains('press')) return 'strict_press';
-    if (value.contains('barbell row')) return 'barbell_row';
-    if (value.contains('snatch')) return 'snatch';
-    if (value.contains('clean')) return 'clean';
-    if (value.contains('split squat')) return 'split_squat';
-    return null;
   }
 
   String _duration(WorkoutDay workout, WorkoutSection section) {
