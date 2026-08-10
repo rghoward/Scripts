@@ -1677,11 +1677,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
             !_hasBenchmarkResult(workout.benchmark!))) {
       await _recordBenchmark(workout);
     }
-    if (finished &&
-        mounted &&
-        !(await _store?.containsKey('session_feedback_${workout.sequence}') ??
-            false)) {
-      await _collectFeedback(workout);
+    if (finished && mounted) {
+      final feedbackRecorded =
+          await _store?.containsKey('session_feedback_${workout.sequence}') ??
+          false;
+      if (!feedbackRecorded) await _collectFeedback(workout);
+      if (mounted) await _showWorkoutCompletionRecap(workout);
     }
   }
 
@@ -1985,11 +1986,124 @@ class _WorkoutHomeState extends State<WorkoutHome>
             !_hasBenchmarkResult(workout.benchmark!))) {
       await _recordBenchmark(workout);
     }
-    if (mounted &&
-        !(await _store?.containsKey('session_feedback_${workout.sequence}') ??
-            false)) {
-      await _collectFeedback(workout);
+    if (mounted) {
+      final feedbackRecorded =
+          await _store?.containsKey('session_feedback_${workout.sequence}') ??
+          false;
+      if (!feedbackRecorded) await _collectFeedback(workout);
+      if (mounted) await _showWorkoutCompletionRecap(workout);
     }
+  }
+
+  Future<void> _showWorkoutCompletionRecap(WorkoutDay workout) async {
+    final sections = _visibleSections(workout);
+    final optionalLeft = [
+      for (var index = 0; index < sections.length; index++)
+        if (sections[index].optional &&
+            _sectionState[_key(workout, index)] != true)
+          _sectionHeading(sections[index].title),
+    ];
+    final result = _conditioningResults[workout.sequence];
+    final nextAssignment = _schedule
+        .where(
+          (assignment) =>
+              assignment.sequence > workout.sequence &&
+              assignment.status != ScheduleStatus.completed &&
+              assignment.status != ScheduleStatus.skipped,
+        )
+        .firstOrNull;
+    final nextWorkout =
+        nextAssignment == null || nextAssignment.sequence > _workouts.length
+        ? null
+        : _workouts[nextAssignment.sequence - 1];
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: card,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.celebration_outlined, color: ember),
+                  SizedBox(width: 10),
+                  Text(
+                    'WORKOUT COMPLETE',
+                    style: TextStyle(
+                      color: ember,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'DAY ${workout.sequence} • ${workout.title}',
+                style: const TextStyle(color: ink, fontWeight: FontWeight.w800),
+              ),
+              if (result != null) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'CONDITIONING SCORE',
+                  style: TextStyle(
+                    color: cyan,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .7,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  result.summary,
+                  style: const TextStyle(
+                    color: success,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+              if (optionalLeft.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  'OPTIONAL WORK LEFT • ${optionalLeft.join(' • ')}',
+                  style: const TextStyle(color: muted, fontSize: 12),
+                ),
+              ],
+              const SizedBox(height: 18),
+              const Text(
+                'NEXT WORKOUT',
+                style: TextStyle(
+                  color: cyan,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: .7,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                nextWorkout == null
+                    ? 'No further workout is currently scheduled.'
+                    : 'DAY ${nextWorkout.sequence} • ${DateFormat('EEEE, MMMM d').format(nextAssignment!.date)}\n${nextWorkout.title}',
+                style: const TextStyle(color: ink, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('DONE'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _markWorkoutPartial(WorkoutDay workout) async {
@@ -5966,13 +6080,16 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (active == null || active.stage == _CardTimerStage.finished) {
       final target = _sectionTimerTargetSeconds(workout, section);
       final isCooldown = section.title.toLowerCase().contains('stretch');
-      return FilledButton.icon(
-        onPressed: () => _startSectionTimer(workout, section, index),
-        icon: const Icon(Icons.play_arrow_rounded),
-        label: Text(
-          isCooldown
-              ? 'START GUIDED COOLDOWN • 10-SECOND COUNTDOWN'
-              : 'START ${_formatTimer(target)} TIMER • 10-SECOND COUNTDOWN',
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: IconButton(
+          tooltip: isCooldown
+              ? 'Start guided cooldown with a 10-second countdown'
+              : 'Start ${_formatTimer(target)} timer with a 10-second countdown',
+          onPressed: () => _startSectionTimer(workout, section, index),
+          icon: const Icon(Icons.play_circle_outline_rounded),
+          color: cyan,
+          iconSize: 30,
         ),
       );
     }
