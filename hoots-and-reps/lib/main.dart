@@ -6622,6 +6622,7 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
         backgroundColor: paper,
         foregroundColor: ink,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           'GUIDED WORKOUT',
           style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
@@ -6739,16 +6740,6 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
                       icon: const Icon(Icons.swap_horiz),
                       color: cyan,
                     ),
-                  if (completed)
-                    IconButton(
-                      tooltip: 'Undo section completion',
-                      onPressed: () async {
-                        await widget.onUndo(_index);
-                        if (mounted) setState(() {});
-                      },
-                      icon: const Icon(Icons.undo_rounded),
-                      color: ember,
-                    ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -6759,16 +6750,40 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
                   label: const Text('COMPLETE SECTION'),
                 )
               else if (next != null)
-                FilledButton.icon(
-                  onPressed: () => _show(next),
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: const Text('SHOW NEXT SECTION'),
+                Row(
+                  children: [
+                    IconButton(
+                      tooltip: 'Undo section completion',
+                      onPressed: _undoCompletion,
+                      icon: const Icon(Icons.undo_rounded),
+                      color: ember,
+                    ),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => _show(next),
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        label: const Text('SHOW NEXT SECTION'),
+                      ),
+                    ),
+                  ],
                 )
               else
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.celebration_outlined),
-                  label: const Text('FINISH WORKOUT'),
+                Row(
+                  children: [
+                    IconButton(
+                      tooltip: 'Undo section completion',
+                      onPressed: _undoCompletion,
+                      icon: const Icon(Icons.undo_rounded),
+                      color: ember,
+                    ),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.celebration_outlined),
+                        label: const Text('FINISH WORKOUT'),
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ),
@@ -6824,6 +6839,11 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _undoCompletion() async {
+    await widget.onUndo(_index);
+    if (mounted) setState(() {});
   }
 }
 
