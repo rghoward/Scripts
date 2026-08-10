@@ -6347,10 +6347,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
                       tooltip: (_timerPanelExpanded[sectionKey] ?? false)
                           ? 'Hide timer controls'
                           : 'Show timer controls',
-                      onPressed: () => setState(
-                        () => _timerPanelExpanded[sectionKey] =
-                            !(_timerPanelExpanded[sectionKey] ?? false),
-                      ),
+                      onPressed: () => setState(() {
+                        final opening =
+                            !(_timerPanelExpanded[sectionKey] ?? false);
+                        _timerPanelExpanded[sectionKey] = opening;
+                        if (opening) _sectionExpanded[sectionKey] = true;
+                      }),
                       icon: Icon(
                         _cardTimer?.sectionKey == sectionKey &&
                                 _cardTimer?.stage != _CardTimerStage.finished
