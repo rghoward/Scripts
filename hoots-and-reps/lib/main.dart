@@ -1545,7 +1545,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
   String _key(WorkoutDay workout, int index) =>
       'generated:${workout.sequence}:${_variant.name}:$index';
 
-  List<_TrainingSubsection> _trainingSubsections(WorkoutSection section) {
+  List<_TrainingSubsection> _trainingSubsections(
+    WorkoutSection section, {
+    String? body,
+  }) {
     if (!const {
       'STRENGTH',
       'SKILL PRACTICE',
@@ -1553,7 +1556,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }.contains(section.title)) {
       return const [];
     }
-    return section.body
+    return (body ?? section.body)
         .split('\n\n')
         .where((block) => !block.startsWith('Move with consistent technique'))
         .map((block) {
@@ -5391,6 +5394,28 @@ class _WorkoutHomeState extends State<WorkoutHome>
     ];
   }
 
+  /// The compact strength/skill rows are rendered independently from the
+  /// section body. Give them the same substituted, athlete-facing source as
+  /// the full section so a chosen movement actually changes the prescription.
+  String _trainingSectionBody(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+  ) {
+    var body = section.body;
+    for (final substitution in _sectionSwaps(workout, section, index)) {
+      body = _substitutions.apply(body, substitution);
+    }
+    body = _publishedResolver
+        .resolve(
+          body: body,
+          athlete: _athleteSettings,
+          completed: _completedWorkouts.contains(workout.sequence),
+        )
+        .body;
+    return _resolvedFutureSectionBody(workout, section, body);
+  }
+
   String _sectionBody(WorkoutDay workout, WorkoutSection section, int index) {
     final substitutions = _sectionSwaps(workout, section, index);
     var body = section.body;
@@ -5735,7 +5760,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     WorkoutSection section,
     int index,
   ) {
-    final subsections = _trainingSubsections(section);
+    final subsections = _trainingSubsections(
+      section,
+      body: _trainingSectionBody(workout, section, index),
+    );
     if (subsections.isEmpty) return _sectionBody(workout, section, index);
     return subsections
         .map((item) => '${item.title}\n${item.body}'.trim())
@@ -6305,7 +6333,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final currentIndex = _nextRequiredIncompleteIndex(workout);
     final expanded =
         _sectionExpanded[sectionKey] ?? (index == currentIndex && !completed);
-    final trainingSubsections = _trainingSubsections(section);
+    final trainingSubsections = _trainingSubsections(
+      section,
+      body: _trainingSectionBody(workout, section, index),
+    );
     final completedTrainingSubsections = List.generate(
       trainingSubsections.length,
       (subsectionIndex) =>
@@ -6654,7 +6685,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
         result != null) {
       return 'SCORE • ${result.summary}';
     }
-    final subsections = _trainingSubsections(section);
+    final subsections = _trainingSubsections(
+      section,
+      body: _trainingSectionBody(workout, section, index),
+    );
     if (subsections.isNotEmpty) {
       return subsections.map((subsection) => subsection.title).join(' • ');
     }
