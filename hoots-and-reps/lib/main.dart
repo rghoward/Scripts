@@ -1894,7 +1894,8 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (!mounted) return;
     if (_castConnected) {
       await _showOnChromecast(workout, sections[index], index);
-    } else if (_externalDisplayAvailable) {
+    }
+    if (_externalDisplayAvailable) {
       await _showOnExternalDisplay(workout, sections[index], index);
     }
   }
@@ -1925,6 +1926,15 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (_castConnected) {
       unawaited(
         _showOnChromecast(workout, _visibleSections(workout)[index], index),
+      );
+    }
+    if (_externalDisplayAvailable) {
+      unawaited(
+        _showOnExternalDisplay(
+          workout,
+          _visibleSections(workout)[index],
+          index,
+        ),
       );
     }
     await Future<void>.delayed(const Duration(milliseconds: 80));
@@ -1969,7 +1979,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
               _substitutions.detectedMovements(sections[index].body).isNotEmpty,
           externalDisplayAvailable: _externalDisplayAvailable,
           castConnected: _castConnected,
-          onShowExternal: (index) =>
+          onStartExternal: (index) =>
               _showOnExternalDisplay(workout, sections[index], index),
           onStartCast: (index) =>
               _showOnChromecast(workout, sections[index], index),
@@ -4749,13 +4759,49 @@ class _WorkoutHomeState extends State<WorkoutHome>
             ),
             const SizedBox(height: 14),
           ],
-          Text(
-            workout.title,
-            style: const TextStyle(
-              color: ink,
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  workout.title,
+                  style: const TextStyle(
+                    color: ink,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Show workout on HDMI display',
+                onPressed: !_externalDisplayAvailable
+                    ? null
+                    : () => _showOnExternalDisplay(
+                        workout,
+                        sections[currentIndex ?? 0],
+                        currentIndex ?? 0,
+                      ),
+                icon: const Icon(Icons.tv_outlined),
+                color: cyan,
+              ),
+              IconButton(
+                tooltip: _castConnected
+                    ? 'Stop casting workout'
+                    : 'Cast workout',
+                onPressed: _castConnected
+                    ? _stopCasting
+                    : () => _showOnChromecast(
+                        workout,
+                        sections[currentIndex ?? 0],
+                        currentIndex ?? 0,
+                      ),
+                icon: Icon(
+                  _castConnected
+                      ? Icons.cast_connected_rounded
+                      : Icons.cast_rounded,
+                ),
+                color: cyan,
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -4806,24 +4852,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                           : Icons.bolt_rounded,
                     ),
                     color: ember,
-                  ),
-                  IconButton(
-                    tooltip: _castConnected
-                        ? 'Stop casting workout'
-                        : 'Cast workout',
-                    onPressed: _castConnected
-                        ? _stopCasting
-                        : () => _showOnChromecast(
-                            workout,
-                            sections[currentIndex ?? 0],
-                            currentIndex ?? 0,
-                          ),
-                    icon: Icon(
-                      _castConnected
-                          ? Icons.cast_connected_rounded
-                          : Icons.cast_rounded,
-                    ),
-                    color: cyan,
                   ),
                 ],
               ),
@@ -6263,12 +6291,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
   }
 
-  Future<void> _hideExternalDisplay() async {
-    await ExternalWorkoutDisplay.hide();
-    if (!mounted) return;
-    setState(() => _projectedSectionKey = null);
-  }
-
   Future<void> _showOnChromecast(
     WorkoutDay workout,
     WorkoutSection section,
@@ -6434,6 +6456,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
               if (isExpanded && _castConnected) {
                 unawaited(_showOnChromecast(workout, section, index));
               }
+              if (isExpanded && _externalDisplayAvailable) {
+                unawaited(_showOnExternalDisplay(workout, section, index));
+              }
             },
             showTrailingIcon: false,
             collapsedBackgroundColor: graphite,
@@ -6549,22 +6574,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         Icons.swap_horiz,
                         color: substitutions.isEmpty ? muted : cyan,
                         size: 20,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: projected
-                          ? 'Stop showing on the external display'
-                          : 'Show this card on the external display',
-                      onPressed: !_externalDisplayAvailable
-                          ? null
-                          : projected
-                          ? _hideExternalDisplay
-                          : () =>
-                                _showOnExternalDisplay(workout, section, index),
-                      icon: Icon(
-                        projected ? Icons.tv_rounded : Icons.tv_outlined,
-                        color: projected ? cyan : muted,
-                        size: 21,
                       ),
                     ),
                     IconButton(
@@ -7070,7 +7079,7 @@ class GuidedWorkoutPage extends StatefulWidget {
     required this.canSwap,
     required this.externalDisplayAvailable,
     required this.castConnected,
-    required this.onShowExternal,
+    required this.onStartExternal,
     required this.onStartCast,
     required this.onStopCast,
     required this.onSwap,
@@ -7092,7 +7101,7 @@ class GuidedWorkoutPage extends StatefulWidget {
   final bool Function(int index) canSwap;
   final bool externalDisplayAvailable;
   final bool castConnected;
-  final Future<void> Function(int index) onShowExternal;
+  final Future<void> Function(int index) onStartExternal;
   final Future<void> Function(int index) onStartCast;
   final Future<void> Function() onStopCast;
   final Future<void> Function(int index) onSwap;
@@ -7221,6 +7230,12 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage>
           style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
         ),
         actions: [
+          if (widget.externalDisplayAvailable)
+            IconButton(
+              tooltip: 'Show workout on HDMI display',
+              onPressed: () => widget.onStartExternal(_index),
+              icon: const Icon(Icons.tv_outlined),
+            ),
           IconButton(
             tooltip: widget.castConnected
                 ? 'Stop casting workout'
@@ -7360,13 +7375,6 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage>
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (widget.externalDisplayAvailable)
-                    IconButton(
-                      tooltip: 'Show this card on the external display',
-                      onPressed: () => widget.onShowExternal(_index),
-                      icon: const Icon(Icons.tv_outlined),
-                      color: cyan,
-                    ),
                   if (!completed && widget.canSwap(_index))
                     IconButton(
                       tooltip: 'Swap a movement',
