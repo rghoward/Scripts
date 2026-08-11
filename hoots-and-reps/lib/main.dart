@@ -5146,148 +5146,161 @@ class _WorkoutHomeState extends State<WorkoutHome>
       ),
     );
     if (movement == null || !mounted) return;
-    final selected = await showModalBottomSheet<(MovementSubstitution?, MovementSwapScope?)>(
-      context: context,
-      backgroundColor: card,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'REPLACE ${_substitutions.label(movement).toUpperCase()}',
-                style: const TextStyle(
-                  color: ember,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'These are training alternatives, not medical recommendations. You choose what fits.',
-                style: TextStyle(color: muted, height: 1.35),
-              ),
-              const SizedBox(height: 14),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  _activeSwap(workout, index, movement) == null
-                      ? Icons.check_circle_outline_rounded
-                      : Icons.undo_rounded,
-                  color: _activeSwap(workout, index, movement) == null
-                      ? success
-                      : ember,
-                ),
-                title: Text(
-                  'PRESCRIBED • ${_substitutions.label(movement).toUpperCase()}',
-                  style: const TextStyle(
-                    color: ink,
-                    fontWeight: FontWeight.w900,
+    final selected =
+        await showModalBottomSheet<(MovementSubstitution?, MovementSwapScope?)>(
+          context: context,
+          backgroundColor: card,
+          isScrollControlled: true,
+          builder: (context) => SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'REPLACE ${_substitutions.label(movement).toUpperCase()}',
+                    style: const TextStyle(
+                      color: ember,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  _activeSwap(workout, index, movement) == null
-                      ? 'Already used in this workout.'
-                      : 'Choose this to restore the workout to its prescribed movement.',
-                  style: const TextStyle(color: muted, height: 1.3),
-                ),
-                onTap: () => Navigator.pop(context, (null, null)),
-              ),
-              const Divider(color: border),
-              const Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 8),
-                child: Text(
-                  'SWAP OPTIONS',
-                  style: TextStyle(
-                    color: cyan,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.1,
+                  const SizedBox(height: 6),
+                  const Text(
+                    'These are training alternatives, not medical recommendations. You choose what fits.',
+                    style: TextStyle(color: muted, height: 1.35),
                   ),
-                ),
-              ),
-              if (_safeCandidates(movement).isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: Text(
-                    'No reviewed alternative fits your current equipment and hard movement boundaries. Keep this section unresolved or update those settings.',
-                    style: TextStyle(color: ember, height: 1.35),
-                  ),
-                ),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.pop(context, (
-                  MovementSubstitution(
-                    movementId: movement,
-                    original: _substitutions.label(movement),
-                    replacement: _customMovementReplacementMarker,
-                    stimulus: 'Athlete-selected custom replacement',
-                    disclosure: 'Custom movement for this workout only.',
-                  ),
-                  MovementSwapScope.today,
-                )),
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text('CHOOSE MY OWN MOVEMENT'),
-              ),
-              const SizedBox(height: 14),
-              for (final candidate in _safeCandidates(movement))
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: paper,
+                  const SizedBox(height: 14),
+                  InkWell(
+                    onTap: () => Navigator.pop(context, (null, null)),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        candidate.replacement,
-                        style: const TextStyle(
-                          color: ink,
-                          fontWeight: FontWeight.w900,
+                    child: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: paper,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: _activeSwap(workout, index, movement) == null
+                              ? success
+                              : border,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        candidate.stimulus,
-                        style: const TextStyle(color: muted),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
+                      child: Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context, (
-                                candidate,
-                                MovementSwapScope.today,
-                              )),
-                              child: const Text('THIS WORKOUT'),
+                            child: Text(
+                              _substitutions.label(movement),
+                              style: const TextStyle(
+                                color: ink,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () => Navigator.pop(context, (
-                                candidate,
-                                MovementSwapScope.always,
-                              )),
-                              child: const Text('ALWAYS'),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xff173523),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'ORIGINAL',
+                              style: TextStyle(
+                                color: success,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: .8,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-            ],
+                  if (_safeCandidates(movement).isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text(
+                        'No reviewed alternative fits your current equipment and hard movement boundaries. Keep this section unresolved or update those settings.',
+                        style: TextStyle(color: ember, height: 1.35),
+                      ),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(context, (
+                      MovementSubstitution(
+                        movementId: movement,
+                        original: _substitutions.label(movement),
+                        replacement: _customMovementReplacementMarker,
+                        stimulus: 'Athlete-selected custom replacement',
+                        disclosure: 'Custom movement for this workout only.',
+                      ),
+                      MovementSwapScope.today,
+                    )),
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('CHOOSE MY OWN MOVEMENT'),
+                  ),
+                  const SizedBox(height: 14),
+                  for (final candidate in _safeCandidates(movement))
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: paper,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: border),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            candidate.replacement,
+                            style: const TextStyle(
+                              color: ink,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            candidate.stimulus,
+                            style: const TextStyle(color: muted),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pop(context, (
+                                    candidate,
+                                    MovementSwapScope.today,
+                                  )),
+                                  child: const Text('THIS WORKOUT'),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: FilledButton(
+                                  onPressed: () => Navigator.pop(context, (
+                                    candidate,
+                                    MovementSwapScope.always,
+                                  )),
+                                  child: const Text('ALWAYS'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+        );
     if (selected == null) return;
     var substitution = selected.$1;
     if (substitution?.replacement == _customMovementReplacementMarker) {
