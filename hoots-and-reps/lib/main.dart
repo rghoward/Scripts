@@ -1636,6 +1636,63 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
   }
 
+  Future<void> _completeTrainingSection(
+    WorkoutDay workout,
+    int sectionIndex,
+    WorkoutSection section,
+  ) async {
+    final subsections = _trainingSubsections(section);
+    if (subsections.isEmpty) return;
+    final parentKey = _key(workout, sectionIndex);
+    final allDone = List.generate(
+      subsections.length,
+      (index) =>
+          _sectionState[_trainingSubsectionKey(workout, sectionIndex, index)] ==
+          true,
+    ).every((done) => done);
+    setState(() {
+      for (
+        var subsectionIndex = 0;
+        subsectionIndex < subsections.length;
+        subsectionIndex++
+      ) {
+        final key = _trainingSubsectionKey(
+          workout,
+          sectionIndex,
+          subsectionIndex,
+        );
+        if (allDone) {
+          _sectionState.remove(key);
+          _fractureSeeds.remove(key);
+        } else {
+          _sectionState[key] = true;
+          _fractureSeeds[key] = math.Random().nextInt(1 << 31);
+        }
+      }
+      if (allDone) {
+        _sectionState.remove(parentKey);
+        _fractureSeeds.remove(parentKey);
+      } else {
+        _sectionState[parentKey] = true;
+        _fractureSeeds[parentKey] = math.Random().nextInt(1 << 31);
+      }
+    });
+    await _saveProgress();
+    if (allDone) return;
+
+    final sections = _visibleSections(workout);
+    final finished = List.generate(
+      sections.length,
+      (index) =>
+          sections[index].optional ||
+          _sectionState[_key(workout, index)] == true,
+    ).every((done) => done);
+    if (finished) await _markWorkoutComplete(workout);
+    if (!finished) {
+      await _focusNextRequiredSection(workout, afterIndex: sectionIndex);
+    }
+  }
+
   Future<void> _completeSection(WorkoutDay workout, int index) async {
     final key = _key(workout, index);
     if (_sectionState[key] == true) {
@@ -6598,15 +6655,19 @@ class _WorkoutHomeState extends State<WorkoutHome>
                       ),
                     ),
                     InkWell(
-                      onTap: trainingSubsections.isEmpty
-                          ? completed
-                                ? () => _undoGuidedSection(workout, index)
-                                : () => _guidedCompleteSection(
-                                    workout,
-                                    index,
-                                    showNextChoice: false,
-                                  )
-                          : null,
+                      onTap: trainingSubsections.isNotEmpty
+                          ? () => _completeTrainingSection(
+                              workout,
+                              index,
+                              section,
+                            )
+                          : completed
+                          ? () => _undoGuidedSection(workout, index)
+                          : () => _guidedCompleteSection(
+                              workout,
+                              index,
+                              showNextChoice: false,
+                            ),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 38,
