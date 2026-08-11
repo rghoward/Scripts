@@ -1922,6 +1922,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
         _sectionExpanded[_key(workout, sectionIndex)] = sectionIndex == index;
       }
     });
+    if (_castConnected) {
+      unawaited(
+        _showOnChromecast(workout, _visibleSections(workout)[index], index),
+      );
+    }
     await Future<void>.delayed(const Duration(milliseconds: 80));
     if (!mounted) return;
     final target = _sectionCardKeys[sectionKey]?.currentContext;
@@ -1966,8 +1971,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
           castConnected: _castConnected,
           onShowExternal: (index) =>
               _showOnExternalDisplay(workout, sections[index], index),
-          onShowCast: (index) =>
+          onStartCast: (index) =>
               _showOnChromecast(workout, sections[index], index),
+          onStopCast: _stopCasting,
           onSwap: (index) =>
               _chooseMovementSwap(workout, sections[index], index),
           timerFor: (index) {
@@ -4801,6 +4807,24 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                     color: ember,
                   ),
+                  IconButton(
+                    tooltip: _castConnected
+                        ? 'Stop casting workout'
+                        : 'Cast workout',
+                    onPressed: _castConnected
+                        ? _stopCasting
+                        : () => _showOnChromecast(
+                            workout,
+                            sections[currentIndex ?? 0],
+                            currentIndex ?? 0,
+                          ),
+                    icon: Icon(
+                      _castConnected
+                          ? Icons.cast_connected_rounded
+                          : Icons.cast_rounded,
+                    ),
+                    color: cyan,
+                  ),
                 ],
               ),
             ),
@@ -6405,8 +6429,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
           ExpansionTile(
             key: ValueKey('$sectionKey:${expanded ? 'open' : 'closed'}'),
             initiallyExpanded: expanded,
-            onExpansionChanged: (isExpanded) =>
-                setState(() => _sectionExpanded[sectionKey] = isExpanded),
+            onExpansionChanged: (isExpanded) {
+              setState(() => _sectionExpanded[sectionKey] = isExpanded);
+              if (isExpanded && _castConnected) {
+                unawaited(_showOnChromecast(workout, section, index));
+              }
+            },
             showTrailingIcon: false,
             collapsedBackgroundColor: graphite,
             backgroundColor: graphite,
@@ -6536,21 +6564,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                       icon: Icon(
                         projected ? Icons.tv_rounded : Icons.tv_outlined,
                         color: projected ? cyan : muted,
-                        size: 21,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: _castConnected && projected
-                          ? 'Stop casting this workout card'
-                          : 'Cast this card to a Chromecast',
-                      onPressed: _castConnected && projected
-                          ? _stopCasting
-                          : () => _showOnChromecast(workout, section, index),
-                      icon: Icon(
-                        _castConnected && projected
-                            ? Icons.cast_connected_rounded
-                            : Icons.cast_rounded,
-                        color: _castConnected && projected ? cyan : muted,
                         size: 21,
                       ),
                     ),
@@ -7058,7 +7071,8 @@ class GuidedWorkoutPage extends StatefulWidget {
     required this.externalDisplayAvailable,
     required this.castConnected,
     required this.onShowExternal,
-    required this.onShowCast,
+    required this.onStartCast,
+    required this.onStopCast,
     required this.onSwap,
     required this.timerFor,
     required this.onStartTimer,
@@ -7079,7 +7093,8 @@ class GuidedWorkoutPage extends StatefulWidget {
   final bool externalDisplayAvailable;
   final bool castConnected;
   final Future<void> Function(int index) onShowExternal;
-  final Future<void> Function(int index) onShowCast;
+  final Future<void> Function(int index) onStartCast;
+  final Future<void> Function() onStopCast;
   final Future<void> Function(int index) onSwap;
   final ({String time, String stage, bool paused})? Function(int index)
   timerFor;
@@ -7095,13 +7110,18 @@ class GuidedWorkoutPage extends StatefulWidget {
   State<GuidedWorkoutPage> createState() => _GuidedWorkoutPageState();
 }
 
-class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
+class _GuidedWorkoutPageState extends State<GuidedWorkoutPage>
+    with SingleTickerProviderStateMixin {
   late int _index = widget.initialIndex;
   Timer? _timerRefresh;
+  late final AnimationController _cardSwipe;
+  double _cardDragDistance = 0;
+  int _cardTransitionDirection = 1;
 
   @override
   void initState() {
     super.initState();
+    _cardSwipe = AnimationController(vsync: this);
     _timerRefresh = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -7110,6 +7130,7 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
   @override
   void dispose() {
     _timerRefresh?.cancel();
+    _cardSwipe.dispose();
     super.dispose();
   }
 
@@ -7126,8 +7147,50 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
   }
 
   Future<void> _show(int index) async {
+    if (index < 0 || index >= widget.sections.length) return;
     await widget.onSelect(index);
     if (mounted) setState(() => _index = index);
+  }
+
+  void _startCardSwipe() {
+    _cardDragDistance = 0;
+    _cardSwipe.value = 0;
+  }
+
+  void _updateCardSwipe(DragUpdateDetails details, double width) {
+    _cardDragDistance += details.primaryDelta ?? 0;
+    if (_cardDragDistance == 0) return;
+    _cardTransitionDirection = _cardDragDistance.isNegative ? 1 : -1;
+    _cardSwipe.value = (_cardDragDistance.abs() / width).clamp(0.0, 1.0);
+  }
+
+  Future<void> _endCardSwipe(DragEndDetails details) async {
+    final velocity = details.primaryVelocity ?? 0;
+    final direction = _cardDragDistance == 0
+        ? (velocity.isNegative ? 1 : -1)
+        : _cardTransitionDirection;
+    final target = _index + direction;
+    final completesTurn =
+        (_cardSwipe.value > .22 || velocity.abs() > 450) &&
+        target >= 0 &&
+        target < widget.sections.length;
+    if (!completesTurn) {
+      await _cardSwipe.animateBack(
+        0,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+      );
+      return;
+    }
+    await _cardSwipe.animateTo(
+      1,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+    );
+    await _show(target);
+    if (!mounted) return;
+    _cardDragDistance = 0;
+    _cardSwipe.value = 0;
   }
 
   Future<void> _complete() async {
@@ -7158,6 +7221,19 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
           style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
         ),
         actions: [
+          IconButton(
+            tooltip: widget.castConnected
+                ? 'Stop casting workout'
+                : 'Cast workout',
+            onPressed: widget.castConnected
+                ? widget.onStopCast
+                : () => widget.onStartCast(_index),
+            icon: Icon(
+              widget.castConnected
+                  ? Icons.cast_connected_rounded
+                  : Icons.cast_rounded,
+            ),
+          ),
           TextButton.icon(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.close, size: 18),
@@ -7191,51 +7267,91 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
               ),
               const SizedBox(height: 14),
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: graphite,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: completed ? success : border,
-                      width: 1.5,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onHorizontalDragStart: (_) => _startCardSwipe(),
+                    onHorizontalDragUpdate: (details) =>
+                        _updateCardSwipe(details, constraints.maxWidth),
+                    onHorizontalDragEnd: _endCardSwipe,
+                    onHorizontalDragCancel: () => _cardSwipe.animateBack(
+                      0,
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
                     ),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          completed ? 'COMPLETE' : 'CURRENT SECTION',
-                          style: TextStyle(
-                            color: completed ? success : ember,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1,
+                    child: AnimatedBuilder(
+                      animation: _cardSwipe,
+                      builder: (context, child) {
+                        final progress = _cardSwipe.value;
+                        final direction = _cardTransitionDirection.toDouble();
+                        final transform = Matrix4.identity()
+                          ..setEntry(3, 2, .0012)
+                          ..translateByDouble(
+                            -direction * constraints.maxWidth * progress,
+                            0,
+                            0,
+                            1,
+                          )
+                          ..rotateY(direction * .16 * progress);
+                        return Transform(
+                          alignment: direction > 0
+                              ? Alignment.centerLeft
+                              : Alignment.centerRight,
+                          transform: transform,
+                          child: Opacity(
+                            opacity: 1 - (.18 * progress),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: graphite,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: completed ? success : border,
+                            width: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          widget.headingFor(section.title),
-                          style: const TextStyle(
-                            color: ink,
-                            fontSize: 29,
-                            fontWeight: FontWeight.w900,
-                            height: 1.05,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                completed ? 'COMPLETE' : 'CURRENT SECTION',
+                                style: TextStyle(
+                                  color: completed ? success : ember,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                widget.headingFor(section.title),
+                                style: const TextStyle(
+                                  color: ink,
+                                  fontSize: 29,
+                                  fontWeight: FontWeight.w900,
+                                  height: 1.05,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _guidedTimerControls(),
+                              const Divider(color: border, height: 32),
+                              Text(
+                                widget.bodyFor(_index),
+                                style: const TextStyle(
+                                  color: ink,
+                                  fontSize: 18,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        _guidedTimerControls(),
-                        const Divider(color: border, height: 32),
-                        Text(
-                          widget.bodyFor(_index),
-                          style: const TextStyle(
-                            color: ink,
-                            fontSize: 18,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -7251,18 +7367,6 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage> {
                       icon: const Icon(Icons.tv_outlined),
                       color: cyan,
                     ),
-                  IconButton(
-                    tooltip: widget.castConnected
-                        ? 'Update Chromecast with this card'
-                        : 'Cast this card to a Chromecast',
-                    onPressed: () => widget.onShowCast(_index),
-                    icon: Icon(
-                      widget.castConnected
-                          ? Icons.cast_connected_rounded
-                          : Icons.cast_rounded,
-                    ),
-                    color: cyan,
-                  ),
                   if (!completed && widget.canSwap(_index))
                     IconButton(
                       tooltip: 'Swap a movement',
