@@ -5277,7 +5277,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         disclosure: 'Custom movement for this workout only.',
       );
     }
-    final scope = selected.$2!;
+    final scope = selected.$2;
     final todayKey = _movementSwapKey(workout, index, movement);
     setState(() {
       if (substitution == null) {
@@ -5293,14 +5293,16 @@ class _WorkoutHomeState extends State<WorkoutHome>
     await _saveProgress();
     await _recordSnapshotTransformation(
       type: 'movement_swap',
-      reason: scope == MovementSwapScope.always
+      reason: substitution == null
+          ? 'Athlete returned to the prescribed movement.'
+          : scope == MovementSwapScope.always
           ? 'Athlete approved a persistent movement substitution.'
           : 'Athlete approved a workout-specific movement substitution.',
       workoutSequence: scope == MovementSwapScope.today
           ? workout.sequence
           : null,
       payload: {
-        'scope': scope.name,
+        'scope': scope?.name ?? 'prescribed',
         'movement_id': movement,
         'replacement': substitution?.replacement,
       },
