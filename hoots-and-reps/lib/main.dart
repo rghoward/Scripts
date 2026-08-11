@@ -582,7 +582,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
           if (connected && _pendingCastSectionKey != null) {
             _projectedSectionKey = _pendingCastSectionKey;
           }
-          if (!connected) _pendingCastSectionKey = null;
+          // Keep the selected card while Cast reconnects. The native sender
+          // retains its latest payload and replays it in onSessionResumed.
+          if (!connected && _projectedSectionKey != null) {
+            _pendingCastSectionKey = _projectedSectionKey;
+          }
         });
       }
     });
@@ -6208,7 +6212,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
     };
     // An HDMI display receives precisely the same plan and controls as Cast.
     unawaited(ExternalWorkoutDisplay.updateExternalTimer(payload));
-    if (!_castConnected) return;
+    // The native Cast bridge keeps this payload even during a temporary
+    // disconnect, then sends it as soon as the SDK resumes the session.
+    // Otherwise starting a timer during recovery is silently lost.
     unawaited(ExternalWorkoutDisplay.updateCastTimer(payload));
   }
 
