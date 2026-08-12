@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +21,11 @@ const isTestNotification = process.argv.includes('--test-notification');
 
 function log(message) {
   console.log(`[honeycomb-monitor] ${message}`);
+}
+
+function expandHomeDirectory(value) {
+  if (value === '~') return os.homedir();
+  return value.startsWith('~/') ? path.join(os.homedir(), value.slice(2)) : value;
 }
 
 async function readState() {
@@ -112,8 +118,9 @@ async function sendTelegram(message) {
 }
 
 async function sendFirebase(message) {
-  const serviceAccountFile = process.env.FCM_SERVICE_ACCOUNT_FILE;
-  if (!serviceAccountFile) return false;
+  const configuredServiceAccountFile = process.env.FCM_SERVICE_ACCOUNT_FILE;
+  if (!configuredServiceAccountFile) return false;
+  const serviceAccountFile = expandHomeDirectory(configuredServiceAccountFile);
 
   let credentials;
   try {

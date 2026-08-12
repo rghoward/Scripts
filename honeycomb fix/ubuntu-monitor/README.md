@@ -51,7 +51,7 @@ chmod 600 ~/.config/honeycomb-monitor/env
 Set the environment file to:
 
 ```sh
-FCM_SERVICE_ACCOUNT_FILE=/home/your-user/.config/honeycomb-monitor/firebase-service-account.json
+FCM_SERVICE_ACCOUNT_FILE=~/.config/honeycomb-monitor/firebase-service-account.json
 FCM_TOPIC=honeycomb-family-alerts-v1
 ```
 
