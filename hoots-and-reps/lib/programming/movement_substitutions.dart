@@ -329,6 +329,18 @@ class MovementSubstitutionRegistry {
       'Unilateral loaded carrying',
     ),
     _MovementDefinition(
+      'front_rack_carry',
+      'Front-Rack Carry',
+      [
+        'front-rack carries',
+        'front rack carries',
+        'front-rack carry',
+        'front rack carry',
+      ],
+      ['Farmer Carry', 'Suitcase Carry', 'Sandbag Bear-Hug Carry'],
+      'Front-loaded carrying and trunk bracing',
+    ),
+    _MovementDefinition(
       'sandbag_carry',
       'Sandbag Carry',
       ['sandbag carries', 'sandbag carry'],
@@ -455,7 +467,12 @@ class MovementSubstitutionRegistry {
     _MovementDefinition(
       'dead_bug',
       'Dead Bug',
-      ['dead bugs', 'dead bug'],
+      [
+        'dead-bug deload circuit',
+        'dead bug deload circuit',
+        'dead bugs',
+        'dead bug',
+      ],
       ['Bird Dog', 'Plank', 'Hollow Hold'],
       'Controlled trunk stability',
     ),
@@ -510,6 +527,32 @@ class MovementSubstitutionRegistry {
       ['banded triceps pressdowns', 'triceps pressdowns', 'triceps pressdown'],
       ['Close-Grip Push-Up', 'Dumbbell Skull Crusher', 'Bench Dip'],
       'Elbow-extension strength',
+    ),
+    _MovementDefinition(
+      'overhead_triceps_extension',
+      'Overhead Triceps Extension',
+      [
+        'overhead triceps extensions',
+        'overhead triceps extension',
+        'triceps extensions',
+        'triceps extension',
+      ],
+      ['Triceps Pressdown', 'Dumbbell Skull Crusher', 'Bench Dip'],
+      'Long-head elbow-extension strength',
+    ),
+    _MovementDefinition(
+      'biceps_curl',
+      'Biceps Curl',
+      [
+        'hammer curls',
+        'hammer curl',
+        'supinated curls',
+        'supinated curl',
+        'curls',
+        'curl',
+      ],
+      ['Incline Dumbbell Curl', 'Band Curl', 'Neutral-Grip Chin-Up'],
+      'Direct elbow-flexion strength',
     ),
     _MovementDefinition(
       'face_pull',
@@ -791,7 +834,11 @@ class MovementSubstitutionRegistry {
     _MovementDefinition(
       'couch_stretch',
       'Couch Stretch',
-      ['couch stretch'],
+      [
+        'couch stretch',
+        'half-kneeling hip-flexor stretch',
+        'half kneeling hip-flexor stretch',
+      ],
       [
         'Half-Kneeling Quad Stretch',
         'Standing Quad Stretch',
@@ -816,9 +863,36 @@ class MovementSubstitutionRegistry {
     _MovementDefinition(
       'breathing_reset',
       'Breathing Reset',
-      ['crocodile breathing', 'breathing reset'],
-      ['Box Breathing', 'Supine 90/90 Breathing', 'Child’s-Pose Breathing'],
+      ['crocodile breathing', 'supine breathing', 'breathing reset'],
+      ['Box Breathing', 'Supine 60/60 Breathing', 'Child’s-Pose Breathing'],
       'Down-regulation and breathing control',
+    ),
+    _MovementDefinition(
+      'open_book_rotation',
+      'Open-Book Rotation',
+      [
+        'open-book rotations',
+        'open-book rotation',
+        'open book rotations',
+        'open book rotation',
+      ],
+      [
+        'Thread-the-Needle Stretch',
+        'Quadruped Thoracic Rotation',
+        'Wall Thoracic Rotation',
+      ],
+      'Thoracic rotation mobility',
+    ),
+    _MovementDefinition(
+      'neck_release',
+      'Upper-Trap and Neck Release',
+      ['upper-trap and neck release', 'upper trap and neck release'],
+      [
+        'Levator Scapulae Stretch',
+        'Gentle Neck Rotation',
+        'Upper-Trap Stretch',
+      ],
+      'Neck and upper-trapezius mobility',
     ),
     _MovementDefinition(
       'posterior_shoulder_stretch',

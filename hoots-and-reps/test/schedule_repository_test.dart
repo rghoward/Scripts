@@ -12,7 +12,7 @@ void main() {
     repository = ScheduleRepository(database);
     await repository.initialize(
       startsOn: DateTime(2026, 7, 27),
-      prescriptionSignatures: List.generate(48, (index) => 'signature-$index'),
+      prescriptionSignatures: List.generate(60, (index) => 'signature-$index'),
     );
   });
 
@@ -20,11 +20,25 @@ void main() {
 
   test('seeds all workouts independently from calendar dates', () async {
     final assignments = await repository.assignments();
-    expect(assignments, hasLength(48));
+    expect(assignments, hasLength(60));
     expect(assignments.first.sequence, 1);
     expect(assignments.first.date, DateTime(2026, 7, 27));
-    expect(assignments[4].date, DateTime(2026, 8, 3));
+    expect(assignments[4].date, DateTime(2026, 8, 1));
   });
+
+  test(
+    'clears inherited completion state only in the active program',
+    () async {
+      final before = await repository.assignments();
+      await repository.complete(before.first.assignmentId);
+
+      await repository.clearInheritedCompletionStates();
+
+      final after = await repository.assignments();
+      expect(after.first.status, ScheduleStatus.planned);
+      expect(after.first.date, DateTime(2026, 7, 27));
+    },
+  );
 
   test('pause and undo restore pending calendar assignments', () async {
     final before = await repository.assignments();

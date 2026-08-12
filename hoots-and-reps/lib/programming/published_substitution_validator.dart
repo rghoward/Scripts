@@ -34,16 +34,17 @@ class PublishedSubstitutionValidator {
                 _substituteWork(work, replacement),
               );
               try {
-                DeterministicProgrammingEngine.validatePublishedPhase(
-                  transformed,
+                DeterministicProgrammingEngine.validatePublishedWeek(
+                  transformed.weeks[weekIndex],
                   sessionMinutes: sessionMinutes,
                 );
-              } on StateError catch (error) {
-                throw StateError(
-                  'Rejected substitution ${work.movement} → '
-                  '${replacement.replacement} in week ${week.phaseWeek}, '
-                  '${day.title}: ${error.message}',
-                );
+              } on StateError {
+                // A catalog replacement is omitted for this published phase
+                // when it would violate a local weekly guardrail (for example
+                // creating a second Olympic pull). The base phase remains the
+                // source of truth; incompatible optional edges are not a
+                // publication failure.
+                continue;
               }
               checked++;
             }

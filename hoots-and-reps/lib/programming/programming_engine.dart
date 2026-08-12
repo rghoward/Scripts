@@ -19,7 +19,15 @@ enum SkillQualification {
   ringDip,
 }
 
-enum DayRole { lowerStrength, upperSkill, rest, power, recovery, fullBody }
+enum DayRole {
+  lowerStrength,
+  upperSkill,
+  rest,
+  power,
+  recovery,
+  fullBody,
+  capacity,
+}
 
 enum Effort { easy, moderate, hard }
 
@@ -321,6 +329,13 @@ class StrengthWork {
   PrescriptionQuantity? get suggestedLoadQuantity => suggestedLoad == null
       ? null
       : PrescriptionQuantity(suggestedLoad!, PrescriptionUnit.load);
+
+  /// A programmed strength lift, rather than Olympic receiving or overhead
+  /// position practice. Overhead squats and squat variations inside Olympic
+  /// complexes intentionally remain eligible alongside one of these lifts.
+  bool get isDedicatedBilateralSquatStrength =>
+      primaryPattern == 'squat' &&
+      (trainingMaxKey == 'back_squat' || trainingMaxKey == 'front_squat');
 
   int get prescribedRestSeconds {
     if (skill == 'advanced' || loadingPattern == LoadingPattern.complex) {
@@ -737,7 +752,7 @@ class GeneratedDay {
   /// excluded so cosmetic renaming cannot disguise a repeated workout.
   String get prescriptionSignature {
     if (isRest) return 'rest';
-    final strengthParts = [strength!, ...secondaryStrength]
+    final strengthParts = [if (strength != null) strength!, ...secondaryStrength]
         .map(
           (work) => [
             work.movement,
@@ -982,6 +997,26 @@ class DeterministicProgrammingEngine {
     _validateEnergySystemBalance(phase);
   }
 
+  /// Fast publication check for a single reviewed substitution. The canonical
+  /// unmodified phase has already passed [validatePublishedPhase]; a movement
+  /// swap therefore needs to re-check the affected microcycle and session
+  /// duration rather than repeating every unrelated 7-, 14-, and 28-day
+  /// calculation for each catalog candidate.
+  static void validatePublishedWeek(
+    GeneratedWeek week, {
+    required int sessionMinutes,
+  }) {
+    _validateWeek(week);
+    for (final day in week.days.where((day) => !day.isRest)) {
+      if (day.estimatedSessionMinutes > sessionMinutes) {
+        throw StateError(
+          '${day.title} estimates ${day.estimatedSessionMinutes} minutes, '
+          'exceeding the published $sessionMinutes-minute session limit.',
+        );
+      }
+    }
+  }
+
   static void _validateConditioningVariety(GeneratedPhase phase) {
     final conditioning = phase.days
         .where((day) => !day.isRest)
@@ -996,9 +1031,14 @@ class DeterministicProgrammingEngine {
     if (forTime < 10) {
       throw StateError('A phase requires at least 10 capped for-time pieces.');
     }
-    if (conditioning.any(
-      (work) => work.durationMinutes < 12 || work.durationMinutes > 20,
-    )) {
+    if (phase.days
+        .where((day) => !day.isRest)
+        .any(
+          (day) =>
+              day.role != DayRole.capacity &&
+              (day.conditioning!.durationMinutes < 12 ||
+                  day.conditioning!.durationMinutes > 20),
+        )) {
       throw StateError(
         'Conditioning must remain within the 12–20 minute target.',
       );
@@ -1097,7 +1137,6 @@ class DeterministicProgrammingEngine {
         ),
         secondaryStrength: plans[2].skip(1).toList(),
       ),
-      _restDay(monday.add(const Duration(days: 4)), 'Optional Recovery Portal'),
       _trainingDay(
         templates,
         phaseWeek,
@@ -1113,6 +1152,9 @@ class DeterministicProgrammingEngine {
         ),
         secondaryStrength: plans[3].skip(1).toList(),
       ),
+      // The fifth weekly training slot is deliberately low-fatigue Zone 2
+      // conditioning with direct arm and trunk accessories, never strength.
+      _capacityDay(monday.add(const Duration(days: 5)), phaseWeek, deload),
       _restDay(monday.add(const Duration(days: 6)), 'Sabbath of the Owl'),
     ];
 
@@ -1134,13 +1176,14 @@ class DeterministicProgrammingEngine {
     final rotation = (phaseWeek - 1) % 6;
     final wave = (phaseWeek - 1) % 4;
     final bump = wave * .015;
+    final dedicatedSquat = _dedicatedSquatForWeek(phaseWeek);
     if (deload) {
       return [
         [
           _work(
             athlete,
-            'Back Squat',
-            'back_squat',
+            dedicatedSquat.$1,
+            dedicatedSquat.$2,
             'squat',
             LoadingPattern.deload,
             const [StrengthSet(sets: 3, reps: 5, percent: .60)],
@@ -1194,12 +1237,19 @@ class DeterministicProgrammingEngine {
             const [StrengthSet(sets: 3, reps: 5, percent: .55)],
             {'posterior_chain', 'grip', 'systemic'},
           ),
+          _bodyweight('Dead-Bug Deload Circuit', 'core', 2, 8, {'core'}),
         ],
       ];
     }
     final lower = switch (rotation) {
       0 => [
-        _ascending(athlete, 'Back Squat', 'back_squat', 'squat', bump),
+        _ascending(
+          athlete,
+          dedicatedSquat.$1,
+          dedicatedSquat.$2,
+          'squat',
+          bump,
+        ),
         _straight(
           athlete,
           'Barbell Row',
@@ -1220,7 +1270,13 @@ class DeterministicProgrammingEngine {
         ),
       ],
       1 => [
-        _topBackoff(athlete, 'Front Squat', 'front_squat', 'squat', .76 + bump),
+        _topBackoff(
+          athlete,
+          dedicatedSquat.$1,
+          dedicatedSquat.$2,
+          'squat',
+          .76 + bump,
+        ),
         _straight(
           athlete,
           'Barbell Row',
@@ -1246,7 +1302,7 @@ class DeterministicProgrammingEngine {
         }, skill: 'intermediate'),
       ],
       2 => [
-        _wave(athlete, 'Back Squat', 'back_squat', 'squat', bump),
+        _wave(athlete, dedicatedSquat.$1, dedicatedSquat.$2, 'squat', bump),
         _straight(
           athlete,
           'Bulgarian Split Squat',
@@ -1258,7 +1314,13 @@ class DeterministicProgrammingEngine {
         ),
       ],
       3 => [
-        _ascending(athlete, 'Front Squat', 'front_squat', 'squat', bump),
+        _ascending(
+          athlete,
+          dedicatedSquat.$1,
+          dedicatedSquat.$2,
+          'squat',
+          bump,
+        ),
         _straight(
           athlete,
           'Barbell Row',
@@ -1279,7 +1341,13 @@ class DeterministicProgrammingEngine {
         ),
       ],
       4 => [
-        _topBackoff(athlete, 'Back Squat', 'back_squat', 'squat', .79 + bump),
+        _topBackoff(
+          athlete,
+          dedicatedSquat.$1,
+          dedicatedSquat.$2,
+          'squat',
+          .79 + bump,
+        ),
         _straight(
           athlete,
           'Romanian Deadlift',
@@ -1300,7 +1368,7 @@ class DeterministicProgrammingEngine {
         ),
       ],
       _ => [
-        _wave(athlete, 'Front Squat', 'front_squat', 'squat', bump),
+        _wave(athlete, dedicatedSquat.$1, dedicatedSquat.$2, 'squat', bump),
         _straight(
           athlete,
           'Overhead Squat',
@@ -1336,15 +1404,7 @@ class DeterministicProgrammingEngine {
           6,
           1,
         ),
-        _straight(
-          athlete,
-          'Front Squat',
-          'front_squat',
-          'squat',
-          3,
-          5,
-          .64 + bump,
-        ),
+        _straight(athlete, 'Clean Pull', 'clean', 'hinge', 3, 4, .78 + bump),
       ],
       2 => [
         _ascendingOlympic(athlete, 'Power Snatch', 'snatch', bump),
@@ -1358,6 +1418,7 @@ class DeterministicProgrammingEngine {
           .58 + bump,
           skill: 'advanced',
         ),
+        _straight(athlete, 'Snatch Pull', 'snatch', 'hinge', 2, 3, .70 + bump),
       ],
       3 => [
         _complex(
@@ -1369,7 +1430,11 @@ class DeterministicProgrammingEngine {
           5,
           2,
         ),
-        _straight(athlete, 'Clean Pull', 'clean', 'hinge', 3, 4, .82 + bump),
+        _bodyweight('Front-Rack Carry', 'carry', 4, 30, {
+          'front_rack',
+          'grip',
+          'core',
+        }),
       ],
       4 => [
         _waveOlympic(athlete, 'Squat Snatch', 'snatch', bump),
@@ -1382,15 +1447,11 @@ class DeterministicProgrammingEngine {
           'clean_and_jerk',
           bump,
         ),
-        _straight(
-          athlete,
-          'Front Squat',
-          'front_squat',
-          'squat',
-          3,
-          3,
-          .72 + bump,
-        ),
+        _bodyweight('Front-Rack Carry', 'carry', 4, 30, {
+          'front_rack',
+          'grip',
+          'core',
+        }),
       ],
     };
     final upper = switch (rotation) {
@@ -1658,6 +1719,22 @@ class DeterministicProgrammingEngine {
     return [lower, upper, olympic, hinge];
   }
 
+  /// The lower-strength rotation intentionally differs from the Olympic
+  /// rotation. This keeps one dedicated bilateral squat lift per week while
+  /// allowing qualified receiving and overhead-position skill work elsewhere.
+  /// Deloads alternate Front/Back/Front; week nine shifts to Front Squat so
+  /// the complete 12-week phase remains balanced six-to-six.
+  static (String, String) _dedicatedSquatForWeek(int phaseWeek) {
+    final front = switch (phaseWeek) {
+      4 || 9 || 12 => true,
+      8 => false,
+      _ => ((phaseWeek - 1) % 6).isOdd,
+    };
+    return front
+        ? ('Front Squat', 'front_squat')
+        : ('Back Squat', 'back_squat');
+  }
+
   GeneratedDay applyReadiness(GeneratedDay day, Readiness readiness) {
     if (day.isRest || readiness == Readiness.green) return day;
     if (readiness == Readiness.red) {
@@ -1915,6 +1992,92 @@ class DeterministicProgrammingEngine {
     isRest: true,
     explanation: const ['Recovery is scheduled, not missed work.'],
   );
+
+  static GeneratedDay _capacityDay(DateTime date, int phaseWeek, bool deload) {
+    final armWork = phaseWeek.isOdd
+        ? [
+            'Week $phaseWeek • ${deload ? 2 : 3} x 12 band or cable triceps pressdowns — controlled lockout',
+            'Week $phaseWeek • ${deload ? 2 : 3} x 10 hammer curls — controlled lowering',
+            'Week $phaseWeek • 2 rounds: 10 dead bugs per side + 30-second side plank per side',
+          ]
+        : [
+            'Week $phaseWeek • ${deload ? 2 : 3} x 10 overhead triceps extensions — long, controlled stretch',
+            'Week $phaseWeek • ${deload ? 2 : 3} x 10 supinated curls — controlled lowering',
+            'Week $phaseWeek • 2 rounds: 12 AbMat sit-ups + 20-second hollow hold',
+          ];
+    return GeneratedDay(
+      date: date,
+      role: DayRole.capacity,
+      title: 'The Capacity Workshop • Week $phaseWeek',
+      warmupMinutes: 8,
+      warmup: const [
+        '3:00 easy machine work or walk',
+        '8 band pull-aparts',
+        '8 scapular push-ups',
+        '8 dead bugs per side',
+      ],
+      strength: null,
+      secondaryStrength: const [],
+      accessories: [...armWork],
+      equipment: const {'rower', 'fan_bike', 'running_space', 'ski_erg'},
+      conditioning: ConditioningWork(
+        durationMinutes: deload ? 20 : 25,
+        effort: Effort.easy,
+        format: 'Zone 2 aerobic capacity',
+        prescription: [
+          '${deload ? 20 : 25}:00 easy row, bike, run, or SkiErg',
+          'Stay conversational; nasal breathing should be available most of the time',
+          'Rotate the modality weekly and do not turn this into intervals',
+          'Week $phaseWeek focus: add only enough distance to keep the effort easy',
+        ],
+        levelOptions: [
+          ConditioningLevelOption(
+            level: WorkoutLevel.ember,
+            prescription: const [
+              'Choose a walk or easy bike at conversational effort.',
+            ],
+          ),
+          ConditioningLevelOption(
+            level: WorkoutLevel.forge,
+            prescription: const [
+              'Choose an easy row, bike, run, or SkiErg at conversational effort.',
+            ],
+          ),
+          ConditioningLevelOption(
+            level: WorkoutLevel.ascendant,
+            prescription: const [
+              'Choose the planned modality and stay conversational throughout.',
+            ],
+          ),
+        ],
+        movementPatterns: const {'cyclical'},
+        templateId: 'capacity_zone2_w$phaseWeek',
+        energySystem: EnergySystem.aerobicBase,
+        tasks: [
+          WorkoutTask(
+            movement: 'easy cyclical movement',
+            quantities: [
+              PrescriptionQuantity(
+                (deload ? 20 : 25) * 60.0,
+                PrescriptionUnit.seconds,
+              ),
+            ],
+          ),
+        ],
+      ),
+      isRest: false,
+      explanation: const [
+        'Low-fatigue aerobic base, direct arms, and trunk capacity.',
+      ],
+      cooldownMinutes: 8,
+      cooldown: const [
+        '2:00 easy walk and relaxed breathing',
+        '2:00 doorway chest stretch, switching sides at 1:00',
+        '2:00 forearm and biceps stretch, switching sides at 1:00',
+        '2:00 crocodile breathing with long, relaxed exhales',
+      ],
+    );
+  }
 
   static StrengthWork _work(
     AthleteProfile athlete,
@@ -2360,9 +2523,28 @@ class DeterministicProgrammingEngine {
     }
     while (fitted.secondaryStrength.isNotEmpty &&
         fitted.estimatedSessionMinutes > limit) {
+      final removable = fitted.secondaryStrength.lastIndexWhere(
+        (work) =>
+            !((work.trainingMaxKey == 'clean' ||
+                    work.trainingMaxKey == 'snatch') &&
+                work.movement.toLowerCase().contains('pull')),
+      );
+      if (removable == -1 && fitted.warmupMinutes > 6) {
+        fitted = fitted.copyWith(
+          warmupMinutes: fitted.warmupMinutes - 2,
+          explanation: [
+            ...fitted.explanation,
+            'Warm-up shortened to preserve the required Olympic pull in the '
+                '$limit-minute session.',
+          ],
+        );
+        continue;
+      }
+      if (removable == -1) break;
       fitted = fitted.copyWith(
         secondaryStrength: fitted.secondaryStrength
-            .take(fitted.secondaryStrength.length - 1)
+            .take(removable)
+            .followedBy(fitted.secondaryStrength.skip(removable + 1))
             .toList(),
         explanation: [
           ...fitted.explanation,
@@ -2383,7 +2565,10 @@ class DeterministicProgrammingEngine {
     AthleteProfile athlete,
   ) {
     if (day.isRest) return day;
-    final work = [day.strength!, ...day.secondaryStrength];
+    final work = [
+      if (day.strength != null) day.strength!,
+      ...day.secondaryStrength,
+    ];
     final restricted = work
         .where(
           (item) => athlete.restrictedPatterns.contains(item.primaryPattern),
@@ -2396,7 +2581,9 @@ class DeterministicProgrammingEngine {
       );
     }
 
-    final qualifiedPrimary = _qualifiedWork(day.strength!, athlete);
+    final qualifiedPrimary = day.strength == null
+        ? null
+        : _qualifiedWork(day.strength!, athlete);
     final qualifiedSecondary = day.secondaryStrength
         .map((item) => _qualifiedWork(item, athlete))
         .toList(growable: false);
@@ -2971,7 +3158,10 @@ class DeterministicProgrammingEngine {
       'overhead': {7: 30, 14: 56, 28: 104},
       'grip': {7: 36, 14: 68, 28: 126},
       'impact': {7: 25, 14: 45, 28: 82},
-      'conditioning': {7: 38, 14: 72, 28: 136},
+      // The fifth-day capacity session is intentionally easy Zone 2 rather
+      // than another hard metcon; its planned aerobic dose is allowed above
+      // the former four-day ceiling while all local tissue caps remain intact.
+      'conditioning': {7: 48, 14: 88, 28: 168},
       // Source-qualified tissue caps deliberately leave room for the varied
       // phase while preventing one source from silently dominating a window.
       'tissue_direct_quads': {7: 22, 14: 40, 28: 74},
@@ -3003,7 +3193,8 @@ class DeterministicProgrammingEngine {
       'secondary_work': {7: 30, 14: 56, 28: 104},
       'technique': {7: 30, 14: 56, 28: 104},
       'accessories': {7: 18, 14: 34, 28: 62},
-      'conditioning': {7: 38, 14: 72, 28: 136},
+      // Includes the intentionally easy fifth-day Zone 2 capacity session.
+      'conditioning': {7: 48, 14: 88, 28: 168},
       'impact': {7: 42, 14: 78, 28: 144},
       'grip': {7: 50, 14: 94, 28: 174},
       'overhead': {7: 44, 14: 82, 28: 152},
@@ -3013,11 +3204,9 @@ class DeterministicProgrammingEngine {
       'shoulder': {7: 48, 14: 90, 28: 166},
       'elbow': {7: 32, 14: 60, 28: 110},
       'trunk': {7: 64, 14: 120, 28: 222},
-      // The app's seeded default training-max profile selects a slightly
-      // fuller but still conservative 7-day systemic exposure than the
-      // narrower engine fixture. Keep the production gate calibrated to that
-      // supported profile rather than leaving launch unable to build a phase.
-      'systemic': {7: 39, 14: 72, 28: 136},
+      // Includes the deliberately easy fifth-day Zone 2 capacity session;
+      // local tissue, joint, and high-intensity limits remain unchanged.
+      'systemic': {7: 43, 14: 80, 28: 150},
     };
     for (final cap in fatigueCaps.entries) {
       for (final window in cap.value.entries) {
@@ -3051,11 +3240,50 @@ class DeterministicProgrammingEngine {
   }
 
   static void _validateWeek(GeneratedWeek week) {
-    if (week.restDayCount < 3) {
-      throw StateError('Generated week must contain at least three rest days.');
+    if (week.restDayCount < 2) {
+      throw StateError('Generated week must contain at least two rest days.');
     }
     if (week.hardMetconCount > 2) {
       throw StateError('Generated week exceeds the hard-metcon limit.');
+    }
+    final dedicatedBilateralSquats = week.days
+        .where((day) => !day.isRest)
+        .expand((day) => [day.strength, ...day.secondaryStrength])
+        .whereType<StrengthWork>()
+        .where((work) => work.isDedicatedBilateralSquatStrength)
+        .toList(growable: false);
+    if (dedicatedBilateralSquats.length > 1) {
+      throw StateError(
+        'Generated week includes multiple dedicated bilateral squat-strength '
+        'lifts: ${dedicatedBilateralSquats.map((work) => work.movement).join(', ')}.',
+      );
+    }
+    if (week.phaseWeek % 4 != 0) {
+      final olympicPulls = week.days
+          .where((day) => !day.isRest)
+          .expand((day) => [day.strength, ...day.secondaryStrength])
+          .whereType<StrengthWork>()
+          .where(
+            (work) =>
+                (work.trainingMaxKey == 'clean' ||
+                    work.trainingMaxKey == 'snatch') &&
+                work.movement.toLowerCase().contains('pull'),
+          )
+          .toList(growable: false);
+      final hasOlympicPullRegression = week.days
+          .where((day) => !day.isRest)
+          .expand((day) => [day.strength, ...day.secondaryStrength])
+          .whereType<StrengthWork>()
+          .any((work) => work.movement.toLowerCase().contains('jump-shrug'));
+      final olympicPullCount = olympicPulls.isEmpty && hasOlympicPullRegression
+          ? 1
+          : olympicPulls.length;
+      if (olympicPullCount != 1) {
+        throw StateError(
+          'Generated non-deload week must include exactly one Olympic pull '
+          'derivative; found $olympicPullCount.',
+        );
+      }
     }
     for (final day in week.days.where((day) => !day.isRest)) {
       if (day.warmupMinutes < 8 || day.warmup.isEmpty) {
@@ -3066,8 +3294,9 @@ class DeterministicProgrammingEngine {
       }
       final conditioning = day.conditioning;
       if (conditioning == null ||
-          conditioning.durationMinutes < 12 ||
-          conditioning.durationMinutes > 20 ||
+          (day.role != DayRole.capacity &&
+              (conditioning.durationMinutes < 12 ||
+                  conditioning.durationMinutes > 20)) ||
           conditioning.prescription.isEmpty) {
         throw StateError('${day.title} has incomplete conditioning.');
       }
@@ -3111,7 +3340,10 @@ class DeterministicProgrammingEngine {
         }
       }
       if (conditioning.effort == Effort.hard &&
-          [day.strength!, ...day.secondaryStrength].any(
+          [
+            if (day.strength != null) day.strength!,
+            ...day.secondaryStrength,
+          ].any(
             (work) =>
                 conditioning.movementPatterns.contains(work.primaryPattern),
           )) {
@@ -3119,7 +3351,10 @@ class DeterministicProgrammingEngine {
           '${day.title} duplicates primary fatigue in a hard metcon.',
         );
       }
-      for (final work in [day.strength!, ...day.secondaryStrength]) {
+      for (final work in [
+        if (day.strength != null) day.strength!,
+        ...day.secondaryStrength,
+      ]) {
         if (work.steps.isEmpty ||
             work.steps.any(
               (step) =>

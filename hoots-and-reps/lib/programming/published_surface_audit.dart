@@ -57,13 +57,20 @@ class PublishedSurfaceAudit {
 
   bool _sameQuantities(String before, String after) {
     final expression = RegExp(r'\d+(?::\d+)?(?:\.\d+)?');
+    // "60/60" names a hip position in the reviewed breathing catalog; it is
+    // not a duration or repetition prescription.
+    final normalizedBefore = before.replaceAll(
+      RegExp(r'\b60/60\b'),
+      'position',
+    );
+    final normalizedAfter = after.replaceAll(RegExp(r'\b60/60\b'), 'position');
     return expression
-            .allMatches(before)
+            .allMatches(normalizedBefore)
             .map((match) => match.group(0))
             .toList()
             .join('|') ==
         expression
-            .allMatches(after)
+            .allMatches(normalizedAfter)
             .map((match) => match.group(0))
             .toList()
             .join('|');

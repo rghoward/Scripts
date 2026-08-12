@@ -17,10 +17,12 @@ void main() {
   test(
     'published snapshot keeps reviewed work grouped in a scannable structure',
     () {
-      expect(workouts, hasLength(48));
+      expect(snapshot['snapshot_id'], 'forged_phase_2026_07_27_v6_zone2');
+      expect(snapshot['version'], 6);
+      expect(workouts, hasLength(60));
       expect(
         workouts.map((workout) => workout['signature']).toSet(),
-        hasLength(48),
+        hasLength(60),
       );
 
       for (final workout in workouts) {
@@ -43,6 +45,13 @@ void main() {
           final cooldown = titles.indexWhere(
             (title) => title.startsWith('POST-QUEST STRETCH'),
           );
+          final isZone2Capacity = sections.any(
+            (section) =>
+                (section['title']! as String).startsWith('CONDITIONING') &&
+                (section['body']! as String).startsWith(
+                  'Zone 2 aerobic capacity',
+                ),
+          );
           final trainingTitles = titles
               .where(
                 (title) =>
@@ -53,8 +62,36 @@ void main() {
               .toList();
 
           expect(titles.first, startsWith('WARMUP'));
-          expect(primary, greaterThan(0));
-          expect(conditioningOrBenchmark, greaterThan(primary));
+          if (isZone2Capacity) {
+            expect(primary, -1);
+            expect(conditioningOrBenchmark, greaterThan(0));
+            expect(
+              sections
+                  .where(
+                    (section) =>
+                        (section['title']! as String).startsWith('ACCESSORY'),
+                  )
+                  .single['body'],
+              allOf(
+                contains(
+                  RegExp(
+                    r'triceps (pressdowns|extensions)',
+                    caseSensitive: false,
+                  ),
+                ),
+                contains(RegExp(r'curls?', caseSensitive: false)),
+                contains(
+                  RegExp(
+                    r'(dead bugs?|side planks?|AbMat sit-ups|hollow hold)',
+                    caseSensitive: false,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            expect(primary, greaterThan(0));
+            expect(conditioningOrBenchmark, greaterThan(primary));
+          }
           expect(cooldown, greaterThan(conditioningOrBenchmark));
           expect(
             trainingTitles,
