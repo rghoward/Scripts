@@ -105,19 +105,36 @@ function reportIsSupplyRequest(report) {
   return Number(report?.DailyReportTypeID) === 6 || /suppl|wipes|clothes|diaper/.test(text);
 }
 
-async function sendTelegram(message) {
+const notificationTypes = {
+  supply: { title: 'Supply request' },
+  report: { title: 'New daily report' },
+  photo: { title: 'New Honeycomb photo' },
+  badge: { title: 'Badge earned' },
+  test: { title: 'Honeycomb test' },
+};
+
+function notification(type, body) {
+  const details = notificationTypes[type] || { title: 'Honeycomb update' };
+  return { type, title: details.title, body };
+}
+
+async function sendTelegram(alert) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) throw new Error('Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in ~/.config/honeycomb-monitor/env.');
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: message.slice(0, 4000), disable_web_page_preview: true }),
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: `${alert.title}\n${alert.body}`.slice(0, 4000),
+      disable_web_page_preview: true,
+    }),
   });
   if (!response.ok) throw new Error(`Telegram request failed (${response.status}).`);
 }
 
-async function sendFirebase(message) {
+async function sendFirebase(alert) {
   const configuredServiceAccountFile = process.env.FCM_SERVICE_ACCOUNT_FILE;
   if (!configuredServiceAccountFile) return false;
   const serviceAccountFile = expandHomeDirectory(configuredServiceAccountFile);
@@ -139,8 +156,9 @@ async function sendFirebase(message) {
   await getMessaging(app).send({
     topic,
     data: {
-      title: 'Honeycomb update',
-      body: message.slice(0, 3500),
+      title: alert.title,
+      body: alert.body.slice(0, 3500),
+      type: alert.type,
       tab: 'home',
     },
     android: { priority: 'high' },
@@ -148,14 +166,14 @@ async function sendFirebase(message) {
   return true;
 }
 
-async function sendAlert(message) {
+async function sendAlert(alert) {
   const destinations = [];
-  if (process.env.FCM_SERVICE_ACCOUNT_FILE) destinations.push(sendFirebase(message));
+  if (process.env.FCM_SERVICE_ACCOUNT_FILE) destinations.push(sendFirebase(alert));
   if (process.env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_CHAT_ID) {
     if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
       throw new Error('Set both TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, or remove both.');
     }
-    destinations.push(sendTelegram(message));
+    destinations.push(sendTelegram(alert));
   }
   if (!destinations.length) {
     throw new Error('Configure FCM_SERVICE_ACCOUNT_FILE for Android alerts, or Telegram credentials for Telegram alerts.');
@@ -183,7 +201,7 @@ async function login() {
 
 async function monitor() {
   if (isTestNotification) {
-    await sendAlert('Honeycomb monitor test: notification delivery is working.');
+    await sendAlert(notification('test', 'Notification delivery is working.'));
     log('Test notification sent.');
     return;
   }
@@ -227,11 +245,23 @@ async function monitor() {
           ? newlySeen(reading.badges, 'BadgeID', previous.badgeIds)
           : [];
         const supplies = newReports.filter(reportIsSupplyRequest).length;
-        if (supplies) alerts.push(`${childName(reading.child)}: ${supplies} new supply request${supplies === 1 ? '' : 's'}`);
-        if (newMoments.length) alerts.push(`${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`);
+        if (supplies) alerts.push(notification(
+          'supply',
+          `${childName(reading.child)}: ${supplies} new supply request${supplies === 1 ? '' : 's'}`,
+        ));
+        if (newMoments.length) alerts.push(notification(
+          'photo',
+          `${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
+        ));
         const otherReports = newReports.length - supplies;
-        if (otherReports) alerts.push(`${childName(reading.child)}: ${otherReports} new report${otherReports === 1 ? '' : 's'}`);
-        if (newBadges.length) alerts.push(`${childName(reading.child)}: ${newBadges.length} new badge${newBadges.length === 1 ? '' : 's'}`);
+        if (otherReports) alerts.push(notification(
+          'report',
+          `${childName(reading.child)}: ${otherReports} new report${otherReports === 1 ? '' : 's'}`,
+        ));
+        if (newBadges.length) alerts.push(notification(
+          'badge',
+          `${childName(reading.child)}: ${newBadges.length} new badge${newBadges.length === 1 ? '' : 's'}`,
+        ));
       }
       state.children[reading.childId] = updatedSnapshot(
         previous,
@@ -248,7 +278,7 @@ async function monitor() {
       log('Baseline saved. Existing Honeycomb items were not sent as alerts.');
       return;
     }
-    if (alerts.length) await sendAlert(alerts.join('\n'));
+    if (alerts.length) await Promise.all(alerts.map(sendAlert));
     await saveState(state);
     log(alerts.length ? `Sent ${alerts.length} alert summary line${alerts.length === 1 ? '' : 's'}.` : 'No new items.');
   } finally {

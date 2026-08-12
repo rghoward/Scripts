@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -21,7 +22,8 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage message) {
         String title = value(message, "title", "Honeycomb update");
         String body = value(message, "body", "Open Honeycomb Family for the latest updates.");
-        showNotification(title, body);
+        String type = value(message, "type", "general");
+        showNotification(type, title, body);
     }
 
     private String value(RemoteMessage message, String key, String fallback) {
@@ -29,18 +31,19 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
         return result == null || result.trim().isEmpty() ? fallback : result;
     }
 
-    private void showNotification(String title, String body) {
+    private void showNotification(String type, String title, String body) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) return;
 
-        String channelId = getString(R.string.push_notification_channel_id);
+        NotificationStyle style = notificationStyle(type);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                channelId,
-                getString(R.string.push_notification_channel_name),
+                style.channelId,
+                style.channelName,
                 NotificationManager.IMPORTANCE_HIGH
             );
+            channel.setDescription(style.channelDescription);
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
 
@@ -53,14 +56,71 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         int notificationId = (int) (System.currentTimeMillis() & 0x7fffffff);
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.mipmap.ic_launcher)
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this, style.channelId)
+            .setSmallIcon(style.iconResource)
+            .setColor(style.color)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setGroup("honeycomb_family_updates")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(contentIntent);
         NotificationManagerCompat.from(this).notify(notificationId, notification.build());
+    }
+
+    private NotificationStyle notificationStyle(String type) {
+        switch (type) {
+            case "supply":
+                return new NotificationStyle(
+                    "family_updates_supply", "Supply requests", "Items requested for a child",
+                    R.drawable.ic_notification_supply, Color.rgb(230, 126, 34)
+                );
+            case "report":
+                return new NotificationStyle(
+                    "family_updates_reports", "Daily reports", "New daily reports",
+                    R.drawable.ic_notification_report, Color.rgb(52, 152, 219)
+                );
+            case "photo":
+                return new NotificationStyle(
+                    "family_updates_photos", "Photos", "New Honeycomb photos and daily moments",
+                    R.drawable.ic_notification_photo, Color.rgb(142, 68, 173)
+                );
+            case "badge":
+                return new NotificationStyle(
+                    "family_updates_badges", "Badges", "Newly earned badges",
+                    R.drawable.ic_notification_badge, Color.rgb(241, 196, 15)
+                );
+            default:
+                return new NotificationStyle(
+                    getString(R.string.push_notification_channel_id),
+                    getString(R.string.push_notification_channel_name),
+                    "Honeycomb Family monitor updates",
+                    R.drawable.ic_notification_honeycomb, Color.rgb(35, 155, 86)
+                );
+        }
+    }
+
+    private static final class NotificationStyle {
+        final String channelId;
+        final String channelName;
+        final String channelDescription;
+        final int iconResource;
+        final int color;
+
+        NotificationStyle(
+            String channelId,
+            String channelName,
+            String channelDescription,
+            int iconResource,
+            int color
+        ) {
+            this.channelId = channelId;
+            this.channelName = channelName;
+            this.channelDescription = channelDescription;
+            this.iconResource = iconResource;
+            this.color = color;
+        }
     }
 }

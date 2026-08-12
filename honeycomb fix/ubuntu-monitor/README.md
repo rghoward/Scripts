@@ -2,7 +2,7 @@
 
 This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends a short count-only summary to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
 
-It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. It sends counts, not photo URLs, report content, or badge details.
+It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. It sends counts, not photo URLs, report content, or badge details. Supply requests, daily reports, photos, and badges use distinct notification titles. Android app version 1.2.0 or newer also gives each category its own channel, color, and icon.
 
 ## Before installing on Ubuntu: Android push expectations
 

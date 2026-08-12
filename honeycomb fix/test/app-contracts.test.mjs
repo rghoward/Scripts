@@ -32,6 +32,17 @@ const androidDownloads = await readFile(
   ),
   "utf8",
 );
+const androidMessaging = await readFile(
+  new URL(
+    "../android/app/src/main/java/com/o2bkids/honeycomb/family/HoneycombMessagingService.java",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const ubuntuMonitor = await readFile(
+  new URL("../ubuntu-monitor/monitor.mjs", import.meta.url),
+  "utf8",
+);
 const iosAppDelegate = await readFile(
   new URL("../ios/App/App/AppDelegate.swift", import.meta.url),
   "utf8",
@@ -135,6 +146,35 @@ test("private data is cleared when authentication ends", () => {
 test("Android uses dispatcher-based back navigation", () => {
   assert.match(android, /OnBackPressedCallback/);
   assert.doesNotMatch(android, /void onBackPressed\(/);
+});
+
+test("Ubuntu push alerts identify each count-only notification category", () => {
+  for (const [type, title] of [
+    ["supply", "Supply request"],
+    ["report", "New daily report"],
+    ["photo", "New Honeycomb photo"],
+    ["badge", "Badge earned"],
+  ]) {
+    assert.match(ubuntuMonitor, new RegExp(`${type}: \\{ title: '${title}'`));
+    assert.match(ubuntuMonitor, new RegExp(`notification\\(\\n?\\s*'${type}'`));
+  }
+  assert.match(ubuntuMonitor, /type: alert\.type/);
+  assert.match(ubuntuMonitor, /body: alert\.body\.slice/);
+});
+
+test("Android push categories have distinct channels, icons, and colors", () => {
+  for (const [type, channel] of [
+    ["supply", "family_updates_supply"],
+    ["report", "family_updates_reports"],
+    ["photo", "family_updates_photos"],
+    ["badge", "family_updates_badges"],
+  ]) {
+    assert.match(androidMessaging, new RegExp(`case "${type}"`));
+    assert.match(androidMessaging, new RegExp(channel));
+    assert.match(androidMessaging, new RegExp(`ic_notification_${type}`));
+  }
+  assert.match(androidMessaging, /setColor\(style\.color\)/);
+  assert.match(androidMessaging, /setGroup\("honeycomb_family_updates"\)/);
 });
 
 test("login theme keeps accessible focus and reduced-motion behavior", () => {
