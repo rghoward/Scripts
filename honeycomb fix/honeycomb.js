@@ -1390,15 +1390,31 @@
     return [...groups.entries()].map(([name, groupBadges]) => ({ name, badges: groupBadges }));
   }
 
+  function badgeImageUrl(badge) {
+    return badge?.Filename ? imageUrl(badge.Filename, 'badge-image-listing') : '';
+  }
+
+  function renderBadgeArtwork(badge) {
+    const src = badgeImageUrl(badge);
+    const title = badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge';
+    return src
+      ? `<img src="${attr(src)}" alt="${attr(title)}" loading="lazy">`
+      : '<span aria-hidden="true">★</span>';
+  }
+
+  function badgeDetail(badge) {
+    return String(badge?.Description || badge?.Category || badge?.CategoryName || '').trim();
+  }
+
   function renderBadges(child, data) {
     const badges = data.badges || [];
     const groups = groupBadgesByCategory(badges);
     if (isPhoneLayout()) return renderMobileBadges(child, data, badges, groups);
-    return `<section class="hcfd2-badges"><div class="hcfd2-badge-hero"><span>★</span><div><h2>${html(fullName(child))}</h2><p>${badges.length || data.badgeCount || 0} earned badges · ${groups.length || state.badgeCategories.length || 0} categories</p></div></div>${badges.length ? groups.map(group => `<section class="hcfd2-badge-category"><h3>${html(group.name)}</h3><div class="hcfd2-badge-grid">${group.badges.map(badge => `<article><span>★</span><strong>${html(badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge')}</strong><small>${html(badge.Category || badge.CategoryName || '')}</small></article>`).join('')}</div></section>`).join('') : '<div class="hcfd2-empty">Honeycomb has not recorded any earned badges for this child yet.</div>'}</section>`;
+    return `<section class="hcfd2-badges"><div class="hcfd2-badge-hero"><span>★</span><div><h2>${html(fullName(child))}</h2><p>${badges.length || data.badgeCount || 0} earned badges · ${groups.length || state.badgeCategories.length || 0} categories</p></div></div>${badges.length ? groups.map(group => `<section class="hcfd2-badge-category"><h3>${html(group.name)}</h3><div class="hcfd2-badge-grid">${group.badges.map(badge => `<article><div class="hcfd2-badge-art">${renderBadgeArtwork(badge)}</div><strong>${html(badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge')}</strong>${badgeDetail(badge) ? `<small>${html(badgeDetail(badge))}</small>` : ''}</article>`).join('')}</div></section>`).join('') : '<div class="hcfd2-empty">Honeycomb has not recorded any earned badges for this child yet.</div>'}</section>`;
   }
 
   function renderMobileBadges(child, data, badges, groups) {
-    return `<section class="hcfd2-mobile-badges"><header>${renderChildAvatar(child, false, false)}<div><span>Achievements</span><h2>${html(child.FirstName || fullName(child))}</h2><small>${badges.length || data.badgeCount || 0} earned badges</small></div></header>${groups.length ? groups.map((group, index) => `<details ${index === 0 ? 'open' : ''}><summary><span>${html(group.name)}</span><small>${group.badges.length}</small><b>⌄</b></summary><div>${group.badges.map(badge => `<article><span>★</span><strong>${html(badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge')}</strong></article>`).join('')}</div></details>`).join('') : '<div class="hcfd2-empty">No earned badges yet.</div>'}</section>`;
+    return `<section class="hcfd2-mobile-badges"><header>${renderChildAvatar(child, false, false)}<div><span>Achievements</span><h2>${html(child.FirstName || fullName(child))}</h2><small>${badges.length || data.badgeCount || 0} earned badges</small></div></header>${groups.length ? groups.map((group, index) => `<details ${index === 0 ? 'open' : ''}><summary><span>${html(group.name)}</span><small>${group.badges.length}</small><b>⌄</b></summary><div>${group.badges.map(badge => `<article><div class="hcfd2-badge-art">${renderBadgeArtwork(badge)}</div><strong>${html(badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge')}</strong>${badgeDetail(badge) ? `<small>${html(badgeDetail(badge))}</small>` : ''}</article>`).join('')}</div></details>`).join('') : '<div class="hcfd2-empty">No earned badges yet.</div>'}</section>`;
   }
 
   function renderToolbar(type, count) {
@@ -5988,7 +6004,23 @@ function openViewer(photoId) {
             text-align: center;
         }
 
-        .hcfd2-badge-grid article > span {
+        .hcfd2-badge-art {
+            display: grid;
+            place-items: center;
+
+            width: 130px;
+            height: 130px;
+        }
+
+        .hcfd2-badge-art img {
+            display: block;
+            width: 100%;
+            height: 100%;
+
+            object-fit: contain;
+        }
+
+        .hcfd2-badge-art > span {
             display: grid;
             place-items: center;
 
@@ -6008,6 +6040,8 @@ function openViewer(photoId) {
         .hcfd2-badge-grid small {
             color:
                 var(--h-muted);
+
+            line-height: 1.35;
         }
 
         /*
@@ -6729,8 +6763,10 @@ function openViewer(photoId) {
             .hcfd2-mobile-badges > details[open] > summary b { transform: rotate(180deg); }
             .hcfd2-mobile-badges > details > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 0 9px 9px; }
             .hcfd2-mobile-badges article { display: grid; justify-items: center; align-content: center; gap: 5px; min-height: 108px; padding: 10px 7px; border-radius: 11px; background: var(--h-surface-muted); text-align: center; }
-            .hcfd2-mobile-badges article > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--h-accent); color: #2b210d; font-size: 1.05rem; }
+            .hcfd2-mobile-badges .hcfd2-badge-art { width: 80px; height: 80px; }
+            .hcfd2-mobile-badges .hcfd2-badge-art > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--h-accent); color: #2b210d; font-size: 1.05rem; }
             .hcfd2-mobile-badges article strong { max-width: 100%; font-size: 0.74rem; overflow-wrap: anywhere; }
+            .hcfd2-mobile-badges article small { max-width: 100%; color: var(--h-muted); font-size: 0.66rem; line-height: 1.3; }
 
             .hcfd2-home-view-bar { display: block; margin-bottom: 12px; padding: 6px; }
             .hcfd2-home-view-bar > div:first-child { display: none; }
