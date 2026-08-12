@@ -4,6 +4,8 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
+import { cert, getApps, initializeApp } from 'firebase-admin/app';
+import { getMessaging } from 'firebase-admin/messaging';
 import { chromium } from 'playwright';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
@@ -108,6 +110,51 @@ async function sendTelegram(message) {
   if (!response.ok) throw new Error(`Telegram request failed (${response.status}).`);
 }
 
+async function sendFirebase(message) {
+  const serviceAccountFile = process.env.FCM_SERVICE_ACCOUNT_FILE;
+  if (!serviceAccountFile) return false;
+
+  let credentials;
+  try {
+    credentials = JSON.parse(await fs.readFile(serviceAccountFile, 'utf8'));
+  } catch (error) {
+    throw new Error(`Could not read FCM_SERVICE_ACCOUNT_FILE: ${error.message}`);
+  }
+  const projectId = process.env.FCM_PROJECT_ID || credentials.project_id;
+  const topic = process.env.FCM_TOPIC || 'honeycomb-family-alerts-v1';
+  if (!projectId) throw new Error('The Firebase service-account file does not include a project ID. Set FCM_PROJECT_ID.');
+  if (!/^[a-zA-Z0-9-_.~%]+$/.test(topic)) throw new Error('FCM_TOPIC contains unsupported characters.');
+
+  const appName = 'honeycomb-ubuntu-monitor';
+  const app = getApps().find(candidate => candidate.name === appName)
+    || initializeApp({ credential: cert(credentials), projectId }, appName);
+  await getMessaging(app).send({
+    topic,
+    data: {
+      title: 'Honeycomb update',
+      body: message.slice(0, 3500),
+      tab: 'home',
+    },
+    android: { priority: 'high' },
+  });
+  return true;
+}
+
+async function sendAlert(message) {
+  const destinations = [];
+  if (process.env.FCM_SERVICE_ACCOUNT_FILE) destinations.push(sendFirebase(message));
+  if (process.env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_CHAT_ID) {
+    if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
+      throw new Error('Set both TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, or remove both.');
+    }
+    destinations.push(sendTelegram(message));
+  }
+  if (!destinations.length) {
+    throw new Error('Configure FCM_SERVICE_ACCOUNT_FILE for Android alerts, or Telegram credentials for Telegram alerts.');
+  }
+  await Promise.all(destinations);
+}
+
 async function login() {
   const context = await createContext(false);
   const page = context.pages()[0] || await context.newPage();
@@ -128,7 +175,7 @@ async function login() {
 
 async function monitor() {
   if (isTestNotification) {
-    await sendTelegram('Honeycomb monitor test: Telegram delivery is working.');
+    await sendAlert('Honeycomb monitor test: notification delivery is working.');
     log('Test notification sent.');
     return;
   }
@@ -175,7 +222,7 @@ async function monitor() {
       log('Baseline saved. Existing Honeycomb items were not sent as alerts.');
       return;
     }
-    if (alerts.length) await sendTelegram(`Honeycomb update\n${alerts.join('\n')}`);
+    if (alerts.length) await sendAlert(alerts.join('\n'));
     await saveState(state);
     log(alerts.length ? `Sent ${alerts.length} alert summary line${alerts.length === 1 ? '' : 's'}.` : 'No new items.');
   } finally {

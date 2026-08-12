@@ -6,6 +6,8 @@ import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.WebViewListener;
 import androidx.activity.OnBackPressedCallback;
+import android.util.Log;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +31,7 @@ public class MainActivity extends BridgeActivity {
             }
         });
         super.onCreate(savedInstanceState);
+        subscribeToPushUpdates();
         downloadBridge = new HoneycombDownloadBridge(this, bridge.getWebView());
         bridge.getWebView().addJavascriptInterface(downloadBridge, "HoneycombDownloads");
         dashboardBackCallback = new OnBackPressedCallback(true) {
@@ -44,6 +47,20 @@ public class MainActivity extends BridgeActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, dashboardBackCallback);
+    }
+
+    private void subscribeToPushUpdates() {
+        try {
+            FirebaseMessaging.getInstance()
+                .subscribeToTopic(getString(R.string.push_topic))
+                .addOnSuccessListener(unused -> Log.i("HoneycombPush", "Subscribed to family updates."))
+                .addOnFailureListener(error -> Log.w("HoneycombPush", "Could not subscribe to family updates.", error));
+        } catch (IllegalStateException error) {
+            // The development APK can be built without google-services.json.
+            // It remains fully usable, but does not receive FCM until Firebase
+            // is configured as documented in ubuntu-monitor/ANDROID_PUSH_EXPECTATIONS.md.
+            Log.i("HoneycombPush", "Firebase is not configured for this APK.");
+        }
     }
 
     private String readDashboardScript() {

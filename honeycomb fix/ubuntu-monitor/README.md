@@ -1,8 +1,17 @@
 # Ubuntu Honeycomb monitor
 
-This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends a short summary to your private Telegram chat. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
+This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends a short count-only summary to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
 
-It is intentionally a starter: it detects the most recent ten reports and photos per child every fifteen minutes. It sends counts, not photo or report content.
+It is intentionally a starter: it detects the most recent ten reports and photos per child every fifteen minutes. It sends counts, not photo URLs or report content.
+
+## Before installing on Ubuntu: Android push expectations
+
+The Android app must be built here, with Firebase configured, before Ubuntu can send pushes. Follow [ANDROID_PUSH_EXPECTATIONS.md](ANDROID_PUSH_EXPECTATIONS.md) first. In short:
+
+- Create one Firebase project and register Android package `com.o2bkids.honeycomb.family`.
+- Put its `google-services.json` in `android/app/` only while building the APK. It is ignored by Git.
+- Install that rebuilt APK, open it once while online, and approve its notification permission from **Menu → Enable notifications**.
+- Create a Firebase Admin SDK service-account JSON file for Ubuntu. Keep it private; Ubuntu uses it to send messages to the app’s `honeycomb-family-alerts-v1` topic.
 
 ## 1. Install it on Ubuntu
 
@@ -27,7 +36,37 @@ npm run login
 
 A local Chromium window opens. Sign in to Honeycomb normally, verify that you can see your family account, return to the terminal, and press Enter. The session is saved in `data/browser-profile/`, which is ignored by Git. If Honeycomb signs you out later, run this command again.
 
-## 3. Create the free Telegram destination
+## 3. Configure the Android push destination
+
+Copy the Firebase Admin SDK service-account JSON file created during the Android preparation to Ubuntu. Do not commit it or put it inside the Git repository.
+
+```sh
+mkdir -p ~/.config/honeycomb-monitor
+cp /path/to/firebase-service-account.json ~/.config/honeycomb-monitor/firebase-service-account.json
+chmod 600 ~/.config/honeycomb-monitor/firebase-service-account.json
+nano ~/.config/honeycomb-monitor/env
+chmod 600 ~/.config/honeycomb-monitor/env
+```
+
+Set the environment file to:
+
+```sh
+FCM_SERVICE_ACCOUNT_FILE=/home/your-user/.config/honeycomb-monitor/firebase-service-account.json
+FCM_TOPIC=honeycomb-family-alerts-v1
+```
+
+Test delivery after installing and opening the rebuilt Android app once:
+
+```sh
+set -a
+. ~/.config/honeycomb-monitor/env
+set +a
+npm run test-notification
+```
+
+If no notification arrives, verify that the phone has Google Play services, is online, has notification permission enabled for Honeycomb Family, and that the Firebase project matches the `google-services.json` used to build the installed APK.
+
+## 4. Optional: create a free Telegram destination
 
 1. In Telegram, open **@BotFather**, create a bot, and copy its token.
 2. Open a chat with your new bot and send it a message such as `hello`.
@@ -40,31 +79,14 @@ curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates"
 
 Find `"chat":{"id":...}` in the result. That numeric value is your `TELEGRAM_CHAT_ID`. For a private setup, do not add the bot to a group.
 
-Create the private environment file:
-
-```sh
-mkdir -p ~/.config/honeycomb-monitor
-nano ~/.config/honeycomb-monitor/env
-chmod 600 ~/.config/honeycomb-monitor/env
-```
-
-Its contents should be:
+Add these lines to the same private environment file if you also want Telegram:
 
 ```sh
 TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_CHAT_ID=your-private-chat-id
 ```
 
-Test Telegram delivery:
-
-```sh
-set -a
-. ~/.config/honeycomb-monitor/env
-set +a
-npm run test-notification
-```
-
-## 4. Establish the no-spam baseline
+## 5. Establish the no-spam baseline
 
 Run the monitor once. It records the currently visible recent items without alerting on old history:
 
@@ -77,7 +99,7 @@ npm start
 
 Run that command again later to check manually. On later runs it sends Telegram only when it detects new reports, photos, or supply requests.
 
-## 5. Run it every 15 minutes with systemd
+## 6. Run it every 15 minutes with systemd
 
 Copy the example service and timer into your user systemd directory:
 
@@ -111,6 +133,6 @@ journalctl --user -u honeycomb-monitor.service -f
 ## Privacy and limitations
 
 - Never commit `data/`, the browser profile, `state.json`, or the Telegram environment file.
-- Telegram receives only count summaries, such as `Alex: 2 new photos`; it does not receive photo URLs or report text.
+- FCM and optional Telegram receive only count summaries, such as `Alex: 2 new photos`; they do not receive photo URLs or report text.
 - The monitor needs a desktop-capable Ubuntu session for the one-time login. Normal polling runs headlessly afterward.
-- This is independent of the mobile app. It is a practical free bridge until a hosted push service is built.
+- Ubuntu needs Node.js, Playwright/Chromium, the browser profile, and the private Firebase service-account file. It does **not** need Android Studio, the Android SDK, Gradle, or an APK build.

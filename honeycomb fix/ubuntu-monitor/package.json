@@ -2,7 +2,7 @@
   "name": "honeycomb-family-ubuntu-monitor",
   "version": "0.1.0",
   "private": true,
-  "description": "Personal Honeycomb monitor that sends Telegram alerts from an always-on Ubuntu computer.",
+  "description": "Personal Honeycomb monitor that sends FCM and Telegram alerts from an always-on Ubuntu computer.",
   "type": "module",
   "scripts": {
     "login": "node monitor.mjs --login",
@@ -10,6 +10,7 @@
     "test-notification": "node monitor.mjs --test-notification"
   },
   "dependencies": {
+    "firebase-admin": "^13.7.0",
     "playwright": "^1.58.0"
   }
 }

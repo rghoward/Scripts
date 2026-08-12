@@ -2,4 +2,5 @@ node_modules/
 ios/App/DerivedData/
 android/.gradle/
 android/app/build/
+android/app/google-services.json
 *.xcuserstate
