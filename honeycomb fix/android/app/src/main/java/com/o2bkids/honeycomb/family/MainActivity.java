@@ -1,5 +1,6 @@
 package com.o2bkids.honeycomb.family;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.webkit.WebView;
 
@@ -8,19 +9,26 @@ import com.getcapacitor.WebViewListener;
 import androidx.activity.OnBackPressedCallback;
 import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessaging;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends BridgeActivity {
+    public static final String EXTRA_NOTIFICATION_CHILD_ID = "honeycomb_notification_child_id";
+    public static final String EXTRA_NOTIFICATION_TAB = "honeycomb_notification_tab";
+
     private String dashboardScript = "";
     private String loginThemeScript = "";
+    private String pendingNotificationChildId = "";
+    private String pendingNotificationTab = "";
     private OnBackPressedCallback dashboardBackCallback;
     private HoneycombDownloadBridge downloadBridge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        captureNotificationTarget(getIntent());
         dashboardScript = readDashboardScript();
         loginThemeScript = readAsset("public/login-theme.js");
         bridgeBuilder.addWebViewListener(new WebViewListener() {
@@ -28,6 +36,7 @@ public class MainActivity extends BridgeActivity {
             public void onPageLoaded(WebView webView) {
                 webView.evaluateJavascript(loginThemeScript, null);
                 injectDashboardWhenAuthenticated(webView);
+                dispatchNotificationTarget(webView);
             }
         });
         super.onCreate(savedInstanceState);
@@ -47,6 +56,41 @@ public class MainActivity extends BridgeActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, dashboardBackCallback);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        captureNotificationTarget(intent);
+        if (bridge != null && bridge.getWebView() != null) {
+            dispatchNotificationTarget(bridge.getWebView());
+        }
+    }
+
+    private void captureNotificationTarget(Intent intent) {
+        if (intent == null) return;
+        String childId = intent.getStringExtra(EXTRA_NOTIFICATION_CHILD_ID);
+        String tab = intent.getStringExtra(EXTRA_NOTIFICATION_TAB);
+        if (childId == null || childId.trim().isEmpty()) return;
+        pendingNotificationChildId = childId.trim();
+        pendingNotificationTab = allowedNotificationTab(tab);
+    }
+
+    private String allowedNotificationTab(String tab) {
+        if ("activity".equals(tab) || "photos".equals(tab) || "badges".equals(tab)) return tab;
+        return "home";
+    }
+
+    private void dispatchNotificationTarget(WebView webView) {
+        if (pendingNotificationChildId.isEmpty()) return;
+        String target = "{childId:" + JSONObject.quote(pendingNotificationChildId)
+            + ",tab:" + JSONObject.quote(pendingNotificationTab) + "}";
+        String script = "(function(target){"
+            + "window.__HCFD_PENDING_NOTIFICATION__=target;"
+            + "if(window.__HCFD_OPEN_NOTIFICATION__)window.__HCFD_OPEN_NOTIFICATION__(target);"
+            + "})(" + target + ");";
+        webView.evaluateJavascript(script, null);
     }
 
     private void subscribeToPushUpdates() {

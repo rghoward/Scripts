@@ -160,6 +160,8 @@ test("Ubuntu push alerts identify each count-only notification category", () => 
   }
   assert.match(ubuntuMonitor, /type: alert\.type/);
   assert.match(ubuntuMonitor, /body: alert\.body\.slice/);
+  assert.match(ubuntuMonitor, /childId: alert\.childId/);
+  assert.match(ubuntuMonitor, /tab: alert\.tab/);
 });
 
 test("Android push categories have distinct channels, icons, and colors", () => {
@@ -175,6 +177,26 @@ test("Android push categories have distinct channels, icons, and colors", () => 
   }
   assert.match(androidMessaging, /setColor\(style\.color\)/);
   assert.match(androidMessaging, /setGroup\("honeycomb_family_updates"\)/);
+  assert.match(androidMessaging, /EXTRA_NOTIFICATION_CHILD_ID/);
+  assert.match(androidMessaging, /EXTRA_NOTIFICATION_TAB/);
+  assert.match(
+    androidMessaging,
+    /PendingIntent\.getActivity\(\s*this,\s*notificationId/,
+  );
+});
+
+test("Android notification taps select the child and destination view", () => {
+  assert.match(android, /void onNewIntent\(Intent intent\)/);
+  assert.match(android, /dispatchNotificationTarget\(bridge\.getWebView\(\)\)/);
+  assert.match(android, /__HCFD_PENDING_NOTIFICATION__/);
+  assert.match(android, /__HCFD_OPEN_NOTIFICATION__/);
+  assert.match(
+    dashboard,
+    /__HCFD_OPEN_NOTIFICATION__ = openNotificationTarget/,
+  );
+  assert.match(dashboard, /await applyPendingNotificationTarget\(\)/);
+  assert.match(dashboard, /await switchChild\(childId\)/);
+  assert.match(dashboard, /await switchTab\(tab\)/);
 });
 
 test("login theme keeps accessible focus and reduced-motion behavior", () => {

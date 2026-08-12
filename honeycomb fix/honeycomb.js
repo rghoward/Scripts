@@ -176,6 +176,7 @@
     globalThis.__HCFD_HANDLE_BACK__ = handleNativeBack;
     globalThis.__HCFD_CLEAR_PRIVATE_DATA__ = clearPrivateData;
     globalThis.__HCFD_DOWNLOAD_STATUS__ = handleDownloadStatus;
+    globalThis.__HCFD_OPEN_NOTIFICATION__ = openNotificationTarget;
 
     // Automatically replace Honeycomb on every page.
     setTimeout(openDashboard, 0);
@@ -214,6 +215,7 @@
         .then(() => warmRecentPhotoCache(remainingForCache));
       startAutoRefresh();
       render();
+      await applyPendingNotificationTarget();
     } catch (error) {
       if (restoredFromCache) {
         console.error('[Honeycomb dashboard refresh after cached load]', error);
@@ -2007,6 +2009,30 @@
     if (!state.data.get(childId)?.loadedAt) await loadChild(childId, true);
     render();
     if (state.tab === 'activity' && state.activityView === 'calendar') await loadAndRenderCalendarMonth();
+  }
+
+  function openNotificationTarget(target) {
+    if (!target || typeof target !== 'object') return;
+    globalThis.__HCFD_PENDING_NOTIFICATION__ = {
+      childId: String(target.childId || ''),
+      tab: String(target.tab || 'home'),
+    };
+    if (state.overlayOpen && state.children.length) void applyPendingNotificationTarget();
+  }
+
+  async function applyPendingNotificationTarget() {
+    const target = globalThis.__HCFD_PENDING_NOTIFICATION__;
+    if (!target || !state.children.length) return;
+    const childId = String(target.childId || '');
+    const tab = ['activity', 'photos', 'badges'].includes(target.tab) ? target.tab : 'home';
+    if (!state.children.some(child => String(child.ChildID) === childId)) {
+      globalThis.__HCFD_PENDING_NOTIFICATION__ = null;
+      return;
+    }
+    globalThis.__HCFD_PENDING_NOTIFICATION__ = null;
+    if (tab === 'activity') state.activityView = 'agenda';
+    await switchChild(childId);
+    await switchTab(tab);
   }
 
   async function switchTab(tab) {

@@ -106,16 +106,16 @@ function reportIsSupplyRequest(report) {
 }
 
 const notificationTypes = {
-  supply: { title: 'Supply request' },
-  report: { title: 'New daily report' },
-  photo: { title: 'New Honeycomb photo' },
-  badge: { title: 'Badge earned' },
-  test: { title: 'Honeycomb test' },
+  supply: { title: 'Supply request', tab: 'activity' },
+  report: { title: 'New daily report', tab: 'activity' },
+  photo: { title: 'New Honeycomb photo', tab: 'photos' },
+  badge: { title: 'Badge earned', tab: 'badges' },
+  test: { title: 'Honeycomb test', tab: 'home' },
 };
 
-function notification(type, body) {
-  const details = notificationTypes[type] || { title: 'Honeycomb update' };
-  return { type, title: details.title, body };
+function notification(type, body, childId = '') {
+  const details = notificationTypes[type] || { title: 'Honeycomb update', tab: 'home' };
+  return { type, title: details.title, body, childId: String(childId), tab: details.tab };
 }
 
 async function sendTelegram(alert) {
@@ -159,7 +159,8 @@ async function sendFirebase(alert) {
       title: alert.title,
       body: alert.body.slice(0, 3500),
       type: alert.type,
-      tab: 'home',
+      childId: alert.childId,
+      tab: alert.tab,
     },
     android: { priority: 'high' },
   });
@@ -248,19 +249,23 @@ async function monitor() {
         if (supplies) alerts.push(notification(
           'supply',
           `${childName(reading.child)}: ${supplies} new supply request${supplies === 1 ? '' : 's'}`,
+          reading.childId,
         ));
         if (newMoments.length) alerts.push(notification(
           'photo',
           `${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
+          reading.childId,
         ));
         const otherReports = newReports.length - supplies;
         if (otherReports) alerts.push(notification(
           'report',
           `${childName(reading.child)}: ${otherReports} new report${otherReports === 1 ? '' : 's'}`,
+          reading.childId,
         ));
         if (newBadges.length) alerts.push(notification(
           'badge',
           `${childName(reading.child)}: ${newBadges.length} new badge${newBadges.length === 1 ? '' : 's'}`,
+          reading.childId,
         ));
       }
       state.children[reading.childId] = updatedSnapshot(
