@@ -37,6 +37,8 @@ The app sends native notifications when a refresh detects:
 
 The dashboard refreshes every five minutes while open and refreshes immediately when brought back to the foreground. Because this project has no notification server, iOS and Android may suspend it while fully closed; consequently, closed-app delivery cannot be guaranteed. Reopening the app catches and notifies about changes that occurred since its previous refresh. Reliable real-time delivery while fully closed would require a push-notification server.
 
+For a free always-on alternative before a push service exists, see [ubuntu-monitor/README.md](ubuntu-monitor/README.md). It provides a local Ubuntu timer that checks the family account and sends count-only summaries to a private Telegram chat.
+
 ## Project layout
 
 - `honeycomb.js` — shared dashboard source; continue editing this file
