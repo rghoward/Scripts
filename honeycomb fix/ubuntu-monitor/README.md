@@ -2,7 +2,7 @@
 
 This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends a short count-only summary to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
 
-It is intentionally a starter: it detects the most recent ten reports and photos per child every fifteen minutes. It sends counts, not photo URLs or report content.
+It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. It sends counts, not photo URLs, report content, or badge details.
 
 ## Before installing on Ubuntu: Android push expectations
 
@@ -133,6 +133,6 @@ journalctl --user -u honeycomb-monitor.service -f
 ## Privacy and limitations
 
 - Never commit `data/`, the browser profile, `state.json`, or the Telegram environment file.
-- FCM and optional Telegram receive only count summaries, such as `Alex: 2 new photos`; they do not receive photo URLs or report text.
+- FCM and optional Telegram receive only count summaries, such as `Alex: 2 new photos` or `Alex: 1 new badge`; they do not receive photo URLs, report text, or badge details.
 - The monitor needs a desktop-capable Ubuntu session for the one-time login. Normal polling runs headlessly afterward.
 - Ubuntu needs Node.js, Playwright/Chromium, the browser profile, and the private Firebase service-account file. It does **not** need Android Studio, the Android SDK, Gradle, or an APK build.

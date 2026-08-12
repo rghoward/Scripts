@@ -68,8 +68,8 @@ async function api(page, url, method = 'GET', body) {
 }
 
 function groupedItems(payload) {
-  return (Array.isArray(payload?.Data) ? payload.Data : []).flatMap(group =>
-    Array.isArray(group?.Data) ? group.Data : []);
+  return (Array.isArray(payload?.Data) ? payload.Data : []).flatMap(item =>
+    Array.isArray(item?.Data) ? item.Data : item);
 }
 
 function childName(child) {
@@ -80,11 +80,12 @@ function snapshotIds(items, key) {
   return items.map(item => String(item?.[key] || '')).filter(Boolean).slice(0, 100);
 }
 
-function updatedSnapshot(previous, reports, moments) {
+function updatedSnapshot(previous, reports, moments, badges) {
   const merge = (current, old) => [...new Set([...current, ...(old || [])])].slice(0, 100);
   return {
     reportIds: merge(snapshotIds(reports, 'DailyReportId'), previous?.reportIds),
     momentIds: merge(snapshotIds(moments, 'DailyMomentId'), previous?.momentIds),
+    badgeIds: merge(snapshotIds(badges, 'BadgeID'), previous?.badgeIds),
   };
 }
 
@@ -190,11 +191,18 @@ async function monitor() {
 
     const readings = await Promise.all(children.map(async child => {
       const childId = String(child.ChildID);
-      const [reports, moments] = await Promise.all([
+      const [reports, moments, badges] = await Promise.all([
         api(page, '/api/daily-report', 'POST', { ChildID: childId, PageNumber: 1, PageSize: pageSize }),
         api(page, '/api/daily-moment', 'POST', { ChildID: childId, PageNumber: 1, PageSize: pageSize }),
+        api(page, '/api/badges-child', 'POST', { ChildID: childId, PageNumber: 1, PageSize: pageSize, ShowUnearned: false }),
       ]);
-      return { child, childId, reports: groupedItems(reports), moments: groupedItems(moments) };
+      return {
+        child,
+        childId,
+        reports: groupedItems(reports),
+        moments: groupedItems(moments),
+        badges: groupedItems(badges),
+      };
     }));
 
     const state = await readState();
@@ -206,13 +214,24 @@ async function monitor() {
       if (!isFirstRun && previous) {
         const newReports = newlySeen(reading.reports, 'DailyReportId', previous.reportIds);
         const newMoments = newlySeen(reading.moments, 'DailyMomentId', previous.momentIds);
+        // Existing state files predate badge tracking. Establish their badge
+        // baseline silently instead of alerting for every previously earned badge.
+        const newBadges = Array.isArray(previous.badgeIds)
+          ? newlySeen(reading.badges, 'BadgeID', previous.badgeIds)
+          : [];
         const supplies = newReports.filter(reportIsSupplyRequest).length;
         if (supplies) alerts.push(`${childName(reading.child)}: ${supplies} new supply request${supplies === 1 ? '' : 's'}`);
         if (newMoments.length) alerts.push(`${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`);
         const otherReports = newReports.length - supplies;
         if (otherReports) alerts.push(`${childName(reading.child)}: ${otherReports} new report${otherReports === 1 ? '' : 's'}`);
+        if (newBadges.length) alerts.push(`${childName(reading.child)}: ${newBadges.length} new badge${newBadges.length === 1 ? '' : 's'}`);
       }
-      state.children[reading.childId] = updatedSnapshot(previous, reading.reports, reading.moments);
+      state.children[reading.childId] = updatedSnapshot(
+        previous,
+        reading.reports,
+        reading.moments,
+        reading.badges,
+      );
     }
     state.initializedAt ||= new Date().toISOString();
     state.lastCheckedAt = new Date().toISOString();
