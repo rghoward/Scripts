@@ -45,8 +45,9 @@ void main() {
           .where((day) => day.conditioning != null)
           .every(
             (day) =>
-                day.conditioning!.durationMinutes >= 12 &&
-                day.conditioning!.durationMinutes <= 20,
+                day.role == DayRole.capacity ||
+                (day.conditioning!.durationMinutes >= 12 &&
+                    day.conditioning!.durationMinutes <= 20),
           ),
       isTrue,
     );
@@ -138,7 +139,7 @@ void main() {
 
     for (final day in week.days.where((day) => !day.isRest)) {
       final movementNames = [
-        day.strength!.movement,
+        if (day.strength != null) day.strength!.movement,
         ...day.secondaryStrength.map((work) => work.movement),
       ];
       expect(movementNames.toSet(), hasLength(movementNames.length));
@@ -157,7 +158,7 @@ void main() {
     )) {
       expect(
         day.conditioning!.movementPatterns,
-        isNot(contains(day.strength!.primaryPattern)),
+        isNot(contains(day.strength?.primaryPattern)),
       );
     }
   });
@@ -171,9 +172,16 @@ void main() {
 
     expect(
       deload.days
-          .where((day) => !day.isRest)
+          .where((day) => !day.isRest && day.role != DayRole.capacity)
           .every((day) => day.accessories.length == 1),
       isTrue,
+    );
+    final capacity = deload.days.singleWhere(
+      (day) => day.role == DayRole.capacity,
+    );
+    expect(
+      capacity.accessories.join(' ').toLowerCase(),
+      allOf(contains('triceps'), contains('curl'), contains('abmat')),
     );
   });
 
@@ -193,10 +201,11 @@ void main() {
       ...weekTwo.days,
     ].where((day) => !day.isRest);
 
-    expect(trainingDays.map((day) => day.warmupTemplateId).toSet().length, 8);
+    // The capacity session deliberately reuses its brief universal warm-up.
+    expect(trainingDays.map((day) => day.warmupTemplateId).toSet().length, 9);
     expect(
       trainingDays.map((day) => day.accessoryTemplateId).toSet().length,
-      8,
+      9,
     );
     expect(
       trainingDays.map((day) => day.conditioning!.templateId).toSet().length,
@@ -223,7 +232,9 @@ void main() {
         (day) => !day.isRest && day.equipment.contains('rower'),
       );
 
-      expect(rowingDays.length, inInclusiveRange(2, 3));
+      // Zone 2 may use a rower, but it is intentionally optional alongside
+      // bike, run, and SkiErg rather than a required fourth rowing session.
+      expect(rowingDays.length, inInclusiveRange(2, 4));
     }
   });
 
@@ -249,7 +260,7 @@ void main() {
         phaseWeek: phaseWeek,
       );
       for (final day in week.days.where((day) => !day.isRest)) {
-        patterns.add(day.strength!.loadingPattern);
+        if (day.strength != null) patterns.add(day.strength!.loadingPattern);
         patterns.addAll(
           day.secondaryStrength.map((work) => work.loadingPattern),
         );
@@ -268,7 +279,10 @@ void main() {
         phaseWeek: phaseWeek,
       );
       for (final day in week.days.where((day) => !day.isRest)) {
-        final work = [day.strength!, ...day.secondaryStrength];
+        final work = [
+          if (day.strength != null) day.strength!,
+          ...day.secondaryStrength,
+        ];
         movements.addAll(work.map((item) => item.movement));
         patterns.addAll(work.map((item) => item.primaryPattern));
       }
@@ -290,6 +304,69 @@ void main() {
       }),
     );
   });
+
+  test(
+    'each week has one dedicated back or front squat while Olympic squat skill remains available',
+    () {
+      var overheadSquatSkillWeeks = 0;
+      const expectedDedicatedSquat = [
+        'Back Squat',
+        'Front Squat',
+        'Back Squat',
+        'Front Squat',
+        'Back Squat',
+        'Front Squat',
+        'Back Squat',
+        'Back Squat',
+        'Front Squat',
+        'Front Squat',
+        'Back Squat',
+        'Front Squat',
+      ];
+      for (var phaseWeek = 1; phaseWeek <= 12; phaseWeek++) {
+        final week = engine.generateWeek(
+          athlete: athlete,
+          weekOf: DateTime(2026, 7, 27),
+          phaseWeek: phaseWeek,
+        );
+        final work = week.days
+            .where((day) => !day.isRest)
+            .expand((day) => [day.strength, ...day.secondaryStrength])
+            .whereType<StrengthWork>()
+            .toList(growable: false);
+        final dedicatedSquats = work
+            .where((item) => item.isDedicatedBilateralSquatStrength)
+            .toList(growable: false);
+
+        expect(dedicatedSquats, hasLength(1), reason: 'week $phaseWeek');
+        expect(
+          dedicatedSquats.single.movement,
+          expectedDedicatedSquat[phaseWeek - 1],
+          reason: 'week $phaseWeek',
+        );
+        if (work.any((item) => item.movement.contains('Overhead Squat'))) {
+          overheadSquatSkillWeeks++;
+          expect(dedicatedSquats, hasLength(1));
+        }
+        if (phaseWeek % 4 != 0) {
+          final olympicPulls = work
+              .where(
+                (item) =>
+                    (item.trainingMaxKey == 'clean' ||
+                        item.trainingMaxKey == 'snatch') &&
+                    item.movement.contains('Pull'),
+              )
+              .toList(growable: false);
+          expect(
+            olympicPulls,
+            hasLength(1),
+            reason: 'week $phaseWeek needs one Olympic pull derivative',
+          );
+        }
+      }
+      expect(overheadSquatSkillWeeks, greaterThanOrEqualTo(4));
+    },
+  );
 
   test(
     'advanced gymnastics is isolated as practice rather than metcon work',
@@ -326,8 +403,12 @@ void main() {
         );
         for (final day in week.days.where((day) => !day.isRest)) {
           final conditioning = day.conditioning!;
+          if (day.role == DayRole.capacity) {
+            expect(conditioning.format, 'Zone 2 aerobic capacity');
+            continue;
+          }
           expect(
-            conditioning.prescription.first,
+            conditioning.prescription.join(' '),
             contains('${conditioning.durationMinutes}'),
           );
         }
@@ -346,7 +427,7 @@ void main() {
       for (final day in week.days.where((day) => !day.isRest)) {
         movements.addAll(
           [
-            day.strength!,
+            if (day.strength != null) day.strength!,
             ...day.secondaryStrength,
           ].map((work) => work.movement),
         );
@@ -401,7 +482,10 @@ void main() {
           phaseWeek: phaseWeek,
         );
         for (final day in week.days.where((day) => !day.isRest)) {
-          final work = [day.strength!, ...day.secondaryStrength];
+          final work = [
+            if (day.strength != null) day.strength!,
+            ...day.secondaryStrength,
+          ];
           olympicDays +=
               work.any((item) => item.primaryPattern == 'olympic_lift') ? 1 : 0;
           verticalPressDays +=
@@ -434,7 +518,7 @@ void main() {
       expect(jumpRopeDays, greaterThanOrEqualTo(1));
       expect(inversionDays, greaterThanOrEqualTo(4));
       expect(climbDays, greaterThanOrEqualTo(3));
-      expect(conditioningTemplates.length, 48);
+      expect(conditioningTemplates.length, 60);
     },
   );
 
@@ -444,14 +528,14 @@ void main() {
       startsOn: DateTime(2026, 7, 27),
     );
     final training = phase.days.where((day) => !day.isRest).toList();
-    expect(training, hasLength(48));
+    expect(training, hasLength(60));
     expect(
       training.map((day) => day.prescriptionSignature).toSet(),
       hasLength(training.length),
     );
   });
 
-  test('all 48 generated workouts have unique non-movement titles', () {
+  test('all 60 generated workouts have unique non-movement titles', () {
     final phase = engine.generatePhase(
       athlete: athlete,
       startsOn: DateTime(2026, 7, 27),
@@ -460,8 +544,8 @@ void main() {
         .where((day) => !day.isRest)
         .map((day) => day.title)
         .toList();
-    expect(titles, hasLength(48));
-    expect(titles.toSet(), hasLength(48));
+    expect(titles, hasLength(60));
+    expect(titles.toSet(), hasLength(60));
     expect(titles.first, 'The Forge Awakens: The Trial of Rising Stars');
     const movementTerms = [
       'row',
@@ -855,6 +939,8 @@ void main() {
           lower.contains('transition') ||
           lower.contains('set of today') ||
           lower.contains('after technique') ||
+          lower.contains('pacing target') ||
+          lower.contains('easy machine work') ||
           lower == '0:30 very easy';
     }
 
@@ -1160,6 +1246,49 @@ void main() {
     );
   });
 
+  test(
+    'full and compressed phases retain direct trunk work and weekly core conditioning',
+    () {
+      const compressedAthlete = AthleteProfile(
+        id: 'compressed-core-athlete',
+        trainingMaxes: {},
+        sessionMinutes: 60,
+      );
+      for (final athleteProfile in [athlete, compressedAthlete]) {
+        final phase = engine.generatePhase(
+          athlete: athleteProfile,
+          startsOn: DateTime(2026, 7, 27),
+        );
+        for (final week in phase.weeks) {
+          final training = week.days.where((day) => !day.isRest).toList();
+          if (athleteProfile.sessionMinutes > 60) {
+            final directCoreBlocks = training
+                .expand(
+                  (day) => [
+                    if (day.strength != null) day.strength!,
+                    ...day.secondaryStrength,
+                  ],
+                )
+                .where(
+                  (work) =>
+                      work.primaryPattern == 'core' ||
+                      work.primaryPattern == 'hanging_core',
+                );
+            expect(directCoreBlocks.length, greaterThanOrEqualTo(1));
+          }
+          expect(
+            training.any(
+              (day) =>
+                  day.conditioning!.movementPatterns.contains('core') ||
+                  day.conditioning!.movementPatterns.contains('hanging_core'),
+            ),
+            isTrue,
+          );
+        }
+      }
+    },
+  );
+
   test('unqualified athletes receive deterministic skill regressions', () {
     const unqualified = AthleteProfile(id: 'new-athlete', trainingMaxes: {});
     final phase = engine.generatePhase(
@@ -1168,7 +1297,12 @@ void main() {
     );
     final work = phase.days
         .where((day) => !day.isRest)
-        .expand((day) => [day.strength!, ...day.secondaryStrength]);
+        .expand(
+          (day) => [
+            if (day.strength != null) day.strength!,
+            ...day.secondaryStrength,
+          ],
+        );
 
     expect(work.every((item) => item.skill != 'advanced'), isTrue);
     expect(
@@ -1326,7 +1460,11 @@ void main() {
       conditioning.where((work) => work.format == 'Steady aerobic'),
       hasLength(4),
     );
-    expect(conditioning.map((work) => work.templateId).toSet(), hasLength(48));
+    expect(
+      conditioning.where((work) => work.format == 'Zone 2 aerobic capacity'),
+      hasLength(12),
+    );
+    expect(conditioning.map((work) => work.templateId).toSet(), hasLength(60));
     expect(
       conditioning
           .where((work) => work.format == 'For time')
@@ -1366,7 +1504,12 @@ void main() {
     );
     final training = phase.days.where((day) => !day.isRest);
     final unilateralSets = training
-        .expand((day) => [day.strength!, ...day.secondaryStrength])
+        .expand(
+          (day) => [
+            if (day.strength != null) day.strength!,
+            ...day.secondaryStrength,
+          ],
+        )
         .where((work) => work.primaryPattern == 'unilateral')
         .expand((work) => work.steps)
         .fold<int>(0, (total, step) => total + step.sets);
@@ -1387,7 +1530,7 @@ void main() {
     );
     for (final day in phase.days.where((day) => !day.isRest)) {
       final movements = [
-        day.strength!,
+        if (day.strength != null) day.strength!,
         ...day.secondaryStrength,
       ].map((work) => work.movement.toLowerCase());
       for (final accessory in day.accessories) {

@@ -33,15 +33,21 @@ class ProgramPause {
 /// SQLite-backed scheduler. Workout order is immutable; calendar assignments
 /// are mutable and every mutation is recorded as an append-only event.
 class ScheduleRepository {
-  ScheduleRepository(this.database);
+  ScheduleRepository(
+    this.database, {
+    this.programId = defaultProgramId,
+    this.rulesetVersion = defaultRulesetVersion,
+  });
 
   static const athleteId = 'local-athlete';
-  static const programId = 'phase-1-2026-07-27';
-  static const rulesetVersion = 'phase-1-v1';
+  static const defaultProgramId = 'phase-1-2026-07-27';
+  static const defaultRulesetVersion = 'phase-1-v1';
   static const _pauseStartedKey = 'schedule_pause_started_on';
   static const _pauseReturnKey = 'schedule_pause_return_on';
 
   final Database database;
+  final String programId;
+  final String rulesetVersion;
 
   static String _day(DateTime value) => DateTime(
     value.year,
@@ -53,6 +59,7 @@ class ScheduleRepository {
     DateTime.monday,
     DateTime.tuesday,
     DateTime.thursday,
+    DateTime.friday,
     DateTime.saturday,
   }.contains(date.weekday);
 
@@ -101,8 +108,8 @@ class ScheduleRepository {
       var date = _nextTrainingDate(startsOn);
       for (var index = 0; index < prescriptionSignatures.length; index++) {
         final sequence = index + 1;
-        final workoutId = 'phase-1-workout-$sequence';
-        final assignmentId = 'phase-1-assignment-$sequence';
+        final workoutId = '$programId-workout-$sequence';
+        final assignmentId = '$programId-assignment-$sequence';
         await transaction.insert('workout_prescriptions', {
           'id': workoutId,
           'program_id': programId,
@@ -163,6 +170,36 @@ class ScheduleRepository {
   /// Reopens a completed or partial workout without changing its assigned day.
   Future<void> reopen(String assignmentId) =>
       _setStatus(assignmentId, 'in_progress', 'reopen');
+
+  /// Removes completion state mistakenly carried over from a different
+  /// published snapshot. It affects only this program's assignments; historic
+  /// programs and their completion records remain unchanged.
+  Future<void> clearInheritedCompletionStates() async {
+    await database.transaction((transaction) async {
+      final prior = await transaction.query(
+        'schedule_assignments',
+        where: "program_id = ? AND status IN ('completed', 'in_progress')",
+        whereArgs: [programId],
+      );
+      if (prior.isEmpty) return;
+      final now = DateTime.now().toUtc().toIso8601String();
+      for (final row in prior) {
+        await transaction.update(
+          'schedule_assignments',
+          {
+            'status': 'planned',
+            'revision': (row['revision']! as int) + 1,
+            'updated_at': now,
+          },
+          where: 'id = ?',
+          whereArgs: [row['id']! as String],
+        );
+      }
+      // The original schema has a closed event-type set and no repair type.
+      // Progress ownership is recorded in the snapshot migration key instead;
+      // this transaction intentionally only restores this program's status.
+    });
+  }
 
   /// One-time athlete schedule repair: preserve completed work before
   /// [sequence] and place that sequence on [startsOn], then give each later
@@ -421,7 +458,7 @@ class ScheduleRepository {
     }
   }
 
-  static Future<List<Map<String, Object?>>> _pendingSnapshot(
+  Future<List<Map<String, Object?>>> _pendingSnapshot(
     Transaction transaction,
   ) => transaction.query(
     'schedule_assignments',
@@ -431,7 +468,7 @@ class ScheduleRepository {
     orderBy: 'assigned_date, id',
   );
 
-  static Future<void> _event(
+  Future<void> _event(
     Transaction transaction, {
     required String type,
     required String? assignmentId,

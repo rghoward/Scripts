@@ -531,6 +531,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   LocalStateStore? _store;
   PublishedProgramRepository? _publishedProgramRepository;
   String? _bundledSnapshotPendingCache;
+  String? _loadedPublishedSnapshotId;
   ScheduleRepository? _scheduleRepository;
   List<ScheduledWorkout> _schedule = [];
   ProgramPause? _programPause;
@@ -538,6 +539,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
   AthleteSettings _athleteSettings = AthleteSettings.defaults;
   DateTime _selected = DateUtils.dateOnly(DateTime.now());
   late DateTime _scheduleStart;
+
+  String _progressKey(String suffix, [String? snapshotId]) =>
+      'snapshot_progress_${snapshotId ?? _loadedPublishedSnapshotId ?? 'legacy'}_$suffix';
   WorkoutVariant _variant = WorkoutVariant.full;
   WorkoutVariant _preferredWorkoutVariant = WorkoutVariant.full;
   ChronicleFilter _chronicleFilter = ChronicleFilter.all;
@@ -626,6 +630,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
       store.database,
     );
     final workouts = await _loadPublishedWorkouts(publishedProgramRepository);
+    await _archiveProgressBeforePublishedProgramSwitch(
+      store,
+      publishedProgramRepository,
+    );
     if (!(await store.getBool('generated_program_v3') ?? false)) {
       await store.remove('completed_sections');
       await store.remove('completed_workouts');
@@ -641,13 +649,15 @@ class _WorkoutHomeState extends State<WorkoutHome>
       await store.setBool('ramp_removed_v1', true);
     }
     final completedSections =
-        await store.getStringList('completed_sections') ?? const [];
+        await store.getStringList(_progressKey('completed_sections')) ??
+        const [];
     final fractureSeeds =
-        await store.getStringList('fracture_seeds') ?? const [];
+        await store.getStringList(_progressKey('fracture_seeds')) ?? const [];
     final completedWorkouts =
-        await store.getStringList('completed_workouts') ?? const [];
+        await store.getStringList(_progressKey('completed_workouts')) ??
+        const [];
     final partialWorkouts =
-        await store.getStringList('partial_workouts') ?? const [];
+        await store.getStringList(_progressKey('partial_workouts')) ?? const [];
     final savedMovementSwaps =
         await store.getString('movement_swaps_v2') ??
         await store.getString('movement_swaps_v1');
@@ -686,13 +696,18 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final scheduleStart = start == null
         ? _scheduleStart
         : DateUtils.dateOnly(DateTime.parse(start));
-    final scheduleRepository = ScheduleRepository(store.database);
+    final scheduleRepository = ScheduleRepository(
+      store.database,
+      programId: 'published-${_loadedPublishedSnapshotId ?? 'legacy'}-five-day',
+      rulesetVersion: _loadedPublishedSnapshotId ?? 'legacy',
+    );
     await scheduleRepository.initialize(
       startsOn: scheduleStart,
       prescriptionSignatures: workouts
           .map((workout) => workout.prescriptionSignature)
           .toList(growable: false),
     );
+    await _repairIncorrectSnapshotCompletionState(store, scheduleRepository);
     var schedule = await scheduleRepository.assignments();
     final completedSequences = completedWorkouts.map(int.parse).toSet();
     for (final assignment in schedule.where(
@@ -1057,12 +1072,96 @@ class _WorkoutHomeState extends State<WorkoutHome>
         (jsonDecode(bundled) as Map<String, dynamic>)['snapshot_id']! as String;
     final cached = await repository.active();
     if (cached?.id == bundledId) {
-      return _decodePublishedSnapshot(cached!.snapshotJson);
+      _loadedPublishedSnapshotId = cached!.id;
+      return _decodePublishedSnapshot(cached.snapshotJson);
     }
     // A newer reviewed bundle must replace the cached published surface while
     // preserving local completion and schedule state by sequence.
     _bundledSnapshotPendingCache = bundled;
+    _loadedPublishedSnapshotId = bundledId;
     return _decodePublishedSnapshot(bundled);
+  }
+
+  /// A bundle update must never erase the athlete's completed work. Before the
+  /// new reviewed phase is made active, retain an immutable local archive that
+  /// pairs the old snapshot with its completion state. Supabase migration will
+  /// import these records into versioned cloud history.
+  Future<void> _archiveProgressBeforePublishedProgramSwitch(
+    LocalStateStore store,
+    PublishedProgramRepository repository,
+  ) async {
+    if (_bundledSnapshotPendingCache == null) return;
+    final current = await repository.active();
+    if (current == null) return;
+    final key = 'archived_program_progress_${current.id}';
+    final completed =
+        await store.getStringList(
+          _progressKey('completed_workouts', current.id),
+        ) ??
+        await store.getStringList('completed_workouts') ??
+        const <String>[];
+    final partial =
+        await store.getStringList(
+          _progressKey('partial_workouts', current.id),
+        ) ??
+        await store.getStringList('partial_workouts') ??
+        const <String>[];
+    final sections =
+        await store.getStringList(
+          _progressKey('completed_sections', current.id),
+        ) ??
+        await store.getStringList('completed_sections') ??
+        const <String>[];
+    if (!(await store.containsKey(key)) &&
+        (completed.isNotEmpty || partial.isNotEmpty || sections.isNotEmpty)) {
+      await store.setString(
+        key,
+        jsonEncode({
+          'snapshot_id': current.id,
+          'snapshot_json': current.snapshotJson,
+          'archived_at': DateTime.now().toUtc().toIso8601String(),
+          'completed_workouts': completed,
+          'partial_workouts': partial,
+          'completed_sections': sections,
+          'schedule_start': await store.getString('schedule_start'),
+        }),
+      );
+    }
+    // The newly active program must not inherit completion flags by display
+    // sequence. The immutable archive above retains the prior program state.
+    await store.remove('completed_workouts');
+    await store.remove('partial_workouts');
+    await store.remove('completed_sections');
+    await store.remove(_progressKey('completed_workouts', current.id));
+    await store.remove(_progressKey('partial_workouts', current.id));
+    await store.remove(_progressKey('completed_sections', current.id));
+    await store.remove(_progressKey('fracture_seeds', current.id));
+  }
+
+  /// Earlier snapshot builds used sequence-only progress keys. The corrected
+  /// Zone 2 program must not display old completions that happened to share a
+  /// sequence or calendar day with different workouts.
+  Future<void> _repairIncorrectSnapshotCompletionState(
+    LocalStateStore store,
+    ScheduleRepository scheduleRepository,
+  ) async {
+    const snapshotId = 'forged_phase_2026_07_27_v6_zone2';
+    const repairKey = 'repair_v6_zone2_inherited_completion_state';
+    if (_loadedPublishedSnapshotId != snapshotId ||
+        (await store.getBool(repairKey) ?? false)) {
+      return;
+    }
+    await scheduleRepository.clearInheritedCompletionStates();
+    for (final suffix in [
+      'completed_sections',
+      'completed_workouts',
+      'partial_workouts',
+      'fracture_seeds',
+    ]) {
+      await store.remove(_progressKey(suffix));
+      await store.remove(suffix);
+    }
+    await store.setBool(repairKey, true);
   }
 
   List<WorkoutDay> _decodePublishedSnapshot(String encoded) {
@@ -3524,19 +3623,19 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   Future<void> _saveProgress() async {
     await _store?.setStringList(
-      'completed_sections',
+      _progressKey('completed_sections'),
       _sectionState.keys.toList(),
     );
     await _store?.setStringList(
-      'completed_workouts',
+      _progressKey('completed_workouts'),
       _completedWorkouts.map((e) => '$e').toList(),
     );
     await _store?.setStringList(
-      'partial_workouts',
+      _progressKey('partial_workouts'),
       _partialWorkouts.map((e) => '$e').toList(),
     );
     await _store?.setStringList(
-      'fracture_seeds',
+      _progressKey('fracture_seeds'),
       _fractureSeeds.entries.map((e) => '${e.key}|${e.value}').toList(),
     );
     Map<String, Object> encodeSwap(MovementSubstitution value) => {

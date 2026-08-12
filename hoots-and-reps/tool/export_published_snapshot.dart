@@ -86,9 +86,9 @@ void main() {
   const encoder = JsonEncoder.withIndent('  ');
   final output = File('assets/data/published_program_snapshot_v1.json');
   final snapshot = {
-    'snapshot_id': 'forged_phase_2026_07_27_v6',
+    'snapshot_id': 'forged_phase_2026_07_27_v6_zone2',
     'version': 6,
-    'published_at': '2026-08-06T00:00:00.000Z',
+    'published_at': '2026-08-11T00:00:00.000Z',
     'workouts': workouts,
   };
   _validatePublishedWorkouts(workouts);
@@ -191,10 +191,7 @@ List<Map<String, String>> _sections(
             '${block.$2.map(_strength).join('\n\n')}\n\nMove with consistent technique; no missed repetitions.',
       },
     if (day.accessories.isNotEmpty)
-      {
-        'title': 'ACCESSORY • OPTIONAL',
-        'body': day.accessories.take(1).join('\n'),
-      },
+      {'title': 'ACCESSORY • OPTIONAL', 'body': day.accessories.join('\n')},
   ];
   final conditioning = day.conditioning!;
   if (benchmark != null) {
@@ -223,7 +220,10 @@ List<Map<String, String>> _sections(
 }
 
 List<(String, List<StrengthWork>)> _groupedBlocks(GeneratedDay day) {
-  final all = [day.strength!, ...day.secondaryStrength];
+  final all = [
+    if (day.strength != null) day.strength!,
+    ...day.secondaryStrength,
+  ];
   final strength = all
       .where(
         (work) =>
@@ -264,8 +264,10 @@ bool _isSkillPracticeWork(StrengthWork work) {
 }
 
 void _validatePublishedWorkouts(List<Map<String, Object?>> workouts) {
-  if (workouts.length != 48) {
-    throw StateError('A published phase must contain exactly 48 workouts.');
+  if (workouts.length != 60) {
+    throw StateError(
+      'A published five-day phase must contain exactly 60 workouts.',
+    );
   }
   for (final workout in workouts) {
     for (final variant in ['full', 'sixty']) {
@@ -283,13 +285,22 @@ void _validatePublishedWorkouts(List<Map<String, Object?>> workouts) {
       final cooldown = titles.indexWhere(
         (title) => title.startsWith('POST-QUEST STRETCH'),
       );
-      if (warmup != 0 ||
-          primary <= warmup ||
-          conditioningOrBenchmark <= primary ||
-          cooldown <= conditioningOrBenchmark) {
+      final isZone2Capacity = sections.any(
+        (section) =>
+            section['title']!.startsWith('CONDITIONING') &&
+            section['body']!.startsWith('Zone 2 aerobic capacity'),
+      );
+      final invalidOrder = isZone2Capacity
+          ? primary != -1 ||
+                conditioningOrBenchmark <= warmup ||
+                cooldown <= conditioningOrBenchmark
+          : primary <= warmup ||
+                conditioningOrBenchmark <= primary ||
+                cooldown <= conditioningOrBenchmark;
+      if (warmup != 0 || invalidOrder) {
         throw StateError(
           'Published workout ${workout['sequence']} does not follow the '
-          'warm-up, primary, conditioning/benchmark, cooldown structure.',
+          'reviewed session structure.',
         );
       }
       final trainingSections = titles
@@ -316,6 +327,24 @@ void _validatePublishedWorkouts(List<Map<String, Object?>> workouts) {
         throw StateError(
           'Published workout ${workout['sequence']} has multiple accessory blocks.',
         );
+      }
+      if (isZone2Capacity) {
+        final accessories = sections
+            .where((section) => section['title']!.startsWith('ACCESSORY'))
+            .map((section) => section['body']!)
+            .join(' ')
+            .toLowerCase();
+        if (!accessories.contains('triceps') ||
+            !accessories.contains('curl') ||
+            !(accessories.contains('dead bug') ||
+                accessories.contains('side plank') ||
+                accessories.contains('abmat') ||
+                accessories.contains('hollow'))) {
+          throw StateError(
+            'Published capacity workout ${workout['sequence']} is missing '
+            'the direct arms and trunk accessory prescription.',
+          );
+        }
       }
     }
   }
