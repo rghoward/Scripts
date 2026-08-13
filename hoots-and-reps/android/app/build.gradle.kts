@@ -50,3 +50,17 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Never package the retired four-day phase by mistake. The reviewed program
+// has five sessions for each of 12 weeks, and its snapshot is the build input.
+tasks.named("preBuild") {
+    doFirst {
+        val snapshot = file("../../assets/data/published_program_snapshot_v1.json")
+        val workoutCount = Regex("\\\"sequence\\\"\\s*:\\s*\\d+")
+            .findAll(snapshot.readText())
+            .count()
+        check(workoutCount == 60) {
+            "Refusing to build: expected the reviewed 60-workout five-day phase, found $workoutCount workouts."
+        }
+    }
+}

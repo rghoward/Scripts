@@ -60,8 +60,30 @@ class PublishedProgramRepository {
     final version = raw['version']! as int;
     final publishedAt = raw['published_at']! as String;
     final existing = await active();
-    if (existing?.id == id) return existing!;
+    if (existing?.id == id && existing!.snapshotJson == snapshotJson) {
+      return existing;
+    }
     final now = DateTime.now().toUtc().toIso8601String();
+    if (existing?.id == id) {
+      await database.update(
+        'published_program_snapshots',
+        {
+          'version': version,
+          'published_at': publishedAt,
+          'snapshot_json': snapshotJson,
+          'activated_at': now,
+          'rationale': 'Bundled reviewed phase metadata updated locally.',
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      return PublishedProgramSnapshot(
+        id: id,
+        version: version,
+        publishedAt: DateTime.parse(publishedAt),
+        snapshotJson: snapshotJson,
+      );
+    }
     await database.transaction((transaction) async {
       await transaction.update('published_program_snapshots', {
         'superseded_at': now,
