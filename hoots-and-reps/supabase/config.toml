@@ -1,0 +1,4 @@
+[functions.auth-confirmation]
+# This page is reached from a confirmation email before a Supabase session is
+# established, so it must be publicly callable.
+verify_jwt = false

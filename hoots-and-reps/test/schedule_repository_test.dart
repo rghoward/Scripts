@@ -43,7 +43,10 @@ void main() {
   test('pause and undo restore pending calendar assignments', () async {
     final before = await repository.assignments();
     await repository.pauseUntil(DateTime(2026, 8, 10));
-    expect((await repository.assignments()).first.date, DateTime(2026, 8, 10));
+    final paused = await repository.assignments();
+    expect(paused.first.date, DateTime(2026, 8, 10));
+    expect(paused[1].date, DateTime(2026, 8, 11));
+    expect(paused[2].date, DateTime(2026, 8, 13));
     expect((await repository.pauseState())!.returnOn, DateTime(2026, 8, 10));
 
     expect(await repository.undoLastScheduleChange(), isTrue);
@@ -86,6 +89,51 @@ void main() {
       expect(assignments.first.status, ScheduleStatus.unconfirmed);
       expect(assignments[1].status, ScheduleStatus.unconfirmed);
       expect(assignments[2].status, ScheduleStatus.planned);
+    },
+  );
+
+  test(
+    'restores an anchored published calendar without erasing completion',
+    () async {
+      final before = await repository.assignments();
+      await repository.complete(
+        before[7].assignmentId,
+        completedOn: DateTime(2026, 8, 12),
+      );
+      await repository.markPastUnresolved(DateTime(2026, 8, 13));
+
+      await repository.restoreAnchoredCalendar(
+        startsOn: DateTime(2026, 8, 3),
+        firstAvailableSequence: 8,
+      );
+      final assignments = await repository.assignments();
+
+      expect(assignments[0].date, DateTime(2026, 8, 3));
+      expect(assignments[4].date, DateTime(2026, 8, 8));
+      expect(assignments[7].date, DateTime(2026, 8, 13));
+      expect(assignments[8].date, DateTime(2026, 8, 14));
+      expect(assignments[0].status, ScheduleStatus.skipped);
+      expect(assignments[6].status, ScheduleStatus.skipped);
+      expect(assignments[7].status, ScheduleStatus.completed);
+    },
+  );
+
+  test(
+    'backfilling a skipped workout keeps later calendar dates stable',
+    () async {
+      await repository.restoreAnchoredCalendar(
+        startsOn: DateTime(2026, 8, 3),
+        firstAvailableSequence: 8,
+      );
+      final skipped = (await repository.assignments()).first;
+
+      await repository.complete(skipped.assignmentId);
+      final after = await repository.assignments();
+
+      expect(after.first.status, ScheduleStatus.completed);
+      expect(after.first.date, DateTime(2026, 8, 3));
+      expect(after[1].date, DateTime(2026, 8, 4));
+      expect(after[7].date, DateTime(2026, 8, 13));
     },
   );
 }

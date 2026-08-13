@@ -53,6 +53,36 @@ void main() {
     );
   });
 
+  test('uses five distinct training dates with capacity on Saturday', () {
+    final week = engine.generateWeek(
+      athlete: athlete,
+      weekOf: DateTime(2026, 7, 27),
+      phaseWeek: 1,
+    );
+    final training = week.days.where((day) => !day.isRest).toList();
+
+    expect(training, hasLength(5));
+    expect(
+      training.map((day) => day.date.weekday),
+      orderedEquals([
+        DateTime.monday,
+        DateTime.tuesday,
+        DateTime.thursday,
+        DateTime.friday,
+        DateTime.saturday,
+      ]),
+    );
+    expect(training.map((day) => day.date).toSet(), hasLength(5));
+    expect(
+      training.singleWhere((day) => day.role == DayRole.fullBody).date.weekday,
+      DateTime.friday,
+    );
+    expect(
+      training.singleWhere((day) => day.role == DayRole.capacity).date.weekday,
+      DateTime.saturday,
+    );
+  });
+
   test('calculates every step from a training max', () {
     final week = engine.generateWeek(
       athlete: athlete,
