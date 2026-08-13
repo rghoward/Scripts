@@ -201,6 +201,59 @@ class ScheduleRepository {
     });
   }
 
+  /// Restores a reviewed published program to its intended weekly calendar.
+  ///
+  /// A snapshot may be installed after its nominal start date. Sessions that
+  /// were never available in that snapshot are marked skipped rather than
+  /// incorrectly shown as an athlete's unfinished work. Completed sessions are
+  /// retained, including their completion event history, while their calendar
+  /// position is restored to the program's durable anchor.
+  Future<void> restoreAnchoredCalendar({
+    required DateTime startsOn,
+    required int firstAvailableSequence,
+  }) async {
+    await database.transaction((transaction) async {
+      final rows = await transaction.rawQuery(
+        '''
+        SELECT a.id, a.status, a.assigned_date, a.revision, p.sequence_number
+        FROM schedule_assignments a
+        JOIN workout_prescriptions p ON p.id = a.workout_id
+        WHERE a.program_id = ?
+        ORDER BY p.sequence_number
+        ''',
+        [programId],
+      );
+      var date = _nextTrainingDate(startsOn);
+      final now = DateTime.now().toUtc().toIso8601String();
+      for (final row in rows) {
+        final sequence = row['sequence_number']! as int;
+        final existingStatus = row['status']! as String;
+        final restoredStatus =
+            sequence < firstAvailableSequence && existingStatus != 'completed'
+            ? 'skipped'
+            : existingStatus;
+        final restoredDate = _day(date);
+        if (existingStatus != restoredStatus ||
+            row['assigned_date']! as String != restoredDate) {
+          await transaction.update(
+            'schedule_assignments',
+            {
+              'assigned_date': restoredDate,
+              'status': restoredStatus,
+              'revision': (row['revision']! as int) + 1,
+              'updated_at': now,
+            },
+            where: 'id = ?',
+            whereArgs: [row['id']! as String],
+          );
+        }
+        date = _followingTrainingDate(date);
+      }
+      // This is an explicit migration action recorded in app_state. Existing
+      // completion events preserve the actual date the athlete finished.
+    });
+  }
+
   /// One-time athlete schedule repair: preserve completed work before
   /// [sequence] and place that sequence on [startsOn], then give each later
   /// unfinished workout its own following training day.

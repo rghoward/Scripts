@@ -38,6 +38,12 @@ later add-on. The work should include authentication design, row-level security,
 conflict-aware sync, backup/restore, and migration of existing local profile,
 schedule, results, benchmarks, swaps, and progress.
 
+**Before public registration:** configure custom SMTP with a verified Hoots &
+Reps sending domain, branded confirmation/recovery templates, delivery/error
+monitoring, and rate limits appropriate for the chosen provider. Supabase's
+built-in mailer is development-only (two auth emails per hour) and must not be
+used for a public launch.
+
 Manual workout editing belongs in the same initiative. Edited workouts must be
 versioned and visibly labeled so the published immutable prescription, the
 athlete's local transformations, and an owner-authored manual edit never become

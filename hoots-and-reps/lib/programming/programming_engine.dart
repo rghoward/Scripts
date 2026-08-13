@@ -187,7 +187,7 @@ class AthleteProfile {
     required this.id,
     required this.trainingMaxes,
     this.sessionMinutes = 90,
-    this.trainingDays = const {1, 2, 4, 6},
+    this.trainingDays = const {1, 2, 4, 5, 6},
     this.qualifications = const {},
     this.availableEquipment = commonFunctionalFitnessEquipment,
     this.restrictedPatterns = const {},
@@ -752,7 +752,7 @@ class GeneratedDay {
   /// excluded so cosmetic renaming cannot disguise a repeated workout.
   String get prescriptionSignature {
     if (isRest) return 'rest';
-    final strengthParts = [if (strength != null) strength!, ...secondaryStrength]
+    final strengthParts = [?strength, ...secondaryStrength]
         .map(
           (work) => [
             work.movement,
@@ -1141,7 +1141,7 @@ class DeterministicProgrammingEngine {
         templates,
         phaseWeek,
         deload,
-        monday.add(const Duration(days: 5)),
+        monday.add(const Duration(days: 4)),
         DayRole.fullBody,
         'The Full-Body Reckoning',
         plans[3].first,
@@ -3240,6 +3240,31 @@ class DeterministicProgrammingEngine {
   }
 
   static void _validateWeek(GeneratedWeek week) {
+    final trainingDays = week.days
+        .where((day) => !day.isRest)
+        .toList(growable: false);
+    const expectedTrainingWeekdays = {
+      DateTime.monday,
+      DateTime.tuesday,
+      DateTime.thursday,
+      DateTime.friday,
+      DateTime.saturday,
+    };
+    final distinctDates = trainingDays
+        .map((day) => DateTime(day.date.year, day.date.month, day.date.day))
+        .toSet();
+    final actualTrainingWeekdays = trainingDays
+        .map((day) => day.date.weekday)
+        .toSet();
+    if (trainingDays.length != expectedTrainingWeekdays.length ||
+        distinctDates.length != trainingDays.length ||
+        actualTrainingWeekdays.length != expectedTrainingWeekdays.length ||
+        !actualTrainingWeekdays.containsAll(expectedTrainingWeekdays)) {
+      throw StateError(
+        'Generated week must place exactly one workout on Monday, Tuesday, '
+        'Thursday, Friday, and Saturday.',
+      );
+    }
     if (week.restDayCount < 2) {
       throw StateError('Generated week must contain at least two rest days.');
     }

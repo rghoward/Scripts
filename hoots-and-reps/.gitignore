@@ -33,6 +33,11 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Supabase project settings are supplied at build/run time, never committed.
+.env
+.env.*
+!*.example
+
 # Symbolication related
 app.*.symbols
 

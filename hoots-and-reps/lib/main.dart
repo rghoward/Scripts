@@ -6,16 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'data/app_database.dart';
 import 'data/benchmark_results_repository.dart';
 import 'data/conditioning_results_repository.dart';
 import 'data/published_program_repository.dart';
 import 'data/schedule_repository.dart';
+import 'data/local_history_audit.dart';
+import 'data/local_history_export.dart';
+import 'data/supabase_auth_repository.dart';
+import 'data/supabase_config.dart';
+import 'data/supabase_history_import_repository.dart';
 import 'programming/programming_engine.dart';
 import 'programming/movement_substitutions.dart';
 import 'programming/published_workout_resolver.dart';
 import 'profile/athlete_profile_page.dart';
+import 'profile/cloud_account_page.dart';
 import 'profile/first_run_setup_page.dart';
 
 const ink = Color(0xfff7f5ef);
@@ -233,6 +240,9 @@ Set<SkillQualification> selectedSkillQualifications(AthleteSettings settings) =>
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Local SQLite remains the source of truth until the cloud import flow is
+  // enabled. A build without these dart-defines deliberately stays offline.
+  final cloudConfigured = await SupabaseConfig.initializeIfConfigured();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -241,11 +251,19 @@ Future<void> main() async {
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const HootsApp());
+  runApp(
+    HootsApp(
+      auth: cloudConfigured
+          ? SupabaseAuthRepository.connected(Supabase.instance.client)
+          : SupabaseAuthRepository.disabled(),
+    ),
+  );
 }
 
 class HootsApp extends StatelessWidget {
-  const HootsApp({super.key});
+  const HootsApp({this.auth, super.key});
+
+  final SupabaseAuthRepository? auth;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -258,7 +276,7 @@ class HootsApp extends StatelessWidget {
       colorScheme: const ColorScheme.dark(primary: fire, secondary: ember),
       useMaterial3: true,
     ),
-    home: const WorkoutHome(),
+    home: WorkoutHome(auth: auth ?? SupabaseAuthRepository.disabled()),
   );
 }
 
@@ -500,7 +518,9 @@ enum ChronicleFilter { all, forTime, amrap, intervals, totalWork }
 enum MovementSwapScope { today, always }
 
 class WorkoutHome extends StatefulWidget {
-  const WorkoutHome({super.key});
+  const WorkoutHome({required this.auth, super.key});
+
+  final SupabaseAuthRepository auth;
   @override
   State<WorkoutHome> createState() => _WorkoutHomeState();
 }
@@ -708,6 +728,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
           .toList(growable: false),
     );
     await _repairIncorrectSnapshotCompletionState(store, scheduleRepository);
+    await _repairV6Zone2CalendarAnchor(store, scheduleRepository);
     var schedule = await scheduleRepository.assignments();
     final completedSequences = completedWorkouts.map(int.parse).toSet();
     for (final assignment in schedule.where(
@@ -752,9 +773,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
       _partialWorkouts.addAll(partialWorkouts.map(int.parse));
       _ready = true;
     });
-    // This user-requested repair must never keep the workout shell on its
-    // loading state. Run it after the app is usable, then refresh the calendar.
-    unawaited(_applyDay4ScheduleRepair());
     if (!setupComplete) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _openFirstRunSetup());
     }
@@ -768,22 +786,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
     }
     if (start == null) {
       await store.setString('schedule_start', _scheduleStart.toIso8601String());
-    }
-  }
-
-  Future<void> _applyDay4ScheduleRepair() async {
-    const repairKey = 'schedule_repair_day4_2026_08_09';
-    final store = _store;
-    final repository = _scheduleRepository;
-    if (store == null || repository == null) return;
-    if (await store.getBool(repairKey) ?? false) return;
-    try {
-      await repository.rescheduleUnfinishedFrom(4, DateTime(2026, 8, 9));
-      await store.setBool(repairKey, true);
-      await _reloadSchedule();
-    } catch (_) {
-      // The normal workout surface stays available if a local database repair
-      // is interrupted; the next app launch can safely retry it.
     }
   }
 
@@ -1015,6 +1017,25 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
   }
 
+  Future<void> _openCloudAccount() async {
+    final store = _store;
+    if (store == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => CloudAccountPage(
+          auth: widget.auth,
+          historyAudit: () => LocalHistoryAuditRepository(store).preview(),
+          importLocalHistory: widget.auth.isEnabled
+              ? () => SupabaseHistoryImportRepository(
+                  Supabase.instance.client,
+                  LocalHistoryExporter(store),
+                ).importCurrentAthlete()
+              : null,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openFirstRunSetup() async {
     final store = _store;
     if (store == null || !mounted) return;
@@ -1161,6 +1182,32 @@ class _WorkoutHomeState extends State<WorkoutHome>
       await store.remove(_progressKey(suffix));
       await store.remove(suffix);
     }
+    await store.setBool(repairKey, true);
+  }
+
+  /// The corrected Zone 2 snapshot was installed after its first scheduled
+  /// week had already begun. Restore the calendar to Monday, August 3, and
+  /// avoid presenting pre-install sessions as missed athlete work.
+  Future<void> _repairV6Zone2CalendarAnchor(
+    LocalStateStore store,
+    ScheduleRepository scheduleRepository,
+  ) async {
+    const snapshotId = 'forged_phase_2026_07_27_v6_zone2';
+    const repairKey = 'repair_v6_zone2_calendar_anchor_2026_08_03';
+    if (_loadedPublishedSnapshotId != snapshotId ||
+        (await store.getBool(repairKey) ?? false)) {
+      return;
+    }
+    await scheduleRepository.restoreAnchoredCalendar(
+      startsOn: DateTime(2026, 8, 3),
+      // Day 8 was the first corrected-session day actually available to the
+      // athlete. Earlier version-specific entries remain preserved but skipped.
+      firstAvailableSequence: 8,
+    );
+    await store.setString(
+      'schedule_start',
+      DateTime(2026, 8, 3).toIso8601String(),
+    );
     await store.setBool(repairKey, true);
   }
 
@@ -1826,10 +1873,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       _completedWorkouts.add(workout.sequence);
       _partialWorkouts.remove(workout.sequence);
       if (assignment != null) {
-        await _scheduleRepository?.complete(
-          assignment.assignmentId,
-          completedOn: DateUtils.dateOnly(DateTime.now()),
-        );
+        await _scheduleRepository?.complete(assignment.assignmentId);
       }
     }
     await _saveProgress();
@@ -2207,10 +2251,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
     final assignment = _assignmentFor(_selected);
     if (assignment != null) {
-      await _scheduleRepository?.complete(
-        assignment.assignmentId,
-        completedOn: DateUtils.dateOnly(DateTime.now()),
-      );
+      await _scheduleRepository?.complete(assignment.assignmentId);
     }
     await _saveProgress();
     await _reloadSchedule();
@@ -2362,10 +2403,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
     final assignment = _assignmentFor(_selected);
     if (assignment != null) {
-      await _scheduleRepository?.complete(
-        assignment.assignmentId,
-        completedOn: DateUtils.dateOnly(DateTime.now()),
-      );
+      await _scheduleRepository?.complete(assignment.assignmentId);
     }
     await _saveProgress();
     await _reloadSchedule();
@@ -4245,6 +4283,48 @@ class _WorkoutHomeState extends State<WorkoutHome>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
+                  'CLOUD ACCOUNT',
+                  style: TextStyle(color: cyan, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  widget.auth.isEnabled
+                      ? widget.auth.currentUser == null
+                            ? 'Sign in to keep your future training history account-scoped across devices. Your current data remains on this phone until you approve an import.'
+                            : 'Signed in as ${widget.auth.currentUser!.email ?? 'athlete'}. Review your local history before importing it.'
+                      : 'This build is running offline. Training stays fully available while cloud access is configured.',
+                  style: const TextStyle(
+                    color: muted,
+                    fontSize: 16,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _openCloudAccount,
+                    icon: Icon(
+                      widget.auth.currentUser == null
+                          ? Icons.cloud_outlined
+                          : Icons.cloud_done_outlined,
+                    ),
+                    label: Text(
+                      widget.auth.currentUser == null
+                          ? 'SET UP CLOUD ACCOUNT'
+                          : 'OPEN CLOUD ACCOUNT',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
                   'STRENGTH RECORDS',
                   style: TextStyle(color: ember, fontWeight: FontWeight.w900),
                 ),
@@ -4734,7 +4814,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
           away
               ? _awayCard()
               : assignment?.status == ScheduleStatus.skipped
-              ? _skippedCard()
+              ? _skippedCard(assignment!)
               : workout == null
               ? _restCard()
               : _workoutCard(workout),
@@ -4795,22 +4875,79 @@ class _WorkoutHomeState extends State<WorkoutHome>
     ),
   );
 
-  Widget _skippedCard() => _card(
-    child: const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'QUEST INTENTIONALLY SKIPPED',
-          style: TextStyle(color: ember, fontWeight: FontWeight.w900),
+  Widget _skippedCard(ScheduledWorkout assignment) {
+    final workout = assignment.sequence <= _workouts.length
+        ? _workouts[assignment.sequence - 1]
+        : null;
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'QUEST INTENTIONALLY SKIPPED',
+            style: TextStyle(color: ember, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'This does not count as a victory. If you did this workout after all, you can record it now without moving any later workouts.',
+            style: TextStyle(color: muted, fontSize: 17, height: 1.4),
+          ),
+          if (workout != null) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _reopenSkippedWorkout(assignment),
+                icon: const Icon(Icons.replay_outlined),
+                label: const Text('REOPEN THIS QUEST'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () =>
+                    _confirmPastWorkoutCompletion(assignment, workout),
+                icon: const Icon(Icons.check_circle_outline),
+                label: const Text('MARK AS COMPLETED'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _reopenSkippedWorkout(ScheduledWorkout assignment) async {
+    await _scheduleRepository?.reopen(assignment.assignmentId);
+    await _reloadSchedule();
+  }
+
+  Future<void> _confirmPastWorkoutCompletion(
+    ScheduledWorkout assignment,
+    WorkoutDay workout,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Mark Day ${workout.sequence} complete?'),
+        content: Text(
+          'This records the quest as complete on its original scheduled date, ${DateFormat('MMMM d').format(assignment.date)}. It will not move any current or future workouts.',
         ),
-        SizedBox(height: 12),
-        Text(
-          'This choice is recorded in your schedule history and does not count as a victory.',
-          style: TextStyle(color: muted, fontSize: 17, height: 1.4),
-        ),
-      ],
-    ),
-  );
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('MARK COMPLETE'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await _markWorkoutComplete(workout);
+  }
 
   Widget _awayCard() => _card(
     child: Column(
