@@ -7,21 +7,17 @@ history tables; it does not copy any athlete data by itself.
 1. Create a Supabase project and enable Email Auth.
 2. Link the project with the Supabase CLI, then run `supabase db push` from
    this directory's parent project.
-3. Deploy the confirmation landing page:
-
-   ```sh
-   supabase functions deploy auth-confirmation --no-verify-jwt
-   ```
-
-   Then add this URL in **Authentication → URL Configuration → Additional
-   Redirect URLs**:
+3. Add the native callback URL in **Authentication → URL Configuration →
+   Additional Redirect URLs**:
 
    ```text
-   https://YOUR_PROJECT.supabase.co/functions/v1/auth-confirmation
+   com.rhoward.hootsandreps://auth/callback
    ```
 
-   The page clearly confirms the email and has an explicit **Open Hoots &
-   Reps** button; it forwards the returned auth code to the Android app.
+   Confirmation opens Hoots & Reps, where the Supabase Flutter SDK exchanges
+   the returned code and the Cloud Account screen shows the signed-in state.
+   Do not use an Edge Function as a GET confirmation webpage: Supabase serves
+   that HTML as plain text.
 4. Run the app with values from **Project Settings → API**:
 
    ```sh
