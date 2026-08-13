@@ -874,7 +874,7 @@ class DeterministicProgrammingEngine {
       sessions.add(
         const CalibrationSession(
           id: 'row_short_power_v1',
-          title: 'Row Short-Power Calibration',
+          title: 'An Intergalactic Turkey’s Brief but Heroic Panic',
           tests: [
             CalibrationTest(
               id: 'row_200_v1',
@@ -898,7 +898,7 @@ class DeterministicProgrammingEngine {
       sessions.add(
         const CalibrationSession(
           id: 'row_2000_capacity_v1',
-          title: 'Row 2K Capacity Calibration',
+          title: 'An Extremely Long Spreadsheet of Cosmic Evil',
           tests: [
             CalibrationTest(
               id: 'row_2000_v1',
@@ -2008,7 +2008,7 @@ class DeterministicProgrammingEngine {
     return GeneratedDay(
       date: date,
       role: DayRole.capacity,
-      title: 'The Capacity Workshop • Week $phaseWeek',
+      title: _capacityTitle(phaseWeek),
       warmupMinutes: 8,
       warmup: const [
         '3:00 easy machine work or walk',
@@ -2078,6 +2078,21 @@ class DeterministicProgrammingEngine {
       ],
     );
   }
+
+  static String _capacityTitle(int phaseWeek) => const [
+    'The Astral Alehouse Affair',
+    'The Frozen Star Tea Party',
+    'The Unicorn Bureau of Fate',
+    'The Celestial Crown’s Coffee Break',
+    'The Galactic Goblet Gambit',
+    'The Moonlight Munchies March',
+    'The Crystal Kingdom Casserole',
+    'The Starlight Scone Siege',
+    'The Thunderforge Tupperware',
+    'The Cosmic Crumpet Crusade',
+    'The Nebula Noodle Prophecy',
+    'The Eternal Breakfast of Doom',
+  ][phaseWeek - 1];
 
   static StrengthWork _work(
     AthleteProfile athlete,

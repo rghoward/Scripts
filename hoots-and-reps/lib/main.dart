@@ -1092,12 +1092,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final bundledId =
         (jsonDecode(bundled) as Map<String, dynamic>)['snapshot_id']! as String;
     final cached = await repository.active();
-    if (cached?.id == bundledId) {
-      _loadedPublishedSnapshotId = cached!.id;
+    if (cached?.id == bundledId && cached!.snapshotJson == bundled) {
+      _loadedPublishedSnapshotId = cached.id;
       return _decodePublishedSnapshot(cached.snapshotJson);
     }
-    // A newer reviewed bundle must replace the cached published surface while
-    // preserving local completion and schedule state by sequence.
+    // Same-ID reviewed metadata updates preserve schedule and progress; a new
+    // snapshot ID archives the preceding program state.
     _bundledSnapshotPendingCache = bundled;
     _loadedPublishedSnapshotId = bundledId;
     return _decodePublishedSnapshot(bundled);
@@ -1114,6 +1114,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (_bundledSnapshotPendingCache == null) return;
     final current = await repository.active();
     if (current == null) return;
+    if (current.id == _loadedPublishedSnapshotId) return;
     final key = 'archived_program_progress_${current.id}';
     final completed =
         await store.getStringList(

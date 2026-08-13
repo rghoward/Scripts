@@ -18,7 +18,7 @@ void main() {
     'published snapshot keeps reviewed work grouped in a scannable structure',
     () {
       expect(snapshot['snapshot_id'], 'forged_phase_2026_07_27_v6_zone2');
-      expect(snapshot['version'], 6);
+      expect(snapshot['version'], 7);
       expect(workouts, hasLength(60));
       expect(
         workouts.map((workout) => workout['signature']).toSet(),
