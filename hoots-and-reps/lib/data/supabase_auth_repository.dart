@@ -8,11 +8,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseAuthRepository {
   const SupabaseAuthRepository._(this._client);
 
-  /// Human-readable confirmation landing page. It forwards the Supabase auth
-  /// response to the native callback only when the athlete presses its button.
+  /// The native callback that completes email confirmation inside the app.
+  ///
+  /// Supabase Edge Functions intentionally serve GET HTML as plain text, so an
+  /// Edge Function cannot be used as a browser landing page. Sending the email
+  /// back to this registered app URL lets the Flutter SDK securely exchange the
+  /// returned code and show the signed-in Cloud Account screen instead.
   /// This URL must be allowed in Supabase Authentication > URL Configuration.
   static const emailConfirmationRedirectUrl =
-      'https://ionjpertlpylsoshjmjm.supabase.co/functions/v1/auth-confirmation';
+      'com.rhoward.hootsandreps://auth/callback';
 
   final SupabaseClient? _client;
 
