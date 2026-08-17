@@ -72,6 +72,8 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
       : null;
   var _creatingAccount = false;
   var _submitting = false;
+  var _passwordVisible = false;
+  var _passwordConfirmationVisible = false;
   String? _message;
 
   @override
@@ -263,21 +265,23 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
         ],
         _field(_email, 'Email', TextInputType.emailAddress),
         const SizedBox(height: 10),
-        TextField(
+        _passwordField(
           controller: _password,
-          obscureText: true,
-          autocorrect: false,
-          enableSuggestions: false,
-          decoration: _inputDecoration('Password'),
+          label: 'Password',
+          visible: _passwordVisible,
+          onVisibilityChanged: () =>
+              setState(() => _passwordVisible = !_passwordVisible),
         ),
         if (_creatingAccount) ...[
           const SizedBox(height: 10),
-          TextField(
+          _passwordField(
             controller: _passwordConfirmation,
-            obscureText: true,
-            autocorrect: false,
-            enableSuggestions: false,
-            decoration: _inputDecoration('Confirm password'),
+            label: 'Confirm password',
+            visible: _passwordConfirmationVisible,
+            onVisibilityChanged: () => setState(
+              () =>
+                  _passwordConfirmationVisible = !_passwordConfirmationVisible,
+            ),
           ),
         ],
         const SizedBox(height: 16),
@@ -302,6 +306,8 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
                 : () => setState(() {
                     _creatingAccount = !_creatingAccount;
                     _passwordConfirmation.clear();
+                    _passwordVisible = false;
+                    _passwordConfirmationVisible = false;
                     _message = null;
                   }),
             child: Text(
@@ -413,6 +419,25 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
     keyboardType: type,
     autocorrect: false,
     decoration: _inputDecoration(label),
+  );
+
+  Widget _passwordField({
+    required TextEditingController controller,
+    required String label,
+    required bool visible,
+    required VoidCallback onVisibilityChanged,
+  }) => TextField(
+    controller: controller,
+    obscureText: !visible,
+    autocorrect: false,
+    enableSuggestions: false,
+    decoration: _inputDecoration(label).copyWith(
+      suffixIcon: IconButton(
+        tooltip: visible ? 'Hide password' : 'Show password',
+        icon: Icon(visible ? Icons.visibility_off : Icons.visibility),
+        onPressed: onVisibilityChanged,
+      ),
+    ),
   );
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
