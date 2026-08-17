@@ -7138,19 +7138,19 @@ class _WorkoutHomeState extends State<WorkoutHome>
                           ? const Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                Icon(Icons.video_library_outlined, size: 20),
+                                Icon(Icons.cast_rounded, size: 20),
                                 Positioned(
                                   right: -6,
                                   bottom: -5,
                                   child: Icon(
-                                    Icons.arrow_forward_rounded,
+                                    Icons.swap_horiz_rounded,
                                     size: 12,
                                   ),
                                 ),
                               ],
                             )
                           : const Icon(Icons.cast_rounded, size: 20),
-                      color: _castConnected ? cyan : muted,
+                      color: _isCastingSection(sectionKey) ? cyan : muted,
                     ),
                     IconButton(
                       tooltip: (_timerPanelExpanded[sectionKey] ?? false)
