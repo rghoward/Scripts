@@ -159,13 +159,9 @@ class ScheduleRepository {
   Future<void> markInProgress(String assignmentId) =>
       _setStatus(assignmentId, 'in_progress', 'start');
 
-  Future<void> complete(String assignmentId, {DateTime? completedOn}) =>
-      _setStatus(
-        assignmentId,
-        'completed',
-        'complete',
-        assignedDate: completedOn,
-      );
+  /// Completion records the result; it must never rewrite the programmed day.
+  Future<void> complete(String assignmentId) =>
+      _setStatus(assignmentId, 'completed', 'complete');
 
   /// Reopens a completed or partial workout without changing its assigned day.
   Future<void> reopen(String assignmentId) =>
@@ -289,6 +285,99 @@ class ScheduleRepository {
         date = _followingTrainingDate(date);
       }
     });
+  }
+
+  /// Restores every calendar date from this program's persisted start date.
+  /// Statuses are intentionally left untouched, so completed work remains
+  /// completed. This is used only to recover the historical date migration.
+  Future<bool> restoreCanonicalCalendar() async {
+    return database.transaction((transaction) async {
+      final programs = await transaction.query(
+        'programs',
+        columns: ['starts_on'],
+        where: 'id = ?',
+        whereArgs: [programId],
+        limit: 1,
+      );
+      if (programs.isEmpty) return false;
+      final rows = await transaction.rawQuery(
+        '''
+        SELECT a.id, a.assigned_date, a.revision
+        FROM schedule_assignments a
+        JOIN workout_prescriptions p ON p.id = a.workout_id
+        WHERE a.program_id = ?
+        ORDER BY p.sequence_number
+        ''',
+        [programId],
+      );
+      var date = _nextTrainingDate(
+        DateTime.parse(programs.single['starts_on']! as String),
+      );
+      var changed = false;
+      final now = DateTime.now().toUtc().toIso8601String();
+      for (final row in rows) {
+        if (row['assigned_date'] != _day(date)) {
+          changed = true;
+          await transaction.update(
+            'schedule_assignments',
+            {
+              'assigned_date': _day(date),
+              'revision': (row['revision']! as int) + 1,
+              'updated_at': now,
+            },
+            where: 'id = ?',
+            whereArgs: [row['id']! as String],
+          );
+        }
+        date = _followingTrainingDate(date);
+      }
+      return changed;
+    });
+  }
+
+  /// Repairs the one historical schedule migration that could place pending
+  /// work on or before a completed workout. It is deliberately a no-op for a
+  /// valid schedule, so it never overrides an athlete's pause or reschedule.
+  Future<bool> repairPendingAfterLastCompleted() async {
+    final completed = await database.rawQuery(
+      '''
+      SELECT a.assigned_date
+      FROM schedule_assignments a
+      JOIN workout_prescriptions p ON p.id = a.workout_id
+      WHERE a.program_id = ? AND a.status = 'completed'
+      ORDER BY p.sequence_number DESC
+      LIMIT 1
+      ''',
+      [programId],
+    );
+    if (completed.isEmpty) return false;
+    final pending = await database.rawQuery(
+      '''
+      SELECT p.sequence_number, a.assigned_date
+      FROM schedule_assignments a
+      JOIN workout_prescriptions p ON p.id = a.workout_id
+      WHERE a.program_id = ?
+        AND a.status IN ('planned', 'unconfirmed', 'in_progress')
+      ORDER BY p.sequence_number
+      LIMIT 1
+      ''',
+      [programId],
+    );
+    if (pending.isEmpty) return false;
+
+    final lastCompletedDate = DateTime.parse(
+      completed.single['assigned_date']! as String,
+    );
+    final pendingDate = DateTime.parse(
+      pending.single['assigned_date']! as String,
+    );
+    if (pendingDate.isAfter(lastCompletedDate)) return false;
+
+    await rescheduleUnfinishedFrom(
+      pending.single['sequence_number']! as int,
+      _followingTrainingDate(lastCompletedDate),
+    );
+    return true;
   }
 
   Future<void> pauseUntil(DateTime returnDate) async {

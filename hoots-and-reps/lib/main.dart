@@ -226,6 +226,18 @@ class ExternalWorkoutDisplay {
     }
   }
 
+  /// Publishes the same resolved timer plan used by Cast to the paired Wear OS
+  /// companion. Data Layer persists the latest state through short disconnects.
+  static Future<void> publishWatchSession(String payload) async {
+    try {
+      await _channel.invokeMethod<void>('publishWatchSession', {
+        'payload': payload,
+      });
+    } on MissingPluginException {
+      // Watch sync is Android-only and never blocks the phone workout.
+    }
+  }
+
   static void listen(Future<void> Function(MethodCall call) handler) {
     _channel.setMethodCallHandler(handler);
   }
@@ -499,6 +511,7 @@ class _CardTimer {
   Map<String, dynamic>? castPlan;
   DateTime? lastTickAt;
   int elapsedPlanSeconds = 0;
+  int manualProgress = 0;
 
   bool get isCooldown => cooldownSteps.isNotEmpty;
   bool get isActive => stage != _CardTimerStage.finished;
@@ -568,7 +581,11 @@ class _WorkoutHomeState extends State<WorkoutHome>
   bool _ready = false;
   bool _externalDisplayAvailable = false;
   bool _castConnected = false;
-  String? _projectedSectionKey;
+  // A phone can preview a different guided-workout card while a display keeps
+  // showing the active section. Keep Cast and HDMI ownership independent so a
+  // preview cannot replace the receiver's timer context.
+  String? _castSectionKey;
+  String? _externalDisplaySectionKey;
   String? _pendingCastSectionKey;
   _CardTimer? _cardTimer;
   Timer? _cardTimerTicker;
@@ -583,6 +600,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
   int? _strikingSection;
   int _activeFractureSeed = 1;
 
+  String? get _projectedSectionKey =>
+      _castSectionKey ?? _externalDisplaySectionKey;
+
+  bool _isCastingSection(String sectionKey) =>
+      _castSectionKey == sectionKey || _pendingCastSectionKey == sectionKey;
+
   @override
   void initState() {
     super.initState();
@@ -594,7 +617,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
     _workoutSwipe = AnimationController(vsync: this);
     ExternalWorkoutDisplay.listen((call) async {
       if (!mounted) return;
-      final values = call.arguments as Map?;
+      // Display callbacks carry a map, while watch actions deliberately carry
+      // the action JSON string. Do not cast the latter away before routing it.
+      final values = call.arguments is Map ? call.arguments as Map : null;
       if (call.method == 'displayChanged') {
         setState(
           () => _externalDisplayAvailable = values?['available'] == true,
@@ -604,14 +629,16 @@ class _WorkoutHomeState extends State<WorkoutHome>
         setState(() {
           _castConnected = connected;
           if (connected && _pendingCastSectionKey != null) {
-            _projectedSectionKey = _pendingCastSectionKey;
+            _castSectionKey = _pendingCastSectionKey;
           }
           // Keep the selected card while Cast reconnects. The native sender
           // retains its latest payload and replays it in onSessionResumed.
-          if (!connected && _projectedSectionKey != null) {
-            _pendingCastSectionKey = _projectedSectionKey;
+          if (!connected && _castSectionKey != null) {
+            _pendingCastSectionKey = _castSectionKey;
           }
         });
+      } else if (call.method == 'watchAction' && call.arguments is String) {
+        await _handleWatchAction(call.arguments! as String);
       }
     });
     _load();
@@ -738,6 +765,17 @@ class _WorkoutHomeState extends State<WorkoutHome>
     )) {
       await scheduleRepository.complete(assignment.assignmentId);
     }
+    const legacyRepairKey = 'schedule_repair_day4_2026_08_09';
+    const canonicalCalendarKey = 'canonical_calendar_repair_v1';
+    if ((await store.getBool(legacyRepairKey) ?? false) &&
+        !(await store.getBool(canonicalCalendarKey) ?? false)) {
+      await scheduleRepository.restoreCanonicalCalendar();
+      await store.setBool(canonicalCalendarKey, true);
+    }
+    // Keep calendar integrity as a normal startup invariant instead of using
+    // a date-specific migration. This is a no-op for a valid schedule and
+    // preserves any intentional pause or reschedule.
+    await scheduleRepository.repairPendingAfterLastCompleted();
     await scheduleRepository.markPastUnresolved(
       DateUtils.dateOnly(DateTime.now()),
     );
@@ -2064,6 +2102,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     WorkoutDay workout,
     int index, {
     bool scrollIntoView = true,
+    bool projectToDisplays = true,
   }) async {
     final sections = _visibleSections(workout);
     if (index < 0 || index >= sections.length) return;
@@ -2093,12 +2132,122 @@ class _WorkoutHomeState extends State<WorkoutHome>
       }
     }
     if (!mounted) return;
-    if (_castConnected) {
+    if (projectToDisplays && _castConnected) {
       await _showOnChromecast(workout, sections[index], index);
     }
-    if (_externalDisplayAvailable) {
+    if (projectToDisplays && _externalDisplayAvailable) {
       await _showOnExternalDisplay(workout, sections[index], index);
     }
+    unawaited(_publishWatchSession(workout, sections[index], index));
+  }
+
+  Future<void> _publishWatchSession(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+  ) async {
+    final timer = _cardTimer;
+    final isCurrentTimer =
+        timer != null && timer.sectionKey == _key(workout, index);
+    final payload = <String, dynamic>{
+      'version': 1,
+      'workoutSequence': workout.sequence,
+      'sectionIndex': index,
+      'sectionTitle': _sectionHeading(section.title),
+      'sectionBody': _externalSectionBody(workout, section, index),
+      'timer': isCurrentTimer
+          ? {
+              'plan': {
+                ...?timer.castPlan,
+                'startOffsetSeconds': timer.elapsedPlanSeconds,
+              },
+              'command': timer.stage == _CardTimerStage.paused
+                  ? 'pause'
+                  : 'start',
+              'sentAtEpochMs': DateTime.now().millisecondsSinceEpoch,
+              if (_manualProgressKind(workout, section) case final kind?)
+                'manualProgress': {'kind': kind, 'value': timer.manualProgress},
+            }
+          : null,
+    };
+    await ExternalWorkoutDisplay.publishWatchSession(jsonEncode(payload));
+  }
+
+  Future<void> _handleWatchAction(String encoded) async {
+    final raw = jsonDecode(encoded);
+    if (raw is! Map) return;
+    final sequence = raw['workoutSequence'];
+    final sectionIndex = raw['sectionIndex'];
+    final action = raw['action'];
+    if (sequence is! num || sectionIndex is! num || action is! String) return;
+    final workout = _workouts
+        .where((item) => item.sequence == sequence.toInt())
+        .firstOrNull;
+    if (workout == null) return;
+    final sections = _visibleSections(workout);
+    final index = sectionIndex.toInt();
+    if (index < 0 || index >= sections.length) return;
+    switch (action) {
+      case 'start':
+        _startSectionTimer(workout, sections[index], index);
+        return;
+      case 'toggle':
+        _toggleCardTimer();
+        return;
+      case 'reset':
+        _resetCardTimer();
+        return;
+      case 'advanceProgress':
+        _adjustManualProgress(workout, sections[index], index, 1);
+        return;
+      case 'rewindProgress':
+        _adjustManualProgress(workout, sections[index], index, -1);
+        return;
+      case 'complete':
+        await _guidedCompleteSection(workout, index);
+        return;
+      default:
+        return;
+    }
+  }
+
+  /// Human-completed work is different from timer-created rounds. EMOMs and
+  /// intervals advance themselves; AMRAPs, for-time work, strength, skill and
+  /// accessory work expose a deliberate tap counter on the watch.
+  String? _manualProgressKind(WorkoutDay workout, WorkoutSection section) {
+    final title = section.title.toLowerCase();
+    final format = _conditioningFor(workout)?.format.toLowerCase() ?? '';
+    if (format.contains('emom') ||
+        (format.contains('interval') &&
+            _conditioningFor(workout)?.workSeconds != null)) {
+      return null;
+    }
+    if (format.contains('amrap') ||
+        format.contains('for time') ||
+        format.contains('for-time')) {
+      return 'ROUND';
+    }
+    if (title.contains('strength') ||
+        title.contains('accessory') ||
+        title.contains('skill')) {
+      return 'SET';
+    }
+    return null;
+  }
+
+  void _adjustManualProgress(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+    int delta,
+  ) {
+    final timer = _cardTimer;
+    if (timer == null || timer.sectionKey != _key(workout, index)) return;
+    if (_manualProgressKind(workout, section) == null) return;
+    setState(() {
+      timer.manualProgress = math.max(0, timer.manualProgress + delta);
+    });
+    unawaited(_publishWatchSession(workout, section, index));
   }
 
   Future<void> _focusNextRequiredSection(
@@ -2213,10 +2362,19 @@ class _WorkoutHomeState extends State<WorkoutHome>
           onResetTimer: _resetCardTimer,
           onUndo: (index) async {
             await _undoGuidedSection(workout, index);
-            await _openGuidedSection(workout, index, scrollIntoView: false);
+            await _openGuidedSection(
+              workout,
+              index,
+              scrollIntoView: false,
+              projectToDisplays: false,
+            );
           },
-          onSelect: (index) =>
-              _openGuidedSection(workout, index, scrollIntoView: false),
+          onSelect: (index) => _openGuidedSection(
+            workout,
+            index,
+            scrollIntoView: false,
+            projectToDisplays: false,
+          ),
           onComplete: (index) =>
               _guidedCompleteSection(workout, index, openNext: false),
         ),
@@ -2693,6 +2851,13 @@ class _WorkoutHomeState extends State<WorkoutHome>
     'level_2' => 'FORGE',
     'level_3' => 'ASCENDANT • RX',
     _ => 'FREEBLADE • CUSTOM',
+  };
+
+  String _conditioningLevelShortLabel(String levelId) => switch (levelId) {
+    'level_1' => 'EMBER',
+    'level_2' => 'FORGE',
+    'level_3' => 'RX',
+    _ => 'CUSTOM',
   };
 
   List<String> _conditioningPrescription(
@@ -5077,24 +5242,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                 icon: const Icon(Icons.tv_outlined),
                 color: cyan,
               ),
-              IconButton(
-                tooltip: _castConnected
-                    ? 'Stop casting workout'
-                    : 'Cast workout',
-                onPressed: _castConnected
-                    ? _stopCasting
-                    : () => _showOnChromecast(
-                        workout,
-                        sections[currentIndex ?? 0],
-                        currentIndex ?? 0,
-                      ),
-                icon: Icon(
-                  _castConnected
-                      ? Icons.cast_connected_rounded
-                      : Icons.cast_rounded,
-                ),
-                color: cyan,
-              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -5311,7 +5458,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
       }
       for (final substitution in _sectionSwaps(workout, section, index)) {
         final scope =
-            _persistentMovementSwaps[substitution.movementId] == substitution
+            _persistentMovementSwaps[_persistentMovementSwapKey(
+                  workout,
+                  section,
+                  substitution.movementId,
+                )] ==
+                substitution
             ? 'Always swap'
             : 'This workout';
         changes.add((
@@ -5433,7 +5585,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
     WorkoutSection section,
     int index,
   ) async {
-    final movements = _substitutions.detectedMovements(section.body);
+    final movements = _substitutions.detectedMovements(
+      _levelAwareSectionBody(workout, section),
+    );
     if (movements.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -5478,11 +5632,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     ),
                   ),
                   subtitle: Text(
-                    _activeSwap(workout, index, movement) == null
+                    _activeSwap(workout, section, index, movement) == null
                         ? 'Use as prescribed'
-                        : 'Currently: ${_activeSwap(workout, index, movement)!.replacement}',
+                        : 'Currently: ${_activeSwap(workout, section, index, movement)!.replacement}',
                     style: TextStyle(
-                      color: _activeSwap(workout, index, movement) == null
+                      color:
+                          _activeSwap(workout, section, index, movement) == null
                           ? muted
                           : cyan,
                     ),
@@ -5533,7 +5688,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         color: paper,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: _activeSwap(workout, index, movement) == null
+                          color:
+                              _activeSwap(workout, section, index, movement) ==
+                                  null
                               ? success
                               : border,
                         ),
@@ -5665,13 +5822,18 @@ class _WorkoutHomeState extends State<WorkoutHome>
       );
     }
     final scope = selected.$2;
-    final todayKey = _movementSwapKey(workout, index, movement);
+    final todayKey = _movementSwapKey(workout, section, index, movement);
+    final persistentKey = _persistentMovementSwapKey(
+      workout,
+      section,
+      movement,
+    );
     setState(() {
       if (substitution == null) {
         _movementSwaps.remove(todayKey);
-        _persistentMovementSwaps.remove(movement);
+        _persistentMovementSwaps.remove(persistentKey);
       } else if (scope == MovementSwapScope.always) {
-        _persistentMovementSwaps[movement] = substitution;
+        _persistentMovementSwaps[persistentKey] = substitution;
         _movementSwaps.remove(todayKey);
       } else {
         _movementSwaps[todayKey] = substitution;
@@ -5754,8 +5916,32 @@ class _WorkoutHomeState extends State<WorkoutHome>
     return replacement?.isEmpty ?? true ? null : replacement;
   }
 
-  String _movementSwapKey(WorkoutDay workout, int index, String movement) =>
-      '${_key(workout, index)}|$movement';
+  String _movementSwapLevel(WorkoutDay workout, WorkoutSection section) =>
+      section.title.startsWith('CONDITIONING')
+      ? _conditioningSelection(workout).levelId
+      : 'training';
+
+  String _movementSwapKey(
+    WorkoutDay workout,
+    WorkoutSection section,
+    int index,
+    String movement,
+  ) =>
+      '${_key(workout, index)}|${_movementSwapLevel(workout, section)}|$movement';
+
+  String _persistentMovementSwapKey(
+    WorkoutDay workout,
+    WorkoutSection section,
+    String movement,
+  ) => '${_movementSwapLevel(workout, section)}|$movement';
+
+  String _levelAwareSectionBody(WorkoutDay workout, WorkoutSection section) {
+    if (!section.title.startsWith('CONDITIONING')) return section.body;
+    final conditioning = _conditioningFor(workout);
+    return conditioning == null
+        ? section.body
+        : _applyConditioningLevel(section.body, workout, conditioning);
+  }
 
   List<MovementSubstitution> _safeCandidates(String movement) =>
       _substitutionSafety.safeCandidates(
@@ -5766,11 +5952,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   MovementSubstitution? _activeSwap(
     WorkoutDay workout,
+    WorkoutSection section,
     int index,
     String movement,
   ) =>
-      _movementSwaps[_movementSwapKey(workout, index, movement)] ??
-      _persistentMovementSwaps[movement];
+      _movementSwaps[_movementSwapKey(workout, section, index, movement)] ??
+      _persistentMovementSwaps[_persistentMovementSwapKey(
+        workout,
+        section,
+        movement,
+      )] ??
+      // Keep saved RX swaps from the earlier format working, while new swaps
+      // remain specific to the displayed prescription level.
+      (_movementSwapLevel(workout, section) == 'level_3'
+          ? (_movementSwaps['${_key(workout, index)}|$movement'] ??
+                _persistentMovementSwaps[movement])
+          : null);
 
   List<MovementSubstitution> _sectionSwaps(
     WorkoutDay workout,
@@ -5778,8 +5975,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     int index,
   ) {
     return [
-      for (final movement in _substitutions.detectedMovements(section.body))
-        ?_activeSwap(workout, index, movement),
+      for (final movement in _substitutions.detectedMovements(
+        _levelAwareSectionBody(workout, section),
+      ))
+        ?_activeSwap(workout, section, index, movement),
     ];
   }
 
@@ -5850,7 +6049,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final details = substitutions
         .map((substitution) {
           final persistent =
-              _persistentMovementSwaps[substitution.movementId] == substitution;
+              _persistentMovementSwaps[_persistentMovementSwapKey(
+                workout,
+                section,
+                substitution.movementId,
+              )] ==
+              substitution;
           return '${substitution.original} → ${substitution.replacement}'
               '  •  ${persistent ? 'ALWAYS' : 'THIS WORKOUT'}';
         })
@@ -6435,6 +6639,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       (_) => _tickCardTimer(),
     );
     _sendTimerToCast(command: 'start', includePlan: true);
+    unawaited(_publishWatchSession(workout, section, index));
   }
 
   void _toggleCardTimer() {
@@ -6461,6 +6666,13 @@ class _WorkoutHomeState extends State<WorkoutHome>
     _sendTimerToCast(
       command: timer.stage == _CardTimerStage.paused ? 'pause' : 'resume',
     );
+    final workout = _activeTimerWorkout;
+    final index = _activeTimerSectionIndex;
+    if (workout != null && index != null) {
+      unawaited(
+        _publishWatchSession(workout, _visibleSections(workout)[index], index),
+      );
+    }
   }
 
   void _resetCardTimer() {
@@ -6480,6 +6692,13 @@ class _WorkoutHomeState extends State<WorkoutHome>
       (_) => _tickCardTimer(),
     );
     _sendTimerToCast(command: 'reset', includePlan: true);
+    final workout = _activeTimerWorkout;
+    final index = _activeTimerSectionIndex;
+    if (workout != null && index != null) {
+      unawaited(
+        _publishWatchSession(workout, _visibleSections(workout)[index], index),
+      );
+    }
   }
 
   void _advanceCardTimerPhase(_CardTimer timer) {
@@ -6552,19 +6771,24 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   void _sendTimerToCast({String command = 'start', bool includePlan = false}) {
     final timer = _cardTimer;
-    if (timer == null || _projectedSectionKey != timer.sectionKey) {
-      return;
-    }
+    if (timer == null) return;
     final payload = <String, dynamic>{
       'command': command,
       if (includePlan) 'plan': timer.castPlan,
     };
-    // An HDMI display receives precisely the same plan and controls as Cast.
-    unawaited(ExternalWorkoutDisplay.updateExternalTimer(payload));
+    // Each display receives updates only for the section it is actually
+    // showing. In particular, browsing guided cards on the phone must not
+    // reset a Cast receiver's timer.
+    if (_externalDisplaySectionKey == timer.sectionKey) {
+      unawaited(ExternalWorkoutDisplay.updateExternalTimer(payload));
+    }
     // The native Cast bridge keeps this payload even during a temporary
     // disconnect, then sends it as soon as the SDK resumes the session.
     // Otherwise starting a timer during recovery is silently lost.
-    unawaited(ExternalWorkoutDisplay.updateCastTimer(payload));
+    if (_castSectionKey == timer.sectionKey ||
+        _pendingCastSectionKey == timer.sectionKey) {
+      unawaited(ExternalWorkoutDisplay.updateCastTimer(payload));
+    }
   }
 
   Future<void> _showOnExternalDisplay(
@@ -6584,7 +6808,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (!mounted) return;
     setState(() {
       _externalDisplayAvailable = shown;
-      _projectedSectionKey = shown ? _key(workout, index) : null;
+      _externalDisplaySectionKey = shown ? _key(workout, index) : null;
     });
   }
 
@@ -6606,7 +6830,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (!mounted || !showing) return;
     setState(() {
       _castConnected = true;
-      _projectedSectionKey = sectionKey;
+      _castSectionKey = sectionKey;
     });
   }
 
@@ -6616,7 +6840,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     setState(() {
       _castConnected = false;
       _pendingCastSectionKey = null;
-      _projectedSectionKey = null;
+      _castSectionKey = null;
     });
   }
 
@@ -6750,9 +6974,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
             initiallyExpanded: expanded,
             onExpansionChanged: (isExpanded) {
               setState(() => _sectionExpanded[sectionKey] = isExpanded);
-              if (isExpanded && _castConnected) {
-                unawaited(_showOnChromecast(workout, section, index));
-              }
               if (isExpanded && _externalDisplayAvailable) {
                 unawaited(_showOnExternalDisplay(workout, section, index));
               }
@@ -6873,6 +7094,50 @@ class _WorkoutHomeState extends State<WorkoutHome>
                         size: 20,
                       ),
                     ),
+                    if (isConditioning)
+                      TextButton(
+                        onPressed: completed
+                            ? null
+                            : () => _chooseConditioningLevel(
+                                workout,
+                                conditioning,
+                              ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: cyan,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          minimumSize: const Size(0, 38),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _conditioningLevelShortLabel(
+                                _conditioningSelection(workout).levelId,
+                              ),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const Icon(Icons.arrow_drop_down_rounded, size: 18),
+                          ],
+                        ),
+                      ),
+                    IconButton(
+                      tooltip: _isCastingSection(sectionKey)
+                          ? 'Stop casting this section'
+                          : 'Cast this section',
+                      onPressed: _isCastingSection(sectionKey)
+                          ? _stopCasting
+                          : () => _showOnChromecast(workout, section, index),
+                      icon: Icon(
+                        _isCastingSection(sectionKey)
+                            ? Icons.cast_connected_rounded
+                            : Icons.cast_rounded,
+                        size: 20,
+                      ),
+                      color: cyan,
+                    ),
                     IconButton(
                       tooltip: (_timerPanelExpanded[sectionKey] ?? false)
                           ? 'Hide timer controls'
@@ -6951,14 +7216,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (isConditioning) ...[
-                        _conditioningLevelPicker(
-                          workout,
-                          conditioning,
-                          completed,
-                        ),
-                        const SizedBox(height: 14),
-                      ],
                       if (_timerPanelExpanded[sectionKey] ?? false) ...[
                         _sectionTimerControls(workout, section, index),
                         const SizedBox(height: 14),
@@ -7074,63 +7331,68 @@ class _WorkoutHomeState extends State<WorkoutHome>
 
   String _sectionHeading(String title) => title.split(' • ').first;
 
-  Widget _conditioningLevelPicker(
+  Future<void> _chooseConditioningLevel(
     WorkoutDay workout,
     ConditioningWork conditioning,
-    bool completed,
-  ) {
+  ) async {
     final selection = _conditioningSelection(workout);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'PRESCRIPTION LEVEL',
-          style: TextStyle(
-            color: cyan,
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            for (final option in const [
-              ('level_1', 'EMBER'),
-              ('level_2', 'FORGE'),
-              ('level_3', 'RX'),
-              ('custom', 'EDIT'),
-            ])
-              ChoiceChip(
-                label: Text(option.$2),
-                selected: selection.levelId == option.$1,
-                onSelected: completed
-                    ? null
-                    : (_) async {
-                        if (option.$1 == 'custom') {
-                          await _editCustomConditioningPrescription(
-                            workout,
-                            conditioning,
-                          );
-                        } else {
-                          await _saveConditioningSelection(
-                            workout,
-                            _ConditioningSelection(levelId: option.$1),
-                          );
-                        }
-                      },
+    final levelId = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: card,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PRESCRIPTION LEVEL',
+                style: TextStyle(
+                  color: cyan,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-          ],
-        ),
-        if (selection.levelId == 'custom' && !completed)
-          TextButton.icon(
-            onPressed: () =>
-                _editCustomConditioningPrescription(workout, conditioning),
-            icon: const Icon(Icons.edit_outlined, size: 16),
-            label: const Text('EDIT THIS WORKOUT'),
+              const SizedBox(height: 8),
+              const Text(
+                'Choose the version of this conditioning workout you want to perform.',
+                style: TextStyle(color: muted, height: 1.35),
+              ),
+              const SizedBox(height: 12),
+              for (final option in const [
+                ('level_1', 'EMBER'),
+                ('level_2', 'FORGE'),
+                ('level_3', 'ASCENDANT • RX'),
+                ('custom', 'FREEBLADE • CUSTOM'),
+              ])
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    option.$2,
+                    style: const TextStyle(
+                      color: ink,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  trailing: selection.levelId == option.$1
+                      ? const Icon(Icons.check_circle_rounded, color: cyan)
+                      : const Icon(Icons.chevron_right_rounded, color: muted),
+                  onTap: () => Navigator.pop(context, option.$1),
+                ),
+            ],
           ),
-      ],
+        ),
+      ),
+    );
+    if (levelId == null || !mounted) return;
+    if (levelId == 'custom') {
+      await _editCustomConditioningPrescription(workout, conditioning);
+      return;
+    }
+    await _saveConditioningSelection(
+      workout,
+      _ConditioningSelection(levelId: levelId),
     );
   }
 

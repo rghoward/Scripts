@@ -56,6 +56,15 @@ pause/resume/reset, interval cues, and section completion/undo. The phone stays
 the primary editor and source of truth. Decide Wear OS first (the current Pixel
 ecosystem) versus a shared architecture that can later support watchOS.
 
+The initial platform decision is now Wear OS first, targeting Pixel Watch 3
+and Pixel Watch 4. The expanded product/technical design—format-aware scoring
+for AMRAPs, for-time workouts, intervals and EMOMs; strength/accessory logging;
+and watch-owned live heart rate—is in
+[`docs/WEAR_OS_COMPANION_DESIGN.md`](WEAR_OS_COMPANION_DESIGN.md). The first
+delivery remains deliberately smaller: session transport, current section,
+timer controls, interval cues, and completion/undo before richer scoring and
+heart-rate collection.
+
 ### 3. iOS feature parity
 
 Define parity as an acceptance checklist, not merely a successful iOS build.

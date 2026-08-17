@@ -39,6 +39,7 @@ dependencies {
     // media player, so the native sender framework is the only dependency.
     implementation("com.google.android.gms:play-services-cast-framework:22.3.1")
     implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("com.google.android.gms:play-services-wearable:20.0.1")
 }
 
 kotlin {

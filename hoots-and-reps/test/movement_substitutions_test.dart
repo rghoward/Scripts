@@ -80,4 +80,13 @@ void main() {
     );
     expect(registry.candidates('hanging_knee_raise'), isNotEmpty);
   });
+
+  test('recognizes displayed Forge and Ember movement regressions', () {
+    expect(
+      registry.detectedMovements(
+        '8 pike push-ups\n10 knees-to-elbows\n12 band-assisted pull-ups',
+      ),
+      containsAll(['pike_push_up', 'hanging_knee_raise', 'pull_up']),
+    );
+  });
 }

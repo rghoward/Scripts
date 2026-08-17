@@ -33,6 +33,8 @@ import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
 import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -49,6 +51,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
         const val EMBER = 0xffffc44e.toInt()
         const val BORDER = 0xff8b69c9.toInt()
         const val EXTERNAL_DISPLAY_HEARTBEAT_MS = 25_000L
+        const val CAST_RECOVERY_RETRY_MS = 2_000L
     }
 
     private lateinit var displayManager: DisplayManager
@@ -76,6 +79,22 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             mainHandler.postDelayed(this, EXTERNAL_DISPLAY_HEARTBEAT_MS)
         }
     }
+    private val castRecovery = object : Runnable {
+        override fun run() {
+            // Cast's reconnection service restores the saved session. Polling
+            // here is intentionally only a payload recovery mechanism: as
+            // soon as that session is live, replay the newest card/timer even
+            // if the framework's resume callback arrived late.
+            val session = currentCastSession()
+            if (castCardPayload == null) return
+            if (session?.isConnected == true) {
+                sendCastCard(session)
+                notifyCastConnection()
+                return
+            }
+            mainHandler.postDelayed(this, CAST_RECOVERY_RETRY_MS)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +119,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        WearWorkoutBridge.channel = channel
         channel?.setMethodCallHandler { call, result -> handleDisplayCall(call, result) }
     }
 
@@ -164,8 +184,24 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
             }
             "stopCasting" -> {
                 castCardPayload = null
+                mainHandler.removeCallbacks(castRecovery)
                 castSessionManager.endCurrentSession(true)
                 result.success(null)
+            }
+            "publishWatchSession" -> {
+                val payload = call.argument<String>("payload")
+                if (payload == null) {
+                    result.error("invalid_session", "Missing watch session payload.", null)
+                } else {
+                    val request = PutDataMapRequest.create("/hoots/workout-session").apply {
+                        dataMap.putString("payload", payload)
+                        // A repeated session must still emit an event after a phone
+                        // timer action, even when its prescription is unchanged.
+                        dataMap.putLong("updated_at", System.currentTimeMillis())
+                    }.asPutDataRequest().setUrgent()
+                    Wearable.getDataClient(this).putDataItem(request)
+                    result.success(null)
+                }
             }
             else -> result.notImplemented()
         }
@@ -233,6 +269,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
     override fun onSessionStarting(session: CastSession) = Unit
 
     override fun onSessionStarted(session: CastSession, sessionId: String) {
+        mainHandler.removeCallbacks(castRecovery)
         sendCastCard(session)
         notifyCastConnection()
     }
@@ -242,6 +279,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
     override fun onSessionResuming(session: CastSession, sessionId: String) = Unit
 
     override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
+        mainHandler.removeCallbacks(castRecovery)
         sendCastCard(session)
         notifyCastConnection()
     }
@@ -250,9 +288,19 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
 
     override fun onSessionEnding(session: CastSession) = Unit
 
-    override fun onSessionEnded(session: CastSession, error: Int) = notifyCastConnection()
+    override fun onSessionEnded(session: CastSession, error: Int) {
+        mainHandler.removeCallbacks(castRecovery)
+        notifyCastConnection()
+    }
 
-    override fun onSessionSuspended(session: CastSession, reason: Int) = notifyCastConnection()
+    override fun onSessionSuspended(session: CastSession, reason: Int) {
+        // Suspension is a recoverable network interruption.  Keep Flutter in
+        // its casting state so timer updates continue to replace the cached
+        // payload; onSessionResumed sends that latest payload to the receiver.
+        // Terminal failures still arrive through onSessionEnded.
+        mainHandler.removeCallbacks(castRecovery)
+        mainHandler.post(castRecovery)
+    }
 
     private fun presentationDisplay(): Display? = displayManager
         .getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)

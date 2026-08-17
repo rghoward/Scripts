@@ -2093,7 +2093,6 @@ class DeterministicProgrammingEngine {
     'The Nebula Noodle Prophecy',
     'The Eternal Breakfast of Doom',
   ][phaseWeek - 1];
-
   static StrengthWork _work(
     AthleteProfile athlete,
     String movement,

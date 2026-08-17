@@ -639,6 +639,11 @@ void main() {
     () {
       final sessions = engine.calibrationSessions(athlete);
       expect(sessions, hasLength(2));
+      expect(sessions.map((session) => session.title), [
+        'An Intergalactic Turkey’s Brief but Heroic Panic',
+        'An Extremely Long Spreadsheet of Cosmic Evil',
+      ]);
+      expect(sessions.map((session) => session.title).toSet(), hasLength(2));
       expect(sessions.first.tests.map((test) => test.distanceMeters), [
         200,
         500,
@@ -919,8 +924,14 @@ void main() {
       (option) => option.level == WorkoutLevel.ember,
     );
 
+    expect(work.prescription.join(' '), contains('chest-to-bar pull-ups'));
     expect(forge.prescription.join(' '), contains('pull-ups'));
+    expect(forge.prescription.join(' '), isNot(contains('band-assisted')));
     expect(ember.prescription.join(' '), contains('band-assisted pull-ups'));
+    expect(
+      ember.prescription.join(' '),
+      isNot(contains('band-assisted band-assisted')),
+    );
   });
 
   test('dumbbell snatches recur across distinct conditioning formats', () {
