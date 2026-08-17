@@ -7948,6 +7948,32 @@ class _GuidedWorkoutPageState extends State<GuidedWorkoutPage>
                 ],
               ),
               const SizedBox(height: 10),
+              Row(
+                children: [
+                  if (widget.externalDisplayAvailable) ...[
+                    OutlinedButton.icon(
+                      onPressed: () => widget.onStartExternal(_index),
+                      icon: const Icon(Icons.tv_outlined),
+                      label: const Text('DISPLAY'),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: widget.castConnected
+                          ? widget.onStopCast
+                          : () => widget.onStartCast(_index),
+                      icon: Icon(
+                        widget.castConnected
+                            ? Icons.cast_connected_rounded
+                            : Icons.cast_rounded,
+                      ),
+                      label: Text(widget.castConnected ? 'CASTING' : 'CAST'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
               if (!completed)
                 FilledButton.icon(
                   onPressed: _complete,
