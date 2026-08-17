@@ -17,9 +17,24 @@ void main() {
   test(
     'published snapshot keeps reviewed work grouped in a scannable structure',
     () {
-      expect(snapshot['snapshot_id'], 'forged_phase_2026_07_27_v6_zone2');
-      expect(snapshot['version'], 7);
+      expect(
+        snapshot['snapshot_id'],
+        'forged_phase_2026_07_27_v8_conditioning_surface',
+      );
+      expect(snapshot['version'], 8);
       expect(workouts, hasLength(60));
+      expect(
+        workouts
+            .expand(
+              (workout) => [
+                ...(workout['full'] as List<dynamic>),
+                ...(workout['sixty'] as List<dynamic>),
+              ],
+            )
+            .map((section) => (section as Map<String, dynamic>)['body'])
+            .join('\n'),
+        isNot(contains('CUSTOM • Record the actual implement')),
+      );
       expect(
         workouts.map((workout) => workout['signature']).toSet(),
         hasLength(60),

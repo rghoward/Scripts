@@ -5997,6 +5997,9 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (templateId.contains('hspu_db_press')) {
       return add(body, 'alternating dumbbell push presses', primary);
     }
+    if (templateId.contains('ski_pullup_lunge')) {
+      return add(body, 'front-rack dumbbell reverse lunges', primary);
+    }
     if (templateId.contains('ski_clean_pull')) {
       return add(body, 'power cleans', primary);
     }

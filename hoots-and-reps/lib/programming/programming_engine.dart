@@ -2897,7 +2897,15 @@ class DeterministicProgrammingEngine {
   static List<ConditioningLevelOption> _conditioningLevelOptions(
     WorkoutContentTemplate content,
   ) {
-    final rx = content.conditioningPrescription;
+    const chestToBarMarker = '__chest_to_bar_pull_ups__';
+    final rx = content.conditioningPrescription
+        .map(
+          (line) => line
+              .replaceAll('chest-to-bar pull-ups', chestToBarMarker)
+              .replaceAll('pull-ups', 'chest-to-bar pull-ups')
+              .replaceAll(chestToBarMarker, 'chest-to-bar pull-ups'),
+        )
+        .toList(growable: false);
     final lower = rx.join(' ').toLowerCase();
     final requirements = <SkillQualification>{
       if (lower.contains('toes-to-bar')) SkillQualification.hangingCore,
@@ -3037,6 +3045,7 @@ class DeterministicProgrammingEngine {
     if (id.contains('fan_bike_vo2')) return 'The Tempest Circuit';
     if (id.contains('db_snatch_burpee')) return 'The Falling Star Trial';
     if (id.contains('row_toes_to_bar')) return 'The Astral Gate';
+    if (id.contains('ski_pullup_lunge')) return 'The Winter Crown';
     if (id.contains('ski_hspu')) return 'The Winter Crown';
     if (id.contains('bike_step_ttb')) return 'The Stormwheel Passage';
     if (id.contains('row_swing')) return 'The Pendulum of Night';
@@ -3440,6 +3449,23 @@ class DeterministicProgrammingEngine {
       final current = week.days[index].conditioning;
       if (previous?.effort == Effort.hard && current?.effort == Effort.hard) {
         throw StateError('Hard conditioning days may not be consecutive.');
+      }
+    }
+    for (var index = 1; index < week.days.length; index++) {
+      final previous = week.days[index - 1];
+      final current = week.days[index];
+      final previousConditioning = previous.conditioning;
+      if (previousConditioning == null || current.isRest) continue;
+      final substantialPressingConditioning =
+          previousConditioning.durationMinutes >= 12 &&
+          (previousConditioning.movementPatterns.contains('vertical_push') ||
+              previousConditioning.movementPatterns.contains('inversion'));
+      if (substantialPressingConditioning &&
+          current.strength?.primaryPattern == 'vertical_push') {
+        throw StateError(
+          '${current.title} schedules primary vertical pressing immediately '
+          'after substantial pressing conditioning.',
+        );
       }
     }
   }

@@ -482,6 +482,35 @@ void main() {
     expect(handstandDay.equipment, isNot(contains('ski_erg')));
   });
 
+  test(
+    'substantial pressing conditioning does not precede primary vertical pressing',
+    () {
+      final phase = engine.generatePhase(
+        athlete: athlete,
+        startsOn: DateTime(2026, 7, 27),
+      );
+      for (final week in phase.weeks) {
+        for (var index = 1; index < week.days.length; index++) {
+          final previous = week.days[index - 1];
+          final current = week.days[index];
+          final conditioning = previous.conditioning;
+          final hasSubstantialPressingConditioning =
+              conditioning != null &&
+              conditioning.durationMinutes >= 12 &&
+              (conditioning.movementPatterns.contains('vertical_push') ||
+                  conditioning.movementPatterns.contains('inversion'));
+          expect(
+            hasSubstantialPressingConditioning &&
+                current.strength?.primaryPattern == 'vertical_push',
+            isFalse,
+            reason:
+                'Primary vertical pressing must not follow substantial pressing conditioning.',
+          );
+        }
+      }
+    },
+  );
+
   test('warmups are derived from the actual primary movement family', () {
     final week = engine.generateWeek(
       athlete: athlete,
@@ -862,8 +891,14 @@ void main() {
     );
 
     expect(forge.prescription.join(' '), isNot(contains('chest-to-bar')));
+    expect(work.prescription.join(' '), contains('chest-to-bar pull-ups'));
     expect(forge.prescription.join(' '), contains('pull-ups'));
+    expect(forge.prescription.join(' '), isNot(contains('band-assisted')));
     expect(ember.prescription.join(' '), contains('band-assisted pull-ups'));
+    expect(
+      ember.prescription.join(' '),
+      isNot(contains('band-assisted band-assisted')),
+    );
   });
 
   test('plain pull-ups have accessible Forge and Ember progressions', () {

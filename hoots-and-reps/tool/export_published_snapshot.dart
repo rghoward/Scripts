@@ -86,9 +86,9 @@ void main() {
   const encoder = JsonEncoder.withIndent('  ');
   final output = File('assets/data/published_program_snapshot_v1.json');
   final snapshot = {
-    'snapshot_id': 'forged_phase_2026_07_27_v6_zone2',
-    'version': 6,
-    'published_at': '2026-08-11T00:00:00.000Z',
+    'snapshot_id': 'forged_phase_2026_07_27_v8_conditioning_surface',
+    'version': 8,
+    'published_at': '2026-08-16T00:00:00.000Z',
     'workouts': workouts,
   };
   _validatePublishedWorkouts(workouts);
@@ -201,13 +201,12 @@ List<Map<String, String>> _sections(
     });
   }
   if (benchmark == null || benchmark['kind'] == 'gymnasticsScreen') {
+    // Standards are injected next to their relevant movement at render time.
+    // Repeating them here creates duplicate load text on both phone and Cast.
     sections.add({
       'title': 'CONDITIONING • ${conditioning.durationMinutes} MIN',
       'body':
-          '${conditioning.format}\n\n${conditioning.prescription.join('\n')}'
-          '${conditioning.rxStandards.isEmpty ? '' : '\n\n${conditioning.rxStandards.join('\n')}'}'
-          '\n\nCUSTOM • Record the actual implement, load, height, and variation. '
-          'Custom results stay distinct from the three published standards.',
+          '${conditioning.format}\n\n${conditioning.prescription.join('\n')}',
     });
   }
   if (day.cooldown.isNotEmpty) {

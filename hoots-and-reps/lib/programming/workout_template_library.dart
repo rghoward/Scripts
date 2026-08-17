@@ -192,16 +192,16 @@ class WorkoutTemplateLibrary {
         stationTargetSeconds: const [(40, 45), (20, 30)],
       ),
       8 => _ConditioningRecipe(
-        id: 'conditioning_amrap_ski_hspu_db_press_$suffix',
+        id: 'conditioning_amrap_ski_pullup_lunge_$suffix',
         prescription: [
           '$minutes-minute quality AMRAP:',
           '${10 + add}/${8 + add}-calorie SkiErg',
-          '${6 + add} strict handstand push-ups',
-          '${8 + add} alternating dumbbell push presses',
-          'Stop each handstand set before technique changes',
+          '${8 + add} pull-ups',
+          '${10 + add} alternating front-rack dumbbell reverse lunges',
+          'Keep every pull-up and lunge repetition technically consistent',
         ],
-        patterns: const {'cyclical', 'inversion', 'vertical_push'},
-        equipment: const {'ski_erg', 'wall_space', 'dumbbells'},
+        patterns: const {'cyclical', 'vertical_pull', 'unilateral'},
+        equipment: const {'ski_erg', 'pull_up_rig', 'dumbbells'},
       ),
       9 => _ConditioningRecipe(
         id: 'conditioning_for_time_bike_step_ttb_$suffix',
@@ -290,20 +290,15 @@ class WorkoutTemplateLibrary {
         equipment: const {'rower'},
       ),
       16 => _ConditioningRecipe(
-        id: 'conditioning_for_time_thruster_pull_$suffix',
+        id: 'conditioning_for_time_clean_pull_bike_$suffix',
         prescription: [
           'For time — 5 rounds, $minutes:00 hard cap:',
-          '${7 + add} barbell thrusters',
+          '${7 + add} power cleans',
           '${9 + add} chest-to-bar pull-ups',
           '${11 + add}/${9 + add}-calorie fan bike',
           'Stop at the cap and record completed rounds plus repetitions',
         ],
-        patterns: const {
-          'squat',
-          'vertical_push',
-          'horizontal_pull',
-          'cyclical',
-        },
+        patterns: const {'hinge', 'horizontal_pull', 'cyclical'},
         equipment: const {'barbell', 'pull_up_rig', 'fan_bike'},
         targetCompletionMinutes: (12, 16),
       ),
@@ -444,10 +439,13 @@ class WorkoutTemplateLibrary {
     if (templateId.contains('hspu_db_press')) {
       standards.add('RX • One dumbbell: ♀ 35 lb / ♂ 50 lb');
     }
-    if (templateId.contains('thruster_pull')) {
-      standards.add('RX • Barbell: ♀ 65 lb / ♂ 95 lb');
+    if (templateId.contains('clean_pull_bike')) {
+      standards.add('RX • Power clean: ♀ 65 lb / ♂ 95 lb');
     }
     if (templateId.contains('row_reverse_lunge')) {
+      standards.add('RX • Two dumbbells: ♀ 25 lb each / ♂ 35 lb each');
+    }
+    if (templateId.contains('ski_pullup_lunge')) {
       standards.add('RX • Two dumbbells: ♀ 25 lb each / ♂ 35 lb each');
     }
     if (templateId.contains('ski_push_carry') ||
