@@ -2132,9 +2132,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
       }
     }
     if (!mounted) return;
-    if (projectToDisplays && _castConnected) {
-      await _showOnChromecast(workout, sections[index], index);
-    }
     if (projectToDisplays && _externalDisplayAvailable) {
       await _showOnExternalDisplay(workout, sections[index], index);
     }
@@ -2273,11 +2270,6 @@ class _WorkoutHomeState extends State<WorkoutHome>
         _sectionExpanded[_key(workout, sectionIndex)] = sectionIndex == index;
       }
     });
-    if (_castConnected) {
-      unawaited(
-        _showOnChromecast(workout, _visibleSections(workout)[index], index),
-      );
-    }
     if (_externalDisplayAvailable) {
       unawaited(
         _showOnExternalDisplay(
