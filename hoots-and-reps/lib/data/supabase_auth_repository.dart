@@ -8,15 +8,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseAuthRepository {
   const SupabaseAuthRepository._(this._client);
 
-  /// The native callback that completes email confirmation inside the app.
+  /// A readable public confirmation page served as static HTML from the
+  /// version-controlled Hoots & Reps source through jsDelivr.
   ///
-  /// Supabase Edge Functions intentionally serve GET HTML as plain text, so an
-  /// Edge Function cannot be used as a browser landing page. Sending the email
-  /// back to this registered app URL lets the Flutter SDK securely exchange the
-  /// returned code and show the signed-in Cloud Account screen instead.
+  /// The page confirms success in every email browser and forwards its query
+  /// or fragment to the native callback only when the athlete selects the
+  /// button. Edge Functions cannot serve this page because Supabase serves GET
+  /// HTML from them as plain text.
   /// This URL must be allowed in Supabase Authentication > URL Configuration.
   static const emailConfirmationRedirectUrl =
-      'com.rhoward.hootsandreps://auth/callback';
+      'https://cdn.jsdelivr.net/gh/rghoward/Scripts@main/hoots-and-reps/supabase/storage/email-confirmed.html';
 
   final SupabaseClient? _client;
 

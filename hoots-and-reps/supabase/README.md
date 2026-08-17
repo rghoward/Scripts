@@ -7,17 +7,19 @@ history tables; it does not copy any athlete data by itself.
 1. Create a Supabase project and enable Email Auth.
 2. Link the project with the Supabase CLI, then run `supabase db push` from
    this directory's parent project.
-3. Add the native callback URL in **Authentication → URL Configuration →
+3. Publish `supabase/storage/email-confirmed.html` with the repository, then
+   add its public static URL in **Authentication → URL Configuration →
    Additional Redirect URLs**:
 
    ```text
-   com.rhoward.hootsandreps://auth/callback
+   https://cdn.jsdelivr.net/gh/YOUR_GITHUB_USER/YOUR_REPOSITORY@main/hoots-and-reps/supabase/storage/email-confirmed.html
    ```
 
-   Confirmation opens Hoots & Reps, where the Supabase Flutter SDK exchanges
-   the returned code and the Cloud Account screen shows the signed-in state.
-   Do not use an Edge Function as a GET confirmation webpage: Supabase serves
-   that HTML as plain text.
+   The static page clearly confirms success in the browser and provides an
+   explicit **Open Hoots & Reps** button. It forwards the returned auth code to
+   the native callback after a user gesture. Do not use an Edge Function or a
+   Storage-dashboard upload as a GET confirmation webpage: they can serve HTML
+   as plain text.
 4. Run the app with values from **Project Settings → API**:
 
    ```sh
