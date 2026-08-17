@@ -8,15 +8,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SupabaseAuthRepository {
   const SupabaseAuthRepository._(this._client);
 
-  /// The native callback that completes email confirmation inside the app.
-  ///
-  /// The readable page source at `supabase/storage/email-confirmed.html` must
-  /// be deployed to an HTML-capable host before changing this URL. Supabase
-  /// Edge Functions and Storage dashboard uploads serve GET HTML as plain text
-  /// and must not be used for that host.
+  /// A readable confirmation page hosted on the Hoots & Reps Cloudflare
+  /// static worker. The page explains success in every email browser and
+  /// forwards its query or fragment to the native callback only after the
+  /// athlete selects the button.
   /// This URL must be allowed in Supabase Authentication > URL Configuration.
   static const emailConfirmationRedirectUrl =
-      'com.rhoward.hootsandreps://auth/callback';
+      'https://hoots-reps-confirmed-page.rghoward1988.workers.dev/email-confirmed';
 
   final SupabaseClient? _client;
 

@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hoots_and_reps/data/supabase_auth_repository.dart';
 
 void main() {
-  test('email confirmation returns to the registered native callback', () {
+  test('email confirmation opens the hosted success page', () {
     expect(
       SupabaseAuthRepository.emailConfirmationRedirectUrl,
-      'com.rhoward.hootsandreps://auth/callback',
+      'https://hoots-reps-confirmed-page.rghoward1988.workers.dev/email-confirmed',
     );
   });
 }

@@ -155,14 +155,15 @@ added only when their native configuration is ready.
   against a signed-in athlete account. The current Pixel database has not been
   uploaded. Resume by installing `1.0.8+6053`, signing in, reviewing the
   importer counts, and confirming its one-time import.
-* Email confirmation returns directly to the registered native callback
-  `com.rhoward.hootsandreps://auth/callback`. It must be allowed in **Supabase
-  Dashboard → Authentication → URL Configuration → Additional Redirect URLs**.
-  Supabase Flutter exchanges the returned code and the Cloud Account screen
-  shows the signed-in state. The readable-page source is ready at
-  `supabase/storage/email-confirmed.html`, but it requires an HTML-capable
-  host before it can safely replace the direct callback. Supabase Edge
-  Functions and Storage-dashboard uploads serve GET HTML as plain text.
+* Email confirmation first lands on
+  `https://hoots-reps-confirmed-page.rghoward1988.workers.dev/email-confirmed`.
+  It is allowed in **Supabase Dashboard → Authentication → URL Configuration
+  → Additional Redirect URLs** and serves the version-controlled static page
+  from `supabase/storage/email-confirmed.html`. The page provides a readable
+  success state, then forwards the returned code to
+  `com.rhoward.hootsandreps://auth/callback` after the athlete selects **Open
+  Hoots & Reps**. Supabase Edge Functions and Storage-dashboard uploads cannot
+  host this page because they serve GET HTML as plain text.
 * The Supabase starter mailer rate limit was reached during this test. Wait for
   its hourly window before requesting another email; use custom SMTP before
   inviting additional athletes.
