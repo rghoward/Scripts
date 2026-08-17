@@ -7150,7 +7150,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
                               ],
                             )
                           : const Icon(Icons.cast_rounded, size: 20),
-                      color: cyan,
+                      color: _castConnected ? cyan : muted,
                     ),
                     IconButton(
                       tooltip: (_timerPanelExpanded[sectionKey] ?? false)
