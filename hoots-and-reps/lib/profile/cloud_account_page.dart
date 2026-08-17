@@ -100,8 +100,9 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
       _submitting = true;
       _message = null;
     });
+    final creatingAccount = _creatingAccount;
     try {
-      final result = _creatingAccount
+      final result = creatingAccount
           ? await widget.auth.signUp(
               email: _email.text.trim(),
               password: _password.text,
@@ -113,9 +114,18 @@ class _CloudAccountPageState extends State<CloudAccountPage> {
             );
       if (!mounted) return;
       setState(() {
-        _message = result.session == null && _creatingAccount
-            ? 'Account created. Confirm the email to return here, then sign in.'
-            : 'Signed in. Your cloud history is ready for review.';
+        if (result.session == null && creatingAccount) {
+          _creatingAccount = false;
+          _password.clear();
+          _passwordConfirmation.clear();
+          _displayName.clear();
+          _passwordVisible = false;
+          _passwordConfirmationVisible = false;
+          _message =
+              'Account created. Confirm the email, then sign in with this email and password.';
+        } else {
+          _message = 'Signed in. Your cloud history is ready for review.';
+        }
       });
     } catch (error) {
       if (!mounted) return;
