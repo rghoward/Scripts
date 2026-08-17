@@ -7130,12 +7130,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
                       onPressed: _isCastingSection(sectionKey)
                           ? _stopCasting
                           : () => _showOnChromecast(workout, section, index),
-                      icon: Icon(
-                        _isCastingSection(sectionKey)
-                            ? Icons.cast_connected_rounded
-                            : Icons.cast_rounded,
-                        size: 20,
-                      ),
+                      icon: _isCastingSection(sectionKey)
+                          ? const Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(Icons.cast_connected_rounded, size: 20),
+                                Positioned(
+                                  right: -6,
+                                  bottom: -5,
+                                  child: Icon(
+                                    Icons.swap_horiz_rounded,
+                                    size: 12,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const Icon(Icons.cast_rounded, size: 20),
                       color: cyan,
                     ),
                     IconButton(
