@@ -7126,20 +7126,24 @@ class _WorkoutHomeState extends State<WorkoutHome>
                     IconButton(
                       tooltip: _isCastingSection(sectionKey)
                           ? 'Stop casting this section'
+                          : _castConnected
+                          ? 'Switch TV to this section'
                           : 'Cast this section',
                       onPressed: _isCastingSection(sectionKey)
                           ? _stopCasting
                           : () => _showOnChromecast(workout, section, index),
                       icon: _isCastingSection(sectionKey)
+                          ? const Icon(Icons.cast_connected_rounded, size: 20)
+                          : _castConnected
                           ? const Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                Icon(Icons.cast_connected_rounded, size: 20),
+                                Icon(Icons.video_library_outlined, size: 20),
                                 Positioned(
                                   right: -6,
                                   bottom: -5,
                                   child: Icon(
-                                    Icons.swap_horiz_rounded,
+                                    Icons.arrow_forward_rounded,
                                     size: 12,
                                   ),
                                 ),
