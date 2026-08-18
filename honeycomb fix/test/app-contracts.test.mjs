@@ -225,7 +225,14 @@ test("photo notification taps open the photo viewer over Today", () => {
   assert.match(android, /pendingNotificationPhotoId/);
   assert.match(android, /"photos"\.equals\(tab\)/);
   assert.match(dashboard, /photoId: String\(target\.photoId \|\| ''\)/);
-  assert.match(dashboard, /else if \(photoId\) \{\s*openViewer\(photoId\);/);
+  assert.match(
+    dashboard,
+    /if \(photoId\) \{\s*await loadChild\(childId, true\);/,
+  );
+  assert.match(dashboard, /const opened = openViewer\(photoId\);/);
+  assert.match(dashboard, /if \(!opened\) \{/);
+  assert.match(dashboard, /return false;/);
+  assert.match(dashboard, /return true;/);
   assert.match(
     dashboard,
     /if \(app\.querySelector\('#hcfd2-viewer:not\(\[hidden\]\)'\)\) \{/,

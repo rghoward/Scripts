@@ -2167,6 +2167,10 @@
     if (tab === 'activity') state.activityView = 'agenda';
     await switchChild(childId);
     await switchTab(tab);
+    if (photoId) {
+      await loadChild(childId, true);
+      render();
+    }
     if (photoId === 'latest') {
       const latestPhoto = visiblePhotosForChild(
         state.data.get(childId)?.moments || [],
@@ -2174,7 +2178,14 @@
       )[0];
       if (latestPhoto) openViewer(String(latestPhoto.DailyMomentId));
     } else if (photoId) {
-      openViewer(photoId);
+      const opened = openViewer(photoId);
+      if (!opened) {
+        const latestPhoto = visiblePhotosForChild(
+          state.data.get(childId)?.moments || [],
+          childId,
+        )[0];
+        if (latestPhoto) openViewer(String(latestPhoto.DailyMomentId));
+      }
     }
   }
 
@@ -2350,7 +2361,7 @@ function openViewer(photoId) {
     }
 
     if (index < 0) {
-        return;
+        return false;
     }
 
     state.selectedChildId = ownerId;
@@ -2373,6 +2384,7 @@ function openViewer(photoId) {
 
     viewer.hidden = false;
     void updateViewer();
+    return true;
 }
 
  async function updateViewer(direction = 0) {
