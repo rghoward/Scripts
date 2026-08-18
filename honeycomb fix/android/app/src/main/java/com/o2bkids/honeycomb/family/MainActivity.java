@@ -18,11 +18,13 @@ import java.nio.charset.StandardCharsets;
 public class MainActivity extends BridgeActivity {
     public static final String EXTRA_NOTIFICATION_CHILD_ID = "honeycomb_notification_child_id";
     public static final String EXTRA_NOTIFICATION_TAB = "honeycomb_notification_tab";
+    public static final String EXTRA_NOTIFICATION_PHOTO_ID = "honeycomb_notification_photo_id";
 
     private String dashboardScript = "";
     private String loginThemeScript = "";
     private String pendingNotificationChildId = "";
     private String pendingNotificationTab = "";
+    private String pendingNotificationPhotoId = "";
     private OnBackPressedCallback dashboardBackCallback;
     private HoneycombDownloadBridge downloadBridge;
 
@@ -72,20 +74,31 @@ public class MainActivity extends BridgeActivity {
         if (intent == null) return;
         String childId = intent.getStringExtra(EXTRA_NOTIFICATION_CHILD_ID);
         String tab = intent.getStringExtra(EXTRA_NOTIFICATION_TAB);
+        String photoId = intent.getStringExtra(EXTRA_NOTIFICATION_PHOTO_ID);
         if (childId == null || childId.trim().isEmpty()) return;
         pendingNotificationChildId = childId.trim();
         pendingNotificationTab = allowedNotificationTab(tab);
+        pendingNotificationPhotoId = photoId == null ? "" : photoId.trim();
+        // Older Ubuntu photo alerts already on the device only contain the
+        // former Photos destination. Open the newest loaded photo for those
+        // alerts; newer alerts carry an exact photo ID.
+        if (pendingNotificationPhotoId.isEmpty() && "photos".equals(tab)) {
+            pendingNotificationPhotoId = "latest";
+        }
     }
 
     private String allowedNotificationTab(String tab) {
-        if ("activity".equals(tab) || "photos".equals(tab) || "badges".equals(tab)) return tab;
+        // Every server alert returns to the child's Today screen. The alert
+        // itself already identifies its category, while Today is the most
+        // useful landing view after the family has been away from the app.
         return "home";
     }
 
     private void dispatchNotificationTarget(WebView webView) {
         if (pendingNotificationChildId.isEmpty()) return;
         String target = "{childId:" + JSONObject.quote(pendingNotificationChildId)
-            + ",tab:" + JSONObject.quote(pendingNotificationTab) + "}";
+            + ",tab:" + JSONObject.quote(pendingNotificationTab)
+            + ",photoId:" + JSONObject.quote(pendingNotificationPhotoId) + "}";
         String script = "(function(target){"
             + "window.__HCFD_PENDING_NOTIFICATION__=target;"
             + "if(window.__HCFD_OPEN_NOTIFICATION__)window.__HCFD_OPEN_NOTIFICATION__(target);"

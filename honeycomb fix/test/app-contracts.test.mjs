@@ -80,7 +80,7 @@ test("photo galleries use cached originals without fetching cache misses", () =>
   assert.match(dashboard, /image\.dataset\.photoResolution = 'original'/);
   assert.doesNotMatch(
     dashboard.match(
-      /async function hydrateCachedGalleryOriginals[\s\S]*?\n  }\n\n  function clearGalleryObjectUrls/,
+      /async function hydrateCachedGalleryOriginals[\s\S]*?\n  }\n\n  async function hydrateBadgeArtwork/,
     )?.[0] || "",
     /fetch\(/,
   );
@@ -162,6 +162,7 @@ test("Ubuntu push alerts identify each count-only notification category", () => 
   assert.match(ubuntuMonitor, /body: alert\.body\.slice/);
   assert.match(ubuntuMonitor, /childId: alert\.childId/);
   assert.match(ubuntuMonitor, /tab: alert\.tab/);
+  assert.match(ubuntuMonitor, /photoId: alert\.photoId/);
 });
 
 test("Android push categories have distinct channels, icons, and colors", () => {
@@ -185,7 +186,13 @@ test("Android push categories have distinct channels, icons, and colors", () => 
   );
 });
 
-test("Android notification taps select the child and destination view", () => {
+test("dashboard refreshes never create duplicate local notifications", () => {
+  assert.doesNotMatch(dashboard, /notifyChildUpdates/);
+  assert.doesNotMatch(dashboard, /LocalNotifications/);
+  assert.doesNotMatch(dashboard, /Enable notifications/);
+});
+
+test("Android notification taps select the child and open Today", () => {
   assert.match(android, /void onNewIntent\(Intent intent\)/);
   assert.match(android, /dispatchNotificationTarget\(bridge\.getWebView\(\)\)/);
   assert.match(android, /__HCFD_PENDING_NOTIFICATION__/);
@@ -197,6 +204,33 @@ test("Android notification taps select the child and destination view", () => {
   assert.match(dashboard, /await applyPendingNotificationTarget\(\)/);
   assert.match(dashboard, /await switchChild\(childId\)/);
   assert.match(dashboard, /await switchTab\(tab\)/);
+  assert.match(
+    android,
+    /Every server alert returns to the child's Today screen/,
+  );
+  assert.match(android, /return "home";/);
+  assert.match(
+    ubuntuMonitor,
+    /supply: \{ title: 'Supply request', tab: 'home' \}/,
+  );
+  assert.match(
+    ubuntuMonitor,
+    /report: \{ title: 'New daily report', tab: 'home' \}/,
+  );
+});
+
+test("photo notification taps open the photo viewer over Today", () => {
+  assert.match(ubuntuMonitor, /newMoments\[0\]\.DailyMomentId/);
+  assert.match(androidMessaging, /EXTRA_NOTIFICATION_PHOTO_ID/);
+  assert.match(android, /pendingNotificationPhotoId/);
+  assert.match(android, /"photos"\.equals\(tab\)/);
+  assert.match(dashboard, /photoId: String\(target\.photoId \|\| ''\)/);
+  assert.match(dashboard, /else if \(photoId\) \{\s*openViewer\(photoId\);/);
+  assert.match(
+    dashboard,
+    /if \(app\.querySelector\('#hcfd2-viewer:not\(\[hidden\]\)'\)\) \{/,
+  );
+  assert.match(dashboard, /closeViewer\(\);/);
 });
 
 test("login theme keeps accessible focus and reduced-motion behavior", () => {

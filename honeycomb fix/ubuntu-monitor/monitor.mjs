@@ -106,16 +106,23 @@ function reportIsSupplyRequest(report) {
 }
 
 const notificationTypes = {
-  supply: { title: 'Supply request', tab: 'activity' },
-  report: { title: 'New daily report', tab: 'activity' },
-  photo: { title: 'New Honeycomb photo', tab: 'photos' },
-  badge: { title: 'Badge earned', tab: 'badges' },
+  supply: { title: 'Supply request', tab: 'home' },
+  report: { title: 'New daily report', tab: 'home' },
+  photo: { title: 'New Honeycomb photo', tab: 'home' },
+  badge: { title: 'Badge earned', tab: 'home' },
   test: { title: 'Honeycomb test', tab: 'home' },
 };
 
-function notification(type, body, childId = '') {
+function notification(type, body, childId = '', photoId = '') {
   const details = notificationTypes[type] || { title: 'Honeycomb update', tab: 'home' };
-  return { type, title: details.title, body, childId: String(childId), tab: details.tab };
+  return {
+    type,
+    title: details.title,
+    body,
+    childId: String(childId),
+    tab: details.tab,
+    photoId: String(photoId),
+  };
 }
 
 async function sendTelegram(alert) {
@@ -161,6 +168,7 @@ async function sendFirebase(alert) {
       type: alert.type,
       childId: alert.childId,
       tab: alert.tab,
+      photoId: alert.photoId,
     },
     android: { priority: 'high' },
   });
@@ -255,6 +263,7 @@ async function monitor() {
           'photo',
           `${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
           reading.childId,
+          newMoments[0].DailyMomentId,
         ));
         const otherReports = newReports.length - supplies;
         if (otherReports) alerts.push(notification(

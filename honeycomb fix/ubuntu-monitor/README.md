@@ -2,7 +2,7 @@
 
 This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends a short count-only summary to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
 
-It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. It sends counts, not photo URLs, report content, or badge details. Supply requests, daily reports, photos, and badges use distinct notification titles. Android app version 1.2.0 or newer also gives each category its own channel, color, and icon. Version 1.2.1 or newer opens the child and destination view associated with a notification when it is tapped.
+It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. It sends counts, not photo URLs, report content, or badge details. Supply requests, daily reports, photos, and badges use distinct notification titles. Android app version 1.2.0 or newer also gives each category its own channel, color, and icon. Tapping a notification opens the relevant child's Today screen.
 
 ## Before installing on Ubuntu: Android push expectations
 
@@ -10,7 +10,7 @@ The Android app must be built here, with Firebase configured, before Ubuntu can 
 
 - Create one Firebase project and register Android package `com.o2bkids.honeycomb.family`.
 - Put its `google-services.json` in `android/app/` only while building the APK. It is ignored by Git.
-- Install that rebuilt APK, open it once while online, and approve its notification permission from **Menu → Enable notifications**.
+- Install that rebuilt APK, open it once while online, and approve Android's notification permission when prompted.
 - Create a Firebase Admin SDK service-account JSON file for Ubuntu. Keep it private; Ubuntu uses it to send messages to the app’s `honeycomb-family-alerts-v1` topic.
 
 ## 1. Install it on Ubuntu

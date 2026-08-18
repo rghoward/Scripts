@@ -21,7 +21,7 @@ The Firebase Admin service-account JSON is a sending credential. Treat it like a
 1. With `google-services.json` in place, build the APK on this development machine.
 2. Install the new APK on the Android device.
 3. Open the app once while it has network access. This registers the app with FCM and subscribes it to `honeycomb-family-alerts-v1`.
-4. In the app, open **Menu → Enable notifications** and approve Android’s notification prompt.
+4. Open the app once and approve Android’s notification prompt.
 5. Follow the Ubuntu monitor guide to copy the service-account JSON into `~/.config/honeycomb-monitor/`, configure `FCM_SERVICE_ACCOUNT_FILE`, and send the test notification.
 
 ## Limits and security

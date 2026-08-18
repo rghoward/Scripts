@@ -19,7 +19,7 @@ No Honeycomb credentials are stored in this repository or passed through a third
 - Native Save original support for Android Gallery and the iOS Photos library
 - Weekly comparison, print/PDF view, and cached dashboard data
 - Responsive phone and tablet layouts already defined in `honeycomb.js`
-- Native notification-center alerts for newly detected photos, reports, and supply requests
+- Ubuntu-server notification support through Firebase Cloud Messaging
 
 Favorites, hidden-photo choices, saved-photo status, avatars, theme choices, and acknowledgement state use the app WebView's local storage. They remain private to each installed app and do not automatically sync between iOS and Android.
 
@@ -27,15 +27,9 @@ Cached family data and photos are cleared after logout is detected or when a dif
 
 ## Notifications
 
-On a phone, open **Menu → Enable notifications** and approve the operating-system permission prompt. The menu then includes **Send test notification**.
+The Android app receives family updates from the Ubuntu monitor through Firebase Cloud Messaging. Approve Android's notification permission when prompted. Tapping an alert opens the notified child's Today screen.
 
-The app sends native notifications when a refresh detects:
-
-- New supply requests
-- New classroom photos
-- New daily reports
-
-The dashboard refreshes every five minutes while open and refreshes immediately when brought back to the foreground. Because this project has no notification server, iOS and Android may suspend it while fully closed; consequently, closed-app delivery cannot be guaranteed. Reopening the app catches and notifies about changes that occurred since its previous refresh. Reliable real-time delivery while fully closed would require a push-notification server.
+The dashboard refreshes every five minutes while open and when brought back to the foreground, but it does not create its own notifications for changes found during those refreshes. This prevents duplicate alerts when the Ubuntu monitor is already delivering pushes.
 
 For a free always-on alternative, see [ubuntu-monitor/README.md](ubuntu-monitor/README.md). It provides a local Ubuntu timer that checks the family account and sends count-only summaries to the Android app through Firebase Cloud Messaging, with Telegram available as an optional second destination.
 

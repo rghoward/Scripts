@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Honeycomb Family Dashboard 2.0
 // @namespace    https://honeycomb.o2bkids.com/
-// @version      2.11.2
+// @version      2.11.6
 // @description  Modern Honeycomb family dashboard with timeline, photos, favorites, reports, badges, statistics, downloads, and auto-refresh.
 // @match        https://honeycomb.o2bkids.com/*
 // @grant        none
@@ -22,9 +22,14 @@
   const PAGE_SIZE = 10;
   const AUTO_REFRESH_MS = 5 * 60 * 1000;
   const PHOTO_CACHE_NAME = 'hcfd2-photo-cache-v3';
+  const BADGE_CACHE_NAME = 'hcfd2-badge-cache-v1';
   const LEGACY_PHOTO_CACHE_NAME = 'hcfd2-recent-photos-v1';
   const PREVIOUS_PHOTO_CACHE_NAME = 'hcfd2-photo-cache-v2';
   const PHOTO_CACHE_MAX_BYTES = 100 * 1024 * 1024;
+  const BADGE_CACHE_MAX_BYTES = 12 * 1024 * 1024;
+  // Honeycomb's badge endpoint uses 25-item pages in its own UI. Larger
+  // requests can return an empty catalog even when unearned badges exist.
+  const BADGE_PAGE_SIZE = 25;
   const PHOTO_CACHE_THUMB_PER_CHILD = 25;
   const PHOTO_CACHE_HISTORY_PER_CHILD = 100;
   const PHOTO_PREFETCH_AHEAD = 5;
@@ -43,10 +48,10 @@
     cache: 'hcfd2-session-cache-v1',
     avatars: 'hcfd2-child-avatars',
     acknowledgedSupplies: 'hcfd2-acknowledged-supplies',
-    notifications: 'hcfd2-notifications',
     savedPhotos: 'hcfd2-saved-photos-v1',
     hiddenPhotos: 'hcfd2-hidden-photos-v1',
     photoCacheIndex: 'hcfd2-photo-cache-index-v3',
+    badgeCacheIndex: 'hcfd2-badge-cache-index-v1',
     accountScope: 'hcfd2-account-scope-v1',
   };
 
@@ -54,6 +59,11 @@
     cacheName: PHOTO_CACHE_NAME,
     indexKey: STORAGE.photoCacheIndex,
     maxBytes: PHOTO_CACHE_MAX_BYTES,
+  });
+  const badgeCache = globalThis.createHoneycombPhotoCache({
+    cacheName: BADGE_CACHE_NAME,
+    indexKey: STORAGE.badgeCacheIndex,
+    maxBytes: BADGE_CACHE_MAX_BYTES,
   });
 
   const state = {
@@ -95,7 +105,6 @@
     loadingMore: false,
     suppressViewAnimation: false,
     calendarTransitionDirection: 0,
-    notificationsEnabled: localStorage.getItem(STORAGE.notifications) === 'true',
     lastResumeRefresh: 0,
   };
 
@@ -115,9 +124,11 @@
   let viewerZoomY = 0;
   let pendingPhotoSaveKey = null;
   let galleryHydrationToken = 0;
+  let badgeArtworkObserver = null;
   const viewerPrefetchControllers = new Set();
   const photoObjectUrls = new Map();
   const galleryObjectUrls = new Set();
+  const badgeObjectUrls = new Set();
   const reportDetailCache = new Map();
 
   init();
@@ -243,6 +254,7 @@
     stopAutoRefresh();
     galleryHydrationToken += 1;
     clearGalleryObjectUrls();
+    clearBadgeObjectUrls();
     document.body.classList.remove('hcfd2-no-scroll');
     overlay?.remove();
     overlay = null;
@@ -316,6 +328,11 @@
       reports: dedupe([...current.reports, ...newReports], 'DailyReportId'),
       moments: dedupe([...current.moments, ...newMoments], 'DailyMomentId'),
       badges: Array.isArray(badges.Data) ? badges.Data : current.badges,
+      allBadges: mergeBadgeCatalog(
+        Array.isArray(badges.Data) ? badges.Data : current.badges,
+        current.allBadges,
+      ),
+      badgeCatalogLoaded: Boolean(current.badgeCatalogLoaded),
       reportCount: Number(reports.Count || current.reportCount || 0),
       momentCount: Number(moments.Count || current.momentCount || 0),
       badgeCount: Number(badges.Count || current.badgeCount || 0),
@@ -324,14 +341,11 @@
       loadedAt: new Date().toISOString(),
     });
 
-    if (addedReports.length || addedMoments.length) {
-      void notifyChildUpdates(childId, addedReports, addedMoments);
-    }
   }
 
   function emptyChildData() {
     return {
-      reports: [], moments: [], badges: [],
+      reports: [], moments: [], badges: [], allBadges: [], badgeCatalogLoaded: false,
       reportCount: 0, momentCount: 0, badgeCount: 0,
       reportPage: 1, momentPage: 1, loadedAt: null,
     };
@@ -348,6 +362,40 @@
     const json = await response.json();
     if (!json.Success) throw new Error(extractApiError(json, `${url} returned an error.`));
     return json;
+  }
+
+  async function loadBadgeCatalog(childId) {
+    const badges = [];
+    let page = 1;
+    let total = null;
+    while (total == null || badges.length < total) {
+      const response = await postJson(API.badges, {
+        ChildID: childId,
+        PageNumber: page,
+        PageSize: BADGE_PAGE_SIZE,
+        ShowUnearned: true,
+      });
+      const pageBadges = Array.isArray(response.Data) ? response.Data : [];
+      badges.push(...pageBadges);
+      const reportedCount = Number(response.Count);
+      if (Number.isFinite(reportedCount) && reportedCount >= 0) total = reportedCount;
+      if (!pageBadges.length || (total == null && pageBadges.length < BADGE_PAGE_SIZE)) break;
+      page += 1;
+    }
+    return dedupe(badges, 'BadgeID');
+  }
+
+  async function ensureBadgeCatalogLoaded(childId = state.selectedChildId) {
+    const data = state.data.get(String(childId));
+    if (!data || data.badgeCatalogLoaded) return;
+    try {
+      const catalog = await loadBadgeCatalog(childId);
+      data.allBadges = mergeBadgeCatalog(data.badges, catalog);
+      data.badgeCatalogLoaded = true;
+      state.data.set(String(childId), data);
+    } catch (error) {
+      console.warn('[Honeycomb badge catalog]', error);
+    }
   }
 
   function extractApiError(json, fallback) {
@@ -375,6 +423,7 @@
     const data = getSelectedData();
     const hydrationToken = ++galleryHydrationToken;
     clearGalleryObjectUrls();
+    clearBadgeObjectUrls();
     app.innerHTML = `
       <section class="hcfd2-shell ${state.suppressViewAnimation ? 'hcfd2-no-enter' : ''}">
         ${renderHeader()}
@@ -389,6 +438,7 @@
     `;
     bindEvents();
     void hydrateCachedGalleryOriginals(hydrationToken);
+    void hydrateBadgeArtwork(hydrationToken);
     state.suppressViewAnimation = false;
     requestAnimationFrame(updateStickyChildContext);
     markSeen(child, data);
@@ -405,8 +455,6 @@
           ${state.headerMenuOpen ? `<div class="hcfd2-mobile-menu" id="hcfd2-mobile-menu">
             <button data-action="refresh">↻ Refresh</button>
             <button data-action="auto">${state.autoRefresh ? '● Auto-refresh on' : '○ Auto-refresh off'}</button>
-            ${nativeNotifications() ? `<button data-action="notifications">${state.notificationsEnabled ? '🔔 Notifications on' : '🔕 Enable notifications'}</button>` : ''}
-            ${nativeNotifications() && state.notificationsEnabled ? '<button data-action="test-notification">Send test notification</button>' : ''}
             <label><span>Theme</span><select data-action="theme" aria-label="Theme">
               <option value="system" ${state.theme === 'system' ? 'selected' : ''}>⚙ System</option>
               <option value="time" ${state.theme === 'time' ? 'selected' : ''}>◷ Time of day</option>
@@ -1392,6 +1440,26 @@
     return [...groups.entries()].map(([name, groupBadges]) => ({ name, badges: groupBadges }));
   }
 
+  function badgeId(badge) {
+    return String(badge?.BadgeID ?? badge?.BadgeId ?? badge?.ID ?? badge?.Id ?? '');
+  }
+
+  function mergeBadgeCatalog(earnedBadges, catalogBadges) {
+    const earned = Array.isArray(earnedBadges) ? earnedBadges : [];
+    const catalog = Array.isArray(catalogBadges) ? catalogBadges : [];
+    const earnedIds = new Set(earned.map(badgeId).filter(Boolean));
+    const merged = new Map();
+    catalog.forEach(badge => merged.set(badgeId(badge) || JSON.stringify(badge), {
+      ...badge,
+      __hcfdEarned: earnedIds.has(badgeId(badge)),
+    }));
+    earned.forEach(badge => {
+      const key = badgeId(badge) || JSON.stringify(badge);
+      merged.set(key, { ...(merged.get(key) || {}), ...badge, __hcfdEarned: true });
+    });
+    return [...merged.values()];
+  }
+
   function badgeImageUrl(badge) {
     return badge?.Filename ? imageUrl(badge.Filename, 'badge-image-listing') : '';
   }
@@ -1400,7 +1468,7 @@
     const src = badgeImageUrl(badge);
     const title = badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge';
     return src
-      ? `<img src="${attr(src)}" alt="${attr(title)}" loading="lazy">`
+      ? `<img src="${attr(src)}" data-badge-image="${attr(src)}" alt="${attr(title)}" loading="lazy">`
       : '<span aria-hidden="true">★</span>';
   }
 
@@ -1409,14 +1477,39 @@
   }
 
   function renderBadges(child, data) {
-    const badges = data.badges || [];
-    const groups = groupBadgesByCategory(badges);
-    if (isPhoneLayout()) return renderMobileBadges(child, data, badges, groups);
-    return `<section class="hcfd2-badges"><div class="hcfd2-badge-hero"><span>★</span><div><h2>${html(fullName(child))}</h2><p>${badges.length || data.badgeCount || 0} earned badges · ${groups.length || state.badgeCategories.length || 0} categories</p></div></div>${badges.length ? groups.map(group => `<section class="hcfd2-badge-category"><h3>${html(group.name)}</h3><div class="hcfd2-badge-grid">${group.badges.map(badge => `<article><div class="hcfd2-badge-art">${renderBadgeArtwork(badge)}</div><strong>${html(badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge')}</strong>${badgeDetail(badge) ? `<small>${html(badgeDetail(badge))}</small>` : ''}</article>`).join('')}</div></section>`).join('') : '<div class="hcfd2-empty">Honeycomb has not recorded any earned badges for this child yet.</div>'}</section>`;
+    const allBadges = data.allBadges?.length ? data.allBadges : mergeBadgeCatalog(data.badges, []);
+    const earned = allBadges.filter(badge => badge.__hcfdEarned);
+    const unearned = allBadges.filter(badge => !badge.__hcfdEarned);
+    if (isPhoneLayout()) return renderMobileBadges(child, data, earned, unearned);
+    return `<section class="hcfd2-badges"><div class="hcfd2-badge-hero"><span>★</span><div><h2>${html(fullName(child))}</h2><p>${earned.length || data.badgeCount || 0} earned badges${data.badgeCatalogLoaded ? ` · ${unearned.length} still to earn` : ''}</p></div></div>${renderBadgeSection('Earned badges', earned, true)}${data.badgeCatalogLoaded ? renderBadgeSection('Still to earn', unearned, false) : ''}</section>`;
   }
 
-  function renderMobileBadges(child, data, badges, groups) {
-    return `<section class="hcfd2-mobile-badges"><header>${renderChildAvatar(child, false, false)}<div><span>Achievements</span><h2>${html(child.FirstName || fullName(child))}</h2><small>${badges.length || data.badgeCount || 0} earned badges</small></div></header>${groups.length ? groups.map((group, index) => `<details ${index === 0 ? 'open' : ''}><summary><span>${html(group.name)}</span><small>${group.badges.length}</small><b>⌄</b></summary><div>${group.badges.map(badge => `<article><div class="hcfd2-badge-art">${renderBadgeArtwork(badge)}</div><strong>${html(badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge')}</strong>${badgeDetail(badge) ? `<small>${html(badgeDetail(badge))}</small>` : ''}</article>`).join('')}</div></details>`).join('') : '<div class="hcfd2-empty">No earned badges yet.</div>'}</section>`;
+  function renderBadgeSection(title, badges, earned) {
+    if (!earned) return renderUnearnedBadgeCollection(badges);
+    const groups = groupBadgesByCategory(badges);
+    if (!groups.length) return `<section class="hcfd2-badge-section earned"><h3>${html(title)}</h3><div class="hcfd2-empty">No earned badges yet.</div></section>`;
+    if (!badges.some(badge => badge.Category || badge.CategoryName)) {
+      return `<section class="hcfd2-badge-section earned"><h3>${html(title)}</h3><div class="hcfd2-badge-grid">${badges.map(badge => renderBadgeCard(badge, true)).join('')}</div></section>`;
+    }
+    return `<section class="hcfd2-badge-section earned"><h3>${html(title)}</h3>${groups.map(group => `<section class="hcfd2-badge-category"><h4>${html(group.name)}</h4><div class="hcfd2-badge-grid">${group.badges.map(badge => renderBadgeCard(badge, true)).join('')}</div></section>`).join('')}</section>`;
+  }
+
+  function renderUnearnedBadgeCollection(badges) {
+    if (!badges.length) return `<section class="hcfd2-badge-section unearned"><h3>Still to earn</h3><div class="hcfd2-empty">Every available badge has been earned!</div></section>`;
+    return `<section class="hcfd2-badge-section unearned"><header class="hcfd2-unearned-heading"><div><span>Badge collection</span><h3>Still to earn</h3><p>Keep exploring—these achievements are waiting to be unlocked.</p></div><strong>${badges.length}</strong></header><div class="hcfd2-badge-grid hcfd2-unearned-grid">${badges.map(badge => renderBadgeCard(badge, false)).join('')}</div></section>`;
+  }
+
+  function renderBadgeCard(badge, earned) {
+    const title = badge.Value || badge.BadgeName || badge.Name || badge.Title || 'Badge';
+    return `<article class="${earned ? '' : 'hcfd2-unearned-badge'}"><div class="hcfd2-badge-art">${renderBadgeArtwork(badge)}</div><strong>${html(title)}</strong>${earned ? '' : '<span class="hcfd2-badge-status">Not earned yet</span>'}${badgeDetail(badge) ? `<small>${html(badgeDetail(badge))}</small>` : ''}</article>`;
+  }
+
+  function renderMobileBadges(child, data, earned, unearned) {
+    const renderGroups = (badges, isEarned) => groupBadgesByCategory(badges).map((group, index) => `<details ${index === 0 && isEarned ? 'open' : ''}><summary><span>${html(group.name)}</span><small>${group.badges.length}</small><b>⌄</b></summary><div>${group.badges.map(badge => renderBadgeCard(badge, isEarned)).join('')}</div></details>`).join('');
+    const earnedContent = earned.some(badge => badge.Category || badge.CategoryName)
+      ? renderGroups(earned, true)
+      : earned.length ? `<div class="hcfd2-mobile-badge-grid">${earned.map(badge => renderBadgeCard(badge, true)).join('')}</div>` : '<div class="hcfd2-empty">No earned badges yet.</div>';
+    return `<section class="hcfd2-mobile-badges"><header>${renderChildAvatar(child, false, false)}<div><span>Achievements</span><h2>${html(child.FirstName || fullName(child))}</h2><small>${earned.length || data.badgeCount || 0} earned badges${data.badgeCatalogLoaded ? ` · ${unearned.length} still to earn` : ''}</small></div></header><section class="hcfd2-mobile-badge-section"><h3>Earned badges</h3>${earnedContent}</section>${data.badgeCatalogLoaded ? `<section class="hcfd2-mobile-badge-section unearned">${renderUnearnedBadgeCollection(unearned)}</section>` : ''}</section>`;
   }
 
   function renderToolbar(type, count) {
@@ -1505,8 +1598,6 @@
     app.querySelector('[data-action="refresh"]')?.addEventListener('click', refreshAll);
     app.querySelector('[data-action="theme"]')?.addEventListener('change', event => setTheme(event.target.value));
     app.querySelector('[data-action="auto"]')?.addEventListener('click', toggleAutoRefresh);
-    app.querySelector('[data-action="notifications"]')?.addEventListener('click', toggleNotifications);
-    app.querySelector('[data-action="test-notification"]')?.addEventListener('click', sendTestNotification);
     app.querySelector('[data-action="print-week"]')?.addEventListener('click', () => window.print());
 
     app.querySelectorAll('[data-child]').forEach(button => button.addEventListener('click', () => switchChild(button.dataset.child)));
@@ -1551,7 +1642,7 @@
       render();
     });
     app.querySelectorAll('[data-open-child]').forEach(button => button.addEventListener('click', () => switchChild(button.dataset.openChild)));
-    app.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => {
+    app.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', async () => {
       const [childId, tab] = button.dataset.open.split(':');
       state.selectedChildId = childId;
       state.tab = ['timeline', 'reports', 'calendar'].includes(tab) ? 'activity' : tab;
@@ -1562,6 +1653,7 @@
         state.calendarScope = childId;
       }
       saveView();
+      if (state.tab === 'badges') await ensureBadgeCatalogLoaded(childId);
       render();
     }));
 
@@ -1873,99 +1965,6 @@
     render();
   }
 
-  function notificationApi() {
-    return globalThis.Capacitor?.Plugins?.LocalNotifications || null;
-  }
-
-  async function toggleNotifications() {
-    if (state.notificationsEnabled) {
-      state.notificationsEnabled = false;
-      localStorage.setItem(STORAGE.notifications, 'false');
-      render();
-      return;
-    }
-
-    const notifications = notificationApi();
-    if (!notifications) {
-      alert('Native notifications are not available in this browser. Use the installed iOS or Android app.');
-      return;
-    }
-
-    try {
-      let permission = await notifications.checkPermissions();
-      if (permission.display !== 'granted') permission = await notifications.requestPermissions();
-      if (permission.display !== 'granted') {
-        alert('Notification permission was not granted. You can enable it later in the phone’s app settings.');
-        return;
-      }
-      state.notificationsEnabled = true;
-      localStorage.setItem(STORAGE.notifications, 'true');
-      await scheduleNativeNotification('Honeycomb notifications enabled', 'New photos, reports, and supply requests will appear here when the app detects them.');
-      render();
-    } catch (error) {
-      console.error('[Honeycomb notifications]', error);
-      alert('Notifications could not be enabled on this device.');
-    }
-  }
-
-  async function sendTestNotification() {
-    await scheduleNativeNotification('Honeycomb test notification', 'Notifications are working on this phone.');
-    state.headerMenuOpen = false;
-    render();
-  }
-
-  async function notifyChildUpdates(childId, reports, moments) {
-    if (!state.notificationsEnabled) return;
-    const child = state.children.find(item => String(item.ChildID) === String(childId));
-    const name = child?.FirstName || fullName(child || {}) || 'Your child';
-    const supplies = reports.filter(report => reportType(report) === 'supplies');
-    const otherReports = reports.filter(report => reportType(report) !== 'supplies');
-
-    if (supplies.length) {
-      const requested = [...new Set(supplies.map(reportTitle).filter(Boolean))].join(', ');
-      await scheduleNativeNotification(`Supplies needed for ${name}`, requested || 'Honeycomb posted a new supply request.');
-    }
-    if (moments.length) {
-      await scheduleNativeNotification(
-        `${moments.length} new photo${moments.length === 1 ? '' : 's'} for ${name}`,
-        moments.length === 1 ? photoTitle(moments[0]) : 'Open Honeycomb Family to view them.'
-      );
-    }
-    if (otherReports.length) {
-      await scheduleNativeNotification(
-        `${otherReports.length} new report${otherReports.length === 1 ? '' : 's'} for ${name}`,
-        otherReports.length === 1 ? reportTitle(otherReports[0]) : 'Open Honeycomb Family for the latest details.'
-      );
-    }
-  }
-
-  async function scheduleNativeNotification(title, body) {
-    const notifications = notificationApi();
-    if (!notifications || !state.notificationsEnabled) return;
-    const id = notificationId(`${title}:${body}:${Date.now()}`);
-    try {
-      await notifications.schedule({
-        notifications: [{
-          id,
-          title,
-          body,
-          sound: 'default',
-          extra: { tab: 'home' },
-        }],
-      });
-    } catch (error) {
-      console.warn('[Honeycomb notification delivery]', error);
-    }
-  }
-
-  function notificationId(value) {
-    let hash = 0;
-    for (let index = 0; index < value.length; index += 1) {
-      hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
-    }
-    return Math.max(1, Math.abs(hash || Date.now()) % 2147483647);
-  }
-
   function bindAppResumeRefresh() {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible' || !state.overlayOpen || !app) return;
@@ -2007,6 +2006,7 @@
     if (state.tab === 'activity') state.timelineScope = childId;
     saveView();
     if (!state.data.get(childId)?.loadedAt) await loadChild(childId, true);
+    if (state.tab === 'badges') await ensureBadgeCatalogLoaded(childId);
     render();
     if (state.tab === 'activity' && state.activityView === 'calendar') await loadAndRenderCalendarMonth();
   }
@@ -2016,6 +2016,7 @@
     globalThis.__HCFD_PENDING_NOTIFICATION__ = {
       childId: String(target.childId || ''),
       tab: String(target.tab || 'home'),
+      photoId: String(target.photoId || ''),
     };
     if (state.overlayOpen && state.children.length) void applyPendingNotificationTarget();
   }
@@ -2025,6 +2026,7 @@
     if (!target || !state.children.length) return;
     const childId = String(target.childId || '');
     const tab = ['activity', 'photos', 'badges'].includes(target.tab) ? target.tab : 'home';
+    const photoId = String(target.photoId || '');
     if (!state.children.some(child => String(child.ChildID) === childId)) {
       globalThis.__HCFD_PENDING_NOTIFICATION__ = null;
       return;
@@ -2033,6 +2035,15 @@
     if (tab === 'activity') state.activityView = 'agenda';
     await switchChild(childId);
     await switchTab(tab);
+    if (photoId === 'latest') {
+      const latestPhoto = visiblePhotosForChild(
+        state.data.get(childId)?.moments || [],
+        childId,
+      )[0];
+      if (latestPhoto) openViewer(String(latestPhoto.DailyMomentId));
+    } else if (photoId) {
+      openViewer(photoId);
+    }
   }
 
   async function switchTab(tab) {
@@ -2057,7 +2068,10 @@
     resetRangeForTab(tab);
     saveView();
     render();
-    if (tab === 'activity' && state.activityView === 'calendar') {
+    if (tab === 'badges') {
+      await ensureBadgeCatalogLoaded();
+      render();
+    } else if (tab === 'activity' && state.activityView === 'calendar') {
       await loadAndRenderCalendarMonth();
     } else if (usesCurrentWeekByDefault(tab)) {
       await loadAndRenderSelectedWeek();
@@ -3502,9 +3516,64 @@ function openViewer(photoId) {
     }
   }
 
+  async function hydrateBadgeArtwork(token) {
+    if (!('caches' in window) || token !== galleryHydrationToken || !app) return;
+    const images = [...app.querySelectorAll('img[data-badge-image]')];
+    if (!images.length) return;
+    const cache = await badgeCache.open();
+    const hydrate = async image => {
+      if (image.dataset.badgeHydrated === 'true') return;
+      image.dataset.badgeHydrated = 'true';
+      const url = image.dataset.badgeImage;
+      if (!url) return;
+      try {
+        let response = await cache.match(url);
+        if (response) {
+          void badgeCache.touch(url);
+        } else {
+          response = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
+          if (response.ok) await badgeCache.store(cache, url, response);
+        }
+        if (!response?.ok) return;
+        const objectUrl = URL.createObjectURL(await response.blob());
+        if (token !== galleryHydrationToken || !image.isConnected) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+        badgeObjectUrls.add(objectUrl);
+        image.src = objectUrl;
+      } catch (error) {
+        console.warn('[Honeycomb badge cache]', error);
+      }
+    };
+
+    // Do not preload an entire badge catalog on mobile. Cache each image when
+    // it approaches the viewport so opening Badges remains fast.
+    if (!('IntersectionObserver' in window)) {
+      await Promise.all(images.slice(0, 4).map(hydrate));
+      return;
+    }
+    badgeArtworkObserver?.disconnect();
+    badgeArtworkObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        badgeArtworkObserver?.unobserve(entry.target);
+        void hydrate(entry.target);
+      });
+    }, { root: overlay, rootMargin: '480px 0px' });
+    images.forEach(image => badgeArtworkObserver.observe(image));
+  }
+
   function clearGalleryObjectUrls() {
     galleryObjectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
     galleryObjectUrls.clear();
+  }
+
+  function clearBadgeObjectUrls() {
+    badgeArtworkObserver?.disconnect();
+    badgeArtworkObserver = null;
+    badgeObjectUrls.forEach(objectUrl => URL.revokeObjectURL(objectUrl));
+    badgeObjectUrls.clear();
   }
 
   async function photoResponse(moment, signal) {
@@ -3818,11 +3887,12 @@ function openViewer(photoId) {
 
   async function clearPrivateData(resetRuntime = true) {
     clearPhotoObjectUrls();
+    clearBadgeObjectUrls();
     reportDetailCache.clear();
     clearTimeout(cacheSaveTimer);
     const privateKeys = [
       STORAGE.child, STORAGE.tab, STORAGE.favorites, STORAGE.lastSeen, STORAGE.cache,
-      STORAGE.avatars, STORAGE.acknowledgedSupplies, STORAGE.photoCacheIndex, STORAGE.accountScope,
+      STORAGE.avatars, STORAGE.acknowledgedSupplies, STORAGE.photoCacheIndex, STORAGE.badgeCacheIndex, STORAGE.accountScope,
       STORAGE.savedPhotos,
       STORAGE.hiddenPhotos,
     ];
@@ -3833,6 +3903,7 @@ function openViewer(photoId) {
     if ('caches' in window) {
       await Promise.all([
         caches.delete(PHOTO_CACHE_NAME),
+        caches.delete(BADGE_CACHE_NAME),
         caches.delete(PREVIOUS_PHOTO_CACHE_NAME),
         caches.delete(LEGACY_PHOTO_CACHE_NAME),
       ]);
@@ -6070,6 +6141,63 @@ function openViewer(photoId) {
             line-height: 1.35;
         }
 
+        .hcfd2-badge-section {
+            margin-top: 28px;
+        }
+
+        .hcfd2-badge-section > h3,
+        .hcfd2-mobile-badge-section > h3 {
+            margin: 0 0 12px;
+        }
+
+        .hcfd2-unearned-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin: 0 0 14px;
+            padding: 16px 18px;
+            border: 1px solid var(--h-border);
+            border-radius: 16px;
+            background: var(--h-surface-muted);
+        }
+
+        .hcfd2-unearned-heading div { display: grid; gap: 3px; }
+        .hcfd2-unearned-heading span { color: var(--h-muted); font-size: .72rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+        .hcfd2-unearned-heading h3 { margin: 0; }
+        .hcfd2-unearned-heading p { margin: 0; color: var(--h-muted); font-size: .84rem; }
+        .hcfd2-unearned-heading > strong { display: grid; place-items: center; min-width: 42px; height: 42px; border-radius: 50%; background: var(--h-accent); color: #2b210d; font-size: 1rem; }
+
+        .hcfd2-badge-category h4 {
+            margin: 18px 0 10px;
+            color: var(--h-muted);
+            font-size: .84rem;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .hcfd2-unearned-badge {
+            border-style: dashed !important;
+            background: color-mix(in srgb, var(--h-surface-muted) 62%, var(--h-surface)) !important;
+        }
+
+        .hcfd2-unearned-badge .hcfd2-badge-art {
+            opacity: .5;
+            filter: grayscale(.8);
+        }
+
+        .hcfd2-badge-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 22px;
+            padding: 2px 8px;
+            border: 1px solid var(--h-border);
+            border-radius: 999px;
+            color: var(--h-muted);
+            font-size: .7rem;
+            font-weight: 800;
+        }
+
         /*
          * Load-more section
          */
@@ -6775,6 +6903,9 @@ function openViewer(photoId) {
             .hcfd2-mobile-stat-section + .hcfd2-note { margin: 10px 4px; }
 
             .hcfd2-mobile-badges { display: grid; gap: 8px; }
+            .hcfd2-mobile-badge-section { display: grid; gap: 8px; }
+            .hcfd2-mobile-badge-section > h3 { margin: 8px 4px 0; font-size: .92rem; }
+            .hcfd2-mobile-badge-section > p { margin: -2px 4px 2px; color: var(--h-muted); font-size: .75rem; line-height: 1.35; }
             .hcfd2-mobile-badges > header { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--h-border); border-radius: 14px; background: var(--h-surface-muted); }
             .hcfd2-mobile-badges > header > div { display: grid; gap: 1px; }
             .hcfd2-mobile-badges > header span,
@@ -6788,6 +6919,11 @@ function openViewer(photoId) {
             .hcfd2-mobile-badges > details > summary b { transition: transform 0.15s ease; }
             .hcfd2-mobile-badges > details[open] > summary b { transform: rotate(180deg); }
             .hcfd2-mobile-badges > details > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 0 9px 9px; }
+            .hcfd2-mobile-badge-grid,
+            .hcfd2-mobile-badges .hcfd2-unearned-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+            .hcfd2-mobile-badges .hcfd2-unearned-heading { margin-bottom: 9px; padding: 12px; }
+            .hcfd2-mobile-badges .hcfd2-unearned-heading p { font-size: .74rem; }
+            .hcfd2-mobile-badges .hcfd2-unearned-heading > strong { min-width: 34px; height: 34px; font-size: .8rem; }
             .hcfd2-mobile-badges article { display: grid; justify-items: center; align-content: center; gap: 5px; min-height: 108px; padding: 10px 7px; border-radius: 11px; background: var(--h-surface-muted); text-align: center; }
             .hcfd2-mobile-badges .hcfd2-badge-art { width: 80px; height: 80px; }
             .hcfd2-mobile-badges .hcfd2-badge-art > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--h-accent); color: #2b210d; font-size: 1.05rem; }

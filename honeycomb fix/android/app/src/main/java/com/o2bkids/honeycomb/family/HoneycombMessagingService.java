@@ -25,7 +25,8 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
         String type = value(message, "type", "general");
         String childId = value(message, "childId", "");
         String tab = value(message, "tab", "home");
-        showNotification(type, title, body, childId, tab);
+        String photoId = value(message, "photoId", "");
+        showNotification(type, title, body, childId, tab, photoId);
     }
 
     private String value(RemoteMessage message, String key, String fallback) {
@@ -33,7 +34,7 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
         return result == null || result.trim().isEmpty() ? fallback : result;
     }
 
-    private void showNotification(String type, String title, String body, String childId, String tab) {
+    private void showNotification(String type, String title, String body, String childId, String tab, String photoId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) return;
@@ -52,7 +53,8 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
         Intent openApp = new Intent(this, MainActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(MainActivity.EXTRA_NOTIFICATION_CHILD_ID, childId)
-            .putExtra(MainActivity.EXTRA_NOTIFICATION_TAB, tab);
+            .putExtra(MainActivity.EXTRA_NOTIFICATION_TAB, tab)
+            .putExtra(MainActivity.EXTRA_NOTIFICATION_PHOTO_ID, photoId);
         int notificationId = (int) (System.currentTimeMillis() & 0x7fffffff);
         PendingIntent contentIntent = PendingIntent.getActivity(
             this,
