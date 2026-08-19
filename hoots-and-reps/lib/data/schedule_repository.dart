@@ -341,7 +341,7 @@ class ScheduleRepository {
   Future<bool> repairPendingAfterLastCompleted() async {
     final completed = await database.rawQuery(
       '''
-      SELECT a.assigned_date
+      SELECT a.assigned_date, p.sequence_number
       FROM schedule_assignments a
       JOIN workout_prescriptions p ON p.id = a.workout_id
       WHERE a.program_id = ? AND a.status = 'completed'
@@ -358,10 +358,11 @@ class ScheduleRepository {
       JOIN workout_prescriptions p ON p.id = a.workout_id
       WHERE a.program_id = ?
         AND a.status IN ('planned', 'unconfirmed', 'in_progress')
+        AND p.sequence_number > ?
       ORDER BY p.sequence_number
       LIMIT 1
       ''',
-      [programId],
+      [programId, completed.single['sequence_number']! as int],
     );
     if (pending.isEmpty) return false;
 

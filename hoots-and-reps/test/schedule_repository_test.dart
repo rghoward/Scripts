@@ -136,4 +136,19 @@ void main() {
       expect(after[7].date, DateTime(2026, 8, 13));
     },
   );
+
+  test(
+    'does not reflow early unresolved workouts after a later completion',
+    () async {
+      final before = await repository.assignments();
+      await repository.complete(before[11].assignmentId);
+
+      expect(await repository.repairPendingAfterLastCompleted(), isFalse);
+
+      final after = await repository.assignments();
+      expect(after.first.date, before.first.date);
+      expect(after[11].status, ScheduleStatus.completed);
+      expect(after[12].date, before[12].date);
+    },
+  );
 }

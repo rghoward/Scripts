@@ -700,7 +700,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         const [];
     final fractureSeeds =
         await store.getStringList(_progressKey('fracture_seeds')) ?? const [];
-    final completedWorkouts =
+    var completedWorkouts =
         await store.getStringList(_progressKey('completed_workouts')) ??
         const [];
     final partialWorkouts =
@@ -756,6 +756,10 @@ class _WorkoutHomeState extends State<WorkoutHome>
     );
     await _repairIncorrectSnapshotCompletionState(store, scheduleRepository);
     await _repairV6Zone2CalendarAnchor(store, scheduleRepository);
+    await _repairV8CalendarReset(store, scheduleRepository);
+    completedWorkouts =
+        await store.getStringList(_progressKey('completed_workouts')) ??
+        const [];
     var schedule = await scheduleRepository.assignments();
     final completedSequences = completedWorkouts.map(int.parse).toSet();
     for (final assignment in schedule.where(
@@ -1187,8 +1191,20 @@ class _WorkoutHomeState extends State<WorkoutHome>
         }),
       );
     }
-    // The newly active program must not inherit completion flags by display
-    // sequence. The immutable archive above retains the prior program state.
+    final nextSnapshotId = _loadedPublishedSnapshotId;
+    if (nextSnapshotId != null &&
+        _isRevisionOfSamePublishedPhase(current.id, nextSnapshotId) &&
+        completed.isNotEmpty) {
+      // A reviewed revision can improve upcoming programming without sending
+      // an athlete back to day one. Carry only whole-workout completion: the
+      // old section-level details may no longer describe revised content.
+      await store.setStringList(
+        _progressKey('completed_workouts', nextSnapshotId),
+        completed,
+      );
+    }
+    // The immutable archive retains the old snapshot's detailed progress.
+    // A different published phase begins without inherited completion state.
     await store.remove('completed_workouts');
     await store.remove('partial_workouts');
     await store.remove('completed_sections');
@@ -1196,6 +1212,12 @@ class _WorkoutHomeState extends State<WorkoutHome>
     await store.remove(_progressKey('partial_workouts', current.id));
     await store.remove(_progressKey('completed_sections', current.id));
     await store.remove(_progressKey('fracture_seeds', current.id));
+  }
+
+  bool _isRevisionOfSamePublishedPhase(String earlier, String later) {
+    const forgedPhasePrefix = 'forged_phase_2026_07_27_';
+    return earlier.startsWith(forgedPhasePrefix) &&
+        later.startsWith(forgedPhasePrefix);
   }
 
   /// Earlier snapshot builds used sequence-only progress keys. The corrected
@@ -1246,6 +1268,61 @@ class _WorkoutHomeState extends State<WorkoutHome>
     await store.setString(
       'schedule_start',
       DateTime(2026, 8, 3).toIso8601String(),
+    );
+    await store.setBool(repairKey, true);
+  }
+
+  /// One-time recovery for the v8 schedule reset. Its prior reviewed revision
+  /// retained completed Days 6–11 in the immutable archive; Day 12 was then
+  /// completed in v8. Restore the shared phase calendar and carry that whole
+  /// workout history forward without reviving stale section-level details.
+  Future<void> _repairV8CalendarReset(
+    LocalStateStore store,
+    ScheduleRepository scheduleRepository,
+  ) async {
+    const snapshotId = 'forged_phase_2026_07_27_v8_conditioning_surface';
+    const priorSnapshotIds = [
+      'forged_phase_2026_07_27_v7_pressing_adjacency',
+      'forged_phase_2026_07_27_v6_zone2',
+    ];
+    const repairKey = 'repair_v8_calendar_reset_2026_08_18_v2';
+    if (_loadedPublishedSnapshotId != snapshotId ||
+        (await store.getBool(repairKey) ?? false)) {
+      return;
+    }
+    final completed = <int>{
+      for (final value
+          in await store.getStringList(_progressKey('completed_workouts')) ??
+              const <String>[])
+        int.tryParse(value) ?? -1,
+    }..remove(-1);
+    String? archived;
+    for (final priorSnapshotId in priorSnapshotIds) {
+      archived = await store.getString(
+        'archived_program_progress_$priorSnapshotId',
+      );
+      if (archived != null) break;
+    }
+    if (archived != null) {
+      final payload = jsonDecode(archived) as Map<String, dynamic>;
+      for (final value
+          in payload['completed_workouts'] as List<dynamic>? ??
+              const <dynamic>[]) {
+        final sequence = int.tryParse(value.toString());
+        if (sequence != null) completed.add(sequence);
+      }
+    }
+    await scheduleRepository.restoreCanonicalCalendar();
+    final assignments = await scheduleRepository.assignments();
+    for (final assignment in assignments) {
+      if (completed.contains(assignment.sequence) &&
+          assignment.status != ScheduleStatus.completed) {
+        await scheduleRepository.complete(assignment.assignmentId);
+      }
+    }
+    await store.setStringList(
+      _progressKey('completed_workouts'),
+      (completed.toList()..sort()).map((value) => '$value').toList(),
     );
     await store.setBool(repairKey, true);
   }
