@@ -163,6 +163,7 @@ test("Ubuntu push alerts identify each count-only notification category", () => 
   assert.match(ubuntuMonitor, /childId: alert\.childId/);
   assert.match(ubuntuMonitor, /tab: alert\.tab/);
   assert.match(ubuntuMonitor, /photoId: alert\.photoId/);
+  assert.match(ubuntuMonitor, /photoFilename: alert\.photoFilename/);
 });
 
 test("Android push categories have distinct channels, icons, and colors", () => {
@@ -238,6 +239,18 @@ test("photo notification taps open the photo viewer over Today", () => {
     /if \(app\.querySelector\('#hcfd2-viewer:not\(\[hidden\]\)'\)\) \{/,
   );
   assert.match(dashboard, /closeViewer\(\);/);
+});
+
+test("photo notifications attach an authenticated thumbnail for Wear OS", () => {
+  assert.match(ubuntuMonitor, /newMoments\[0\]\.Filename/);
+  assert.match(androidMessaging, /photoFilename/);
+  assert.match(
+    androidMessaging,
+    /CookieManager\.getInstance\(\)\.getCookie\(HONEYCOMB_ORIGIN\)/,
+  );
+  assert.match(androidMessaging, /preset=moment-image-thumb/);
+  assert.match(androidMessaging, /NotificationCompat\.BigPictureStyle/);
+  assert.match(androidMessaging, /MAX_THUMBNAIL_DIMENSION/);
 });
 
 test("login theme keeps accessible focus and reduced-motion behavior", () => {

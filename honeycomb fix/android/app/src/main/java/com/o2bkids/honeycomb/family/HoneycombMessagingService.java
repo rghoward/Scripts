@@ -6,8 +6,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
+import android.webkit.CookieManager;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -16,8 +19,16 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /** Displays count-only family updates sent by the personal Ubuntu monitor. */
 public final class HoneycombMessagingService extends FirebaseMessagingService {
+    private static final String HONEYCOMB_ORIGIN = "https://honeycomb.o2bkids.com";
+    private static final int MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+    private static final int MAX_THUMBNAIL_DIMENSION = 512;
+
     @Override
     public void onMessageReceived(RemoteMessage message) {
         String title = value(message, "title", "Honeycomb update");
@@ -26,7 +37,11 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
         String childId = value(message, "childId", "");
         String tab = value(message, "tab", "home");
         String photoId = value(message, "photoId", "");
-        showNotification(type, title, body, childId, tab, photoId);
+        String photoFilename = value(message, "photoFilename", "");
+        Bitmap thumbnail = "photo".equals(type) && !photoFilename.isEmpty()
+            ? fetchPhotoThumbnail(photoFilename)
+            : null;
+        showNotification(type, title, body, childId, tab, photoId, thumbnail);
     }
 
     private String value(RemoteMessage message, String key, String fallback) {
@@ -34,7 +49,7 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
         return result == null || result.trim().isEmpty() ? fallback : result;
     }
 
-    private void showNotification(String type, String title, String body, String childId, String tab, String photoId) {
+    private void showNotification(String type, String title, String body, String childId, String tab, String photoId, Bitmap thumbnail) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) return;
@@ -73,7 +88,55 @@ public final class HoneycombMessagingService extends FirebaseMessagingService {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(contentIntent);
+        if (thumbnail != null) {
+            notification
+                .setLargeIcon(thumbnail)
+                .setStyle(new NotificationCompat.BigPictureStyle()
+                    .bigPicture(thumbnail)
+                    .bigLargeIcon((Bitmap) null)
+                    .setContentDescription("New Honeycomb photo"));
+        }
         NotificationManagerCompat.from(this).notify(notificationId, notification.build());
+    }
+
+    private Bitmap fetchPhotoThumbnail(String photoFilename) {
+        if (!photoFilename.startsWith("/")) return null;
+        String cookies = CookieManager.getInstance().getCookie(HONEYCOMB_ORIGIN);
+        if (cookies == null || cookies.isEmpty()) return null;
+        HttpURLConnection connection = null;
+        try {
+            String separator = photoFilename.contains("?") ? "&" : "?";
+            URL url = new URL(HONEYCOMB_ORIGIN + photoFilename + separator + "preset=moment-image-thumb");
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(3500);
+            connection.setReadTimeout(5000);
+            connection.setRequestProperty("Cookie", cookies);
+            connection.setRequestProperty("Accept", "image/*");
+            connection.setUseCaches(false);
+            if (connection.getResponseCode() < 200 || connection.getResponseCode() >= 300) return null;
+            if (connection.getContentLengthLong() > MAX_THUMBNAIL_BYTES) return null;
+            try (InputStream stream = connection.getInputStream()) {
+                Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                return scaleThumbnail(bitmap);
+            }
+        } catch (Exception error) {
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private Bitmap scaleThumbnail(Bitmap bitmap) {
+        if (bitmap == null) return null;
+        int largestDimension = Math.max(bitmap.getWidth(), bitmap.getHeight());
+        if (largestDimension <= MAX_THUMBNAIL_DIMENSION) return bitmap;
+        float scale = (float) MAX_THUMBNAIL_DIMENSION / largestDimension;
+        return Bitmap.createScaledBitmap(
+            bitmap,
+            Math.round(bitmap.getWidth() * scale),
+            Math.round(bitmap.getHeight() * scale),
+            true
+        );
     }
 
     private NotificationStyle notificationStyle(String type) {

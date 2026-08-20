@@ -78,13 +78,13 @@ Every 15 minutes, the monitor checks each child for new:
 - photos / daily moments;
 - earned badges.
 
-It sends one count-only FCM summary, for example `Alex: 2 new photos`. It must not include report text, photo URLs, badge details, or other private content.
+It sends one count-only FCM summary, for example `Alex: 2 new photos`. It must not include report text, photo URLs, image bytes, badge details, or other private content. Photo alerts may include the uploaded filename so the phone can fetch its own authenticated thumbnail for the paired watch.
 
 The badge-alert support is already committed in the latest `main` branch. Existing monitor state silently establishes a badge baseline once, so old badges do not cause an alert flood.
 
 ## Exact photo-opening update
 
-The latest `main` branch adds a `photoId` to new photo-alert payloads. This lets the Android app open the exact alerted photo, with Back returning to that child's Today screen.
+The latest `main` branch adds a `photoId` and uploaded filename to new photo-alert payloads. This lets the Android app open the exact alerted photo, with Back returning to that child's Today screen, and fetch a private thumbnail for the bridged Wear OS notification.
 
 On an already configured Ubuntu monitor, pull and restart the timer-backed service so future alerts include this field:
 

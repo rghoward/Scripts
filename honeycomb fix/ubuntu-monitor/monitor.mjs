@@ -113,7 +113,7 @@ const notificationTypes = {
   test: { title: 'Honeycomb test', tab: 'home' },
 };
 
-function notification(type, body, childId = '', photoId = '') {
+function notification(type, body, childId = '', photoId = '', photoFilename = '') {
   const details = notificationTypes[type] || { title: 'Honeycomb update', tab: 'home' };
   return {
     type,
@@ -122,6 +122,7 @@ function notification(type, body, childId = '', photoId = '') {
     childId: String(childId),
     tab: details.tab,
     photoId: String(photoId),
+    photoFilename: String(photoFilename),
   };
 }
 
@@ -169,6 +170,7 @@ async function sendFirebase(alert) {
       childId: alert.childId,
       tab: alert.tab,
       photoId: alert.photoId,
+      photoFilename: alert.photoFilename,
     },
     android: { priority: 'high' },
   });
@@ -264,6 +266,7 @@ async function monitor() {
           `${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
           reading.childId,
           newMoments[0].DailyMomentId,
+          newMoments[0].Filename,
         ));
         const otherReports = newReports.length - supplies;
         if (otherReports) alerts.push(notification(
