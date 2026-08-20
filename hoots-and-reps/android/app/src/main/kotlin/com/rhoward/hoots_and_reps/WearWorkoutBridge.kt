@@ -12,4 +12,8 @@ object WearWorkoutBridge {
     fun dispatch(action: String) {
         mainHandler.post { channel?.invokeMethod("watchAction", action) }
     }
+
+    fun notifyActionsAvailable() {
+        mainHandler.post { channel?.invokeMethod("watchActionsAvailable", null) }
+    }
 }

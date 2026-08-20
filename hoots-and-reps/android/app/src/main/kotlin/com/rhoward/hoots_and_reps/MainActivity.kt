@@ -203,6 +203,7 @@ class MainActivity : FlutterFragmentActivity(), DisplayManager.DisplayListener, 
                     result.success(null)
                 }
             }
+            "drainWatchActions" -> result.success(WatchActionInbox.drain(this))
             else -> result.notImplemented()
         }
     }

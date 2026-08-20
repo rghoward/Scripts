@@ -208,6 +208,10 @@ class AthleteSettings {
     this.availableEquipment = const {},
     this.trainingDays = const {1, 2, 3, 4},
     this.preferredSessionMinutes = 90,
+    this.displayName = '',
+    this.birthYear,
+    this.birthMonth,
+    this.birthDay,
     this.skillQualifications = const {
       'olympicLifting',
       'overheadSquat',
@@ -266,6 +270,12 @@ class AthleteSettings {
   final Set<String> availableEquipment;
   final Set<int> trainingDays;
   final int preferredSessionMinutes;
+  final String displayName;
+
+  /// Used only to estimate display-only heart-rate zones on the watch.
+  final int? birthYear;
+  final int? birthMonth;
+  final int? birthDay;
   final Set<String> skillQualifications;
 
   Map<String, double> get effectiveTrainingMaxesLb => {
@@ -329,6 +339,16 @@ class AthleteSettings {
         preferredSessionMinutes: value['preferred_session_minutes'] == 60
             ? 60
             : 90,
+        birthYear: value['birth_year'] is num
+            ? (value['birth_year'] as num).toInt()
+            : null,
+        birthMonth: value['birth_month'] is num
+            ? (value['birth_month'] as num).toInt()
+            : null,
+        birthDay: value['birth_day'] is num
+            ? (value['birth_day'] as num).toInt()
+            : null,
+        displayName: value['display_name']?.toString().trim() ?? '',
         skillQualifications: {
           for (final item
               in (value['skill_qualifications'] as List? ??
@@ -367,6 +387,10 @@ class AthleteSettings {
     'available_equipment': availableEquipment.toList()..sort(),
     'training_days': trainingDays.toList()..sort(),
     'preferred_session_minutes': preferredSessionMinutes,
+    if (displayName.isNotEmpty) 'display_name': displayName,
+    if (birthYear != null) 'birth_year': birthYear,
+    if (birthMonth != null) 'birth_month': birthMonth,
+    if (birthDay != null) 'birth_day': birthDay,
     'skill_qualifications': skillQualifications.toList()..sort(),
   });
 }
@@ -378,6 +402,7 @@ class AthleteProfilePage extends StatefulWidget {
     this.strengthOnly = false,
     this.focusLiftKey,
     this.skillsOnly = false,
+    this.identityOnly = false,
     this.benchmarksOnly = false,
     this.benchmarkHistory = const [],
     this.onBenchmarkEdited,
@@ -389,6 +414,7 @@ class AthleteProfilePage extends StatefulWidget {
   final bool strengthOnly;
   final String? focusLiftKey;
   final bool skillsOnly;
+  final bool identityOnly;
   final bool benchmarksOnly;
   final List<BenchmarkResultEvent> benchmarkHistory;
   final Future<void> Function(BenchmarkResultEvent event)? onBenchmarkEdited;
@@ -410,6 +436,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
   late Set<String> _availableEquipment;
   late TextEditingController _injuryNotes;
   late TextEditingController _movementSearch;
+  late TextEditingController _birthYear;
+  late TextEditingController _birthMonth;
+  late TextEditingController _birthDay;
+  late TextEditingController _displayName;
   late List<BenchmarkResultEvent> _benchmarkHistory;
   bool _saving = false;
 
@@ -427,6 +457,16 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
       text: widget.initial.reportedInjuries.join('\n'),
     );
     _movementSearch = TextEditingController();
+    _birthYear = TextEditingController(
+      text: widget.initial.birthYear?.toString() ?? '',
+    );
+    _birthMonth = TextEditingController(
+      text: widget.initial.birthMonth?.toString() ?? '',
+    );
+    _birthDay = TextEditingController(
+      text: widget.initial.birthDay?.toString() ?? '',
+    );
+    _displayName = TextEditingController(text: widget.initial.displayName);
     _benchmarkHistory = [...widget.benchmarkHistory];
     _populateControllers();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -492,6 +532,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
 
   void _save() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    final birthYear = int.tryParse(_birthYear.text.trim());
+    final birthMonth = int.tryParse(_birthMonth.text.trim());
+    final birthDay = int.tryParse(_birthDay.text.trim());
+    final displayName = _displayName.text.trim();
     final prs = <String, double>{};
     final maxes = <String, double>{};
     for (final lift in liftDefinitions) {
@@ -526,6 +570,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
             .map((line) => line.trim())
             .where((line) => line.isNotEmpty)
             .toList(growable: false),
+        birthYear: birthYear,
+        birthMonth: birthMonth,
+        birthDay: birthDay,
+        displayName: displayName,
       ),
     );
   }
@@ -533,6 +581,12 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
   bool get _hasUnsavedChanges {
     if (widget.benchmarksOnly) return false;
     if (_unit != widget.initial.unit ||
+        _displayName.text.trim() != widget.initial.displayName ||
+        _birthYear.text.trim() !=
+            (widget.initial.birthYear?.toString() ?? '') ||
+        _birthMonth.text.trim() !=
+            (widget.initial.birthMonth?.toString() ?? '') ||
+        _birthDay.text.trim() != (widget.initial.birthDay?.toString() ?? '') ||
         !mapEquals(_movementPreferences, widget.initial.movementPreferences) ||
         !setEquals(_restrictedPatterns, widget.initial.restrictedPatterns) ||
         !setEquals(_skillQualifications, widget.initial.skillQualifications) ||
@@ -593,6 +647,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
     }
     _injuryNotes.dispose();
     _movementSearch.dispose();
+    _birthYear.dispose();
+    _birthMonth.dispose();
+    _birthDay.dispose();
+    _displayName.dispose();
     super.dispose();
   }
 
@@ -617,6 +675,8 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
               ? 'STRENGTH RECORDS'
               : widget.skillsOnly
               ? 'SKILLS & EXPERIENCE'
+              : widget.identityOnly
+              ? 'ATHLETE DETAILS'
               : widget.benchmarksOnly
               ? 'BENCHMARK CHRONICLE'
               : 'STRENGTH VAULT',
@@ -626,7 +686,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
           ),
         ),
         actions: [
-          if (widget.movementOnly || widget.skillsOnly || widget.strengthOnly)
+          if (widget.movementOnly ||
+              widget.skillsOnly ||
+              widget.strengthOnly ||
+              widget.identityOnly)
             TextButton(
               onPressed: _save,
               child: const Text(
@@ -680,6 +743,10 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
                   _skillsHeader(),
                   const SizedBox(height: 14),
                   _skillQualificationsCard(),
+                ] else if (widget.identityOnly) ...[
+                  _identityHeader(),
+                  const SizedBox(height: 14),
+                  _heartRateSettingsCard(),
                 ] else if (widget.benchmarksOnly) ...[
                   const _SectionBanner(
                     icon: Icons.timeline_outlined,
@@ -729,6 +796,15 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
                   ),
                   const SizedBox(height: 18),
                   const _SectionBanner(
+                    icon: Icons.favorite_outline,
+                    title: 'WATCH HEART-RATE ZONES',
+                    subtitle:
+                        'Birth year estimates watch-only training zones. It is not medical guidance.',
+                  ),
+                  const SizedBox(height: 10),
+                  _heartRateSettingsCard(),
+                  const SizedBox(height: 14),
+                  const _SectionBanner(
                     icon: Icons.shield_outlined,
                     title: 'RECORDS OF POWER',
                     subtitle:
@@ -747,7 +823,6 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
                     const SizedBox(height: 10),
                     _benchmarkHistoryCard(),
                   ],
-                  const SizedBox(height: 14),
                   const _SectionBanner(
                     icon: Icons.workspace_premium_outlined,
                     title: 'SKILLS & EXPERIENCE',
@@ -802,6 +877,8 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
                             ? 'SAVE MOVEMENT SETTINGS'
                             : widget.skillsOnly
                             ? 'SAVE SKILL SETTINGS'
+                            : widget.identityOnly
+                            ? 'SAVE ATHLETE DETAILS'
                             : 'FORGE NEW TRAINING MAXES',
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
@@ -937,6 +1014,136 @@ class _AthleteProfilePageState extends State<AthleteProfilePage> {
       ],
     ),
   );
+
+  Widget _identityHeader() => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: _cyan.withValues(alpha: .7)),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xff122b43), _card],
+      ),
+    ),
+    child: const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ATHLETE DETAILS',
+          style: TextStyle(
+            color: _cyan,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        SizedBox(height: 7),
+        Text(
+          'Your name personalizes Hoots. Birth year estimates watch heart-rate zones.',
+          style: TextStyle(color: _muted, height: 1.4),
+        ),
+      ],
+    ),
+  );
+  Widget _heartRateSettingsCard() {
+    final year = int.tryParse(_birthYear.text.trim());
+    final month = int.tryParse(_birthMonth.text.trim());
+    final day = int.tryParse(_birthDay.text.trim());
+    final today = DateTime.now();
+    final age = year == null
+        ? null
+        : today.year -
+              year -
+              ((month != null &&
+                      day != null &&
+                      (today.month < month ||
+                          (today.month == month && today.day < day)))
+                  ? 1
+                  : 0);
+    final estimatedMax = age == null ? null : (208 - (.7 * age)).round();
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: _border.withValues(alpha: .8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: _displayName,
+            textCapitalization: TextCapitalization.words,
+            maxLength: 40,
+            style: const TextStyle(color: _ink, fontWeight: FontWeight.w800),
+            decoration: const InputDecoration(
+              labelText: 'Name',
+              hintText: 'What should Hoots call you?',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _birthField(_birthMonth, 'Month', 1, 12)),
+              const SizedBox(width: 8),
+              Expanded(child: _birthField(_birthDay, 'Day', 1, 31)),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _birthField(
+                  _birthYear,
+                  'Year',
+                  1900,
+                  DateTime.now().year - 13,
+                ),
+              ),
+            ],
+          ),
+          if (estimatedMax != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Estimated max HR: $estimatedMax BPM',
+              style: const TextStyle(
+                color: _ember,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Watch zones use 50–60%, 60–70%, 70–80%, 80–90%, and 90%+ of this estimate.',
+              style: TextStyle(color: _muted, height: 1.35),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _birthField(
+    TextEditingController controller,
+    String label,
+    int minimum,
+    int maximum,
+  ) => TextFormField(
+    controller: controller,
+    keyboardType: TextInputType.number,
+    style: const TextStyle(color: _ink, fontWeight: FontWeight.w800),
+    decoration: InputDecoration(labelText: label),
+    onChanged: (_) => setState(() {}),
+    validator: (value) {
+      final hasAnyBirthValue =
+          _birthMonth.text.trim().isNotEmpty ||
+          _birthDay.text.trim().isNotEmpty ||
+          _birthYear.text.trim().isNotEmpty;
+      if (!hasAnyBirthValue) return null;
+      final parsed = int.tryParse(value?.trim() ?? '');
+      if (parsed == null || parsed < minimum || parsed > maximum) {
+        return '$minimum–$maximum';
+      }
+      return null;
+    },
+  );
+
   Widget _liftCard(LiftDefinition lift) => Container(
     key: _liftCardKeys[lift.key],
     margin: const EdgeInsets.only(bottom: 10),

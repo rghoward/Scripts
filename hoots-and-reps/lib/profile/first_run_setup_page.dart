@@ -13,6 +13,18 @@ class FirstRunSetupPage extends StatefulWidget {
 class _FirstRunSetupPageState extends State<FirstRunSetupPage> {
   var _step = 0;
   late int _minutes = widget.initial.preferredSessionMinutes;
+  late final TextEditingController _displayName = TextEditingController(
+    text: widget.initial.displayName,
+  );
+  late final TextEditingController _birthYear = TextEditingController(
+    text: widget.initial.birthYear?.toString() ?? '',
+  );
+  late final TextEditingController _birthMonth = TextEditingController(
+    text: widget.initial.birthMonth?.toString() ?? '',
+  );
+  late final TextEditingController _birthDay = TextEditingController(
+    text: widget.initial.birthDay?.toString() ?? '',
+  );
   late final Set<String> _equipment = widget.initial.availableEquipment.isEmpty
       ? {...equipmentLabels.keys}
       : {...widget.initial.availableEquipment};
@@ -29,7 +41,20 @@ class _FirstRunSetupPageState extends State<FirstRunSetupPage> {
     skillQualifications: _skills,
     trainingDays: widget.initial.trainingDays,
     preferredSessionMinutes: _minutes,
+    birthYear: int.tryParse(_birthYear.text.trim()),
+    birthMonth: int.tryParse(_birthMonth.text.trim()),
+    birthDay: int.tryParse(_birthDay.text.trim()),
+    displayName: _displayName.text.trim(),
   );
+
+  @override
+  void dispose() {
+    _birthYear.dispose();
+    _birthMonth.dispose();
+    _birthDay.dispose();
+    _displayName.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -46,7 +71,7 @@ class _FirstRunSetupPageState extends State<FirstRunSetupPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'STEP ${_step + 1} OF 3',
+              'STEP ${_step + 1} OF 4',
               style: const TextStyle(
                 color: Color(0xff56d7ff),
                 fontWeight: FontWeight.w900,
@@ -63,10 +88,10 @@ class _FirstRunSetupPageState extends State<FirstRunSetupPage> {
                   ),
                 const Spacer(),
                 FilledButton(
-                  onPressed: _step == 2
+                  onPressed: _step == 3
                       ? () => Navigator.pop(context, _settings)
                       : () => setState(() => _step++),
-                  child: Text(_step == 2 ? 'FINISH SETUP' : 'CONTINUE'),
+                  child: Text(_step == 3 ? 'FINISH SETUP' : 'CONTINUE'),
                 ),
               ],
             ),
@@ -78,6 +103,69 @@ class _FirstRunSetupPageState extends State<FirstRunSetupPage> {
 
   Widget _body() => switch (_step) {
     0 => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'ATHLETE DETAILS',
+          style: TextStyle(
+            color: Color(0xfff7f5ef),
+            fontSize: 25,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Tell Hoots what to call you. Your date of birth estimates watch-only heart-rate zones and can be edited later.',
+          style: TextStyle(color: Color(0xffada6c1), height: 1.4),
+        ),
+        const SizedBox(height: 22),
+        TextField(
+          controller: _displayName,
+          textCapitalization: TextCapitalization.words,
+          style: const TextStyle(color: Color(0xfff7f5ef)),
+          decoration: const InputDecoration(
+            labelText: 'Name',
+            hintText: 'Example: Rowan',
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _birthMonth,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Color(0xfff7f5ef)),
+                decoration: const InputDecoration(labelText: 'Month'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _birthDay,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Color(0xfff7f5ef)),
+                decoration: const InputDecoration(labelText: 'Day'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 2,
+              child: TextField(
+                controller: _birthYear,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Color(0xfff7f5ef)),
+                decoration: const InputDecoration(
+                  labelText: 'Year',
+                  hintText: '1988',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+    1 => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
@@ -104,7 +192,7 @@ class _FirstRunSetupPageState extends State<FirstRunSetupPage> {
         ),
       ],
     ),
-    1 => _switchList(
+    2 => _switchList(
       'EQUIPMENT ACCESS',
       'Only enable what you can normally use. Future workouts adapt to this.',
       equipmentLabels,

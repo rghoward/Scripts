@@ -15,7 +15,9 @@ data class WatchFaceState(
     val timer: String = "—",
     val detail: String = "Choose a section on your phone",
     val heartRate: String = "— BPM",
+    val heartRateZone: Int? = null,
     val tracker: String = "",
+    val roundActionLabel: String = "✓  ROUND",
     val primaryLabel: String = "OPEN",
     val canAdvance: Boolean = false,
 )
@@ -55,47 +57,41 @@ class RoundWorkoutView(context: Context) : View(context) {
             canvas.drawText(text, x, y, paint)
         }
         fun trimmed(text: String, max: Int) = if (text.length > max) "${text.take(max - 1)}…" else text
-        fun control(x: Float, symbol: String, enabled: Boolean, caption: String) {
-            paint.style = Paint.Style.FILL; paint.color = if (enabled) SURFACE else DIM_SURFACE
-            canvas.drawCircle(x, size * .78f, size * .07f, paint)
-            paint.style = Paint.Style.STROKE; paint.strokeWidth = size * .006f; paint.color = if (enabled) GOLD else DIM
-            canvas.drawCircle(x, size * .78f, size * .07f, paint)
-            paint.style = Paint.Style.FILL
-            labelAt(symbol, x, size * .797f, size * .05f, if (enabled) INK else DIM, true)
-            labelAt(caption, x, size * .89f, size * .02f, if (enabled) MUTED else DIM)
-        }
 
-        labelAt("HOOTS & REPS", size * .36f, size * .12f, size * .03f, GOLD, true)
-        labelAt("HR  ${state.heartRate}", size * .68f, size * .12f, size * .023f, MUTED, true)
-        label(trimmed(state.phase.uppercase(), 19), size * .255f, size * .05f, INK, true)
-        label(state.timer, size * .455f, size * .165f, INK, true)
-        label(trimmed(state.detail, 31), size * .515f, size * .034f, MUTED)
+        labelAt(state.heartRate, cx, size * .13f, size * .07f, heartRateColor(state.heartRateZone), true)
+        label(trimmed(state.phase.uppercase(), 17), size * .25f, size * .06f, INK, true)
+        label(state.timer, size * .44f, size * .18f, INK, true)
+        label(trimmed(state.detail, 24), size * .525f, size * .045f, MUTED, true)
         if (state.tracker.isNotBlank()) {
-            paint.style = Paint.Style.FILL; paint.color = SURFACE
-            canvas.drawRoundRect(RectF(size * .24f, size * .555f, size * .76f, size * .62f), size * .035f, size * .035f, paint)
-            paint.style = Paint.Style.STROKE; paint.strokeWidth = size * .005f; paint.color = GOLD
-            canvas.drawRoundRect(RectF(size * .24f, size * .555f, size * .76f, size * .62f), size * .035f, size * .035f, paint)
-            paint.style = Paint.Style.FILL
-            label(trimmed(state.tracker, 23), size * .598f, size * .031f, GOLD, true)
+            label(trimmed(state.tracker, 22), size * .60f, size * .046f, GOLD, true)
         }
-        control(size * .28f, "−", state.canAdvance, "UNDO")
-        control(cx, if (state.primaryLabel == "PAUSE") "||" else "▶", true, state.primaryLabel)
-        control(size * .72f, "+", state.canAdvance, "NEXT")
+        // Round controls are contextual. A quiet, uncluttered watch face is
+        // safer than showing disabled controls for sections that do not count.
+        if (state.canAdvance) {
+            val roundControls = RectF(size * .14f, size * .64f, size * .86f, size * .84f)
+            paint.style = Paint.Style.FILL; paint.color = SURFACE
+            canvas.drawRoundRect(roundControls, size * .065f, size * .065f, paint)
+            paint.style = Paint.Style.STROKE; paint.strokeWidth = size * .007f; paint.color = GOLD
+            canvas.drawRoundRect(roundControls, size * .065f, size * .065f, paint)
+            paint.color = DIM; paint.strokeWidth = size * .004f
+            canvas.drawLine(size * .47f, size * .67f, size * .47f, size * .81f, paint)
+            paint.style = Paint.Style.FILL
+            labelAt("↶", size * .305f, size * .765f, size * .082f, INK, true)
+            labelAt(if (state.roundActionLabel == "FINISH") "✓" else "+", size * .665f, size * .765f, size * .09f, ZONE_2, true)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return true
         val size = min(width, height).toFloat()
-        val controlY = size * .78f
-        val hitRadius = size * .11f
-        if (event.y >= controlY - hitRadius) {
-            when {
-                event.x < size * .4f -> onPrevious?.invoke()
-                event.x > size * .6f -> onNext?.invoke()
-                else -> onPrimary?.invoke()
-            }
-        } else {
-            onPrimary?.invoke()
+        val hasRoundControls = state.canAdvance
+        when {
+            event.x >= size * .18f && event.x <= size * .82f &&
+                event.y >= size * .27f && event.y <= size * .50f -> onPrimary?.invoke()
+            hasRoundControls && event.x >= size * .14f && event.x <= size * .47f &&
+                event.y >= size * .64f && event.y <= size * .84f -> onPrevious?.invoke()
+            hasRoundControls && event.x >= size * .47f && event.x <= size * .86f &&
+                event.y >= size * .64f && event.y <= size * .84f -> onNext?.invoke()
         }
         return true
     }
@@ -108,5 +104,19 @@ class RoundWorkoutView(context: Context) : View(context) {
         private const val MUTED = 0xffada6c1.toInt()
         private const val DIM = 0xff555064.toInt()
         private const val GOLD = 0xffffc44e.toInt()
+        private const val ZONE_1 = 0xff56d7ff.toInt()
+        private const val ZONE_2 = 0xff70e0a1.toInt()
+        private const val ZONE_3 = GOLD
+        private const val ZONE_4 = 0xffff963f.toInt()
+        private const val ZONE_5 = 0xffff5c73.toInt()
+    }
+
+    private fun heartRateColor(zone: Int?): Int = when (zone) {
+        1 -> ZONE_1
+        2 -> ZONE_2
+        3 -> ZONE_3
+        4 -> ZONE_4
+        5 -> ZONE_5
+        else -> MUTED
     }
 }

@@ -26,12 +26,15 @@ import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.DataTypeAvailability
 import androidx.health.services.client.data.ExerciseConfig
 import androidx.health.services.client.data.ExerciseLapSummary
+import androidx.health.services.client.data.ExerciseTrackedStatus
 import androidx.health.services.client.data.ExerciseType
 import androidx.health.services.client.data.ExerciseUpdate
 import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.wearable.PutDataMapRequest
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.max
+import java.util.UUID
 
 /** A deliberately buttonless round-face companion. The phone owns the workout
  * plan; this screen only renders and controls that exact shared plan. */
@@ -43,6 +46,18 @@ class WearWorkoutActivity : Activity() {
     private var locallyPaused = false
     private var latestBpm: Double? = null
     private var currentSession: JSONObject? = null
+    // Render timer taps locally at once; the durable phone sync replaces this
+    // short-lived prediction as soon as its updated session arrives.
+    private var optimisticTimerCommand: String? = null
+    private var optimisticElapsedBase: Long? = null
+    private var optimisticSentAtEpochMs: Long? = null
+    private var optimisticRoundDelta = 0
+    private var awaitingRoundCompletion = false
+    private var completionPending = false
+    private var completionSent = false
+    private var completedPausedSession: JSONObject? = null
+    private var completedElapsedSeconds: Long = 0
+    private var completedRoundSummary = ""
 
     private lateinit var timer: TextView
     private lateinit var phase: TextView
@@ -70,7 +85,8 @@ class WearWorkoutActivity : Activity() {
             update.latestMetrics.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let {
                 runOnUiThread {
                     latestBpm = it.value
-                    heartRate.text = "${it.value.toInt()} BPM"
+                    heartRate.text = formatHeartRate(it.value.toInt())
+                    renderFace()
                 }
             }
         }
@@ -94,10 +110,17 @@ class WearWorkoutActivity : Activity() {
         mainHandler.post(uiTicker)
     }
 
+    override fun onResume() {
+        super.onResume()
+        reconnectOwnedExercise()
+    }
+
     override fun onDestroy() {
         mainHandler.removeCallbacks(uiTicker)
         unregisterReceiver(sessionReceiver)
-        if (startedAtElapsedMs != null) stopHeartRateWorkout()
+        // Do not end the Health Services workout merely because Android has
+        // recreated this activity. The foreground service keeps it owned and
+        // onResume reconnects the callback to the same live exercise.
         super.onDestroy()
     }
 
@@ -111,11 +134,36 @@ class WearWorkoutActivity : Activity() {
             view.onPrimary = { onFacePressed() }
             view.onPrevious = {
                 if (progress.text.isNotBlank() && sendWatchAction("rewindProgress")) {
+                    optimisticRoundDelta--
+                    renderSession()
                     window.decorView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 }
             }
             view.onNext = {
-                if (progress.text.isNotBlank() && sendWatchAction("advanceProgress")) {
+                val manual = currentSession?.optJSONObject("timer")?.optJSONObject("manualProgress")
+                val target = manual?.optInt("target", 0) ?: 0
+                val current = (manual?.optInt("value", 0) ?: 0) + optimisticRoundDelta
+                if (target > 0 && current >= target) {
+                    if (!completionSent && awaitingRoundCompletion && sendWatchAction("complete")) {
+                        awaitingRoundCompletion = false
+                        completionPending = true
+                        completionSent = true
+                        completedElapsedSeconds = currentElapsedSeconds(currentSession?.optJSONObject("timer"))
+                        val manual = currentSession?.optJSONObject("timer")?.optJSONObject("manualProgress")
+                        val rounds = max(0, (manual?.optInt("value", 0) ?: 0) + optimisticRoundDelta)
+                        val target = manual?.optInt("target", 0) ?: 0
+                        completedRoundSummary = if (target > 0) "$rounds / $target ROUNDS" else "$rounds ROUNDS"
+                        forceOptimisticPause(currentSession?.optJSONObject("timer"))
+                        if (startedAtElapsedMs != null && !locallyPaused) toggleHeartRateWorkout()
+                        prompt.text = "COMPLETING ON PHONE"
+                    } else {
+                        awaitingRoundCompletion = true
+                        renderSession()
+                    }
+                } else if (progress.text.isNotBlank() && sendWatchAction("advanceProgress")) {
+                    optimisticRoundDelta++
+                    awaitingRoundCompletion = target > 0 && current + 1 >= target
+                    renderSession()
                     window.decorView.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                 }
             }
@@ -123,7 +171,33 @@ class WearWorkoutActivity : Activity() {
     }
 
     private fun showSessionState() {
-        currentSession = WatchSessionStore.read(this)?.let { raw -> runCatching { JSONObject(raw) }.getOrNull() }
+        val received = WatchSessionStore.read(this)?.let { raw -> runCatching { JSONObject(raw) }.getOrNull() }
+        val receivedTimer = received?.optJSONObject("timer")
+        val currentIndex = currentSession?.optInt("sectionIndex", -1) ?: -1
+        val receivedIndex = received?.optInt("sectionIndex", -1) ?: -1
+        if (completionPending && (receivedTimer == null || receivedIndex != currentIndex)) {
+            completionPending = false
+            completedPausedSession = null
+            completionSent = false
+        }
+        if (completionPending && receivedTimer?.optString("command") == "pause") {
+            completedPausedSession = received
+        }
+        // A round update can arrive after the finish event. Retain the latest
+        // paused envelope until the next section replaces it.
+        val retainedRunningUpdate = completionPending && receivedTimer?.optString("command") != "pause"
+        currentSession = if (retainedRunningUpdate) {
+            completedPausedSession ?: currentSession ?: received
+        } else {
+            received
+        }
+        if (!retainedRunningUpdate) {
+            optimisticTimerCommand = null
+            optimisticElapsedBase = null
+            optimisticSentAtEpochMs = null
+        }
+        optimisticRoundDelta = 0
+        awaitingRoundCompletion = false
         renderSession()
     }
 
@@ -132,7 +206,7 @@ class WearWorkoutActivity : Activity() {
         val primary = when {
             currentSession == null -> "OPEN"
             timerEnvelope == null -> "START"
-            timerEnvelope.optString("command") == "pause" -> "RESUME"
+            (optimisticTimerCommand ?: timerEnvelope.optString("command")) == "pause" -> "RESUME"
             else -> "PAUSE"
         }
         face.render(
@@ -141,14 +215,17 @@ class WearWorkoutActivity : Activity() {
                 timer = timer.text.toString(),
                 detail = detail.text.toString(),
                 heartRate = heartRate.text.toString(),
+                heartRateZone = latestBpm?.let { heartRateZone(it.toInt()) },
                 tracker = progress.text.toString(),
+                roundActionLabel = if (awaitingRoundCompletion) "FINISH" else "✓  ROUND",
                 primaryLabel = primary,
-                canAdvance = progress.text.isNotBlank(),
+                canAdvance = progress.text.isNotBlank() && !completionSent,
             ),
         )
     }
 
     private fun onFacePressed() {
+        if (completionSent) return
         val session = currentSession
         if (session == null) {
             prompt.text = "OPEN GUIDED WORKOUT ON PHONE"
@@ -160,6 +237,7 @@ class WearWorkoutActivity : Activity() {
             prompt.text = "PHONE CONNECTION NEEDED"
             return
         }
+        if (hasTimer) applyOptimisticTimerToggle(session.optJSONObject("timer"))
         if (startedAtElapsedMs == null) requestHeartRateThenStart()
         else if (hasTimer) toggleHeartRateWorkout()
         window.decorView.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -169,11 +247,23 @@ class WearWorkoutActivity : Activity() {
     private fun renderSession() {
         val session = currentSession
         if (session == null) {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            renderFace()
+            return
+        }
+        if (completionSent) {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            phase.text = "COMPLETE"
+            timer.text = format(completedElapsedSeconds)
+            detail.text = completedRoundSummary.ifBlank { "WORKOUT COMPLETE" }
+            progress.text = "FINAL TIME"
+            prompt.text = "CHECK PHONE"
             renderFace()
             return
         }
         val timerEnvelope = session.optJSONObject("timer")
         if (timerEnvelope == null) {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             phase.text = session.optString("sectionTitle", "READY")
             timer.text = "READY"
             detail.text = "TAP FACE TO START · ${session.optString("sectionBody", "").take(24)}"
@@ -182,17 +272,68 @@ class WearWorkoutActivity : Activity() {
             renderFace()
             return
         }
+        // This is an active, foreground exercise display. Keeping the screen
+        // awake prevents Wear OS from immediately returning to the watch face
+        // while the athlete is using the timer.
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val plan = timerEnvelope.optJSONObject("plan") ?: return
         val manual = timerEnvelope.optJSONObject("manualProgress")
         progress.text = manual?.let {
-            "${it.optString("kind", "ROUND")} ${it.optInt("value", 0)}  ·  TAP TO ADD"
+            val value = max(0, it.optInt("value", 0) + optimisticRoundDelta)
+            val target = it.optInt("target", 0)
+            when {
+                target > 0 && awaitingRoundCompletion -> "$value / $target • FINISH?"
+                target > 0 -> "$value / $target ROUNDS"
+                else -> "$value ${it.optString("kind", "ROUND")}S COMPLETE"
+            }
         } ?: ""
-        val elapsedBase = plan.optLong("startOffsetSeconds", 0)
-        val command = timerEnvelope.optString("command", "start")
-        val sentAt = timerEnvelope.optLong("sentAtEpochMs", System.currentTimeMillis())
+        val elapsedBase = optimisticElapsedBase ?: plan.optLong("startOffsetSeconds", 0)
+        val command = optimisticTimerCommand ?: timerEnvelope.optString("command", "start")
+        val sentAt = optimisticSentAtEpochMs ?: timerEnvelope.optLong("sentAtEpochMs", System.currentTimeMillis())
         val elapsed = elapsedBase + if (command == "pause") 0 else max(0, (System.currentTimeMillis() - sentAt) / 1_000)
         renderPlan(plan.optJSONArray("phases") ?: JSONArray(), elapsed, plan)
-        prompt.text = if (command == "pause") "TAP ANYWHERE TO RESUME" else "TAP ANYWHERE TO PAUSE"
+        if (command == "pause") {
+            phase.text = "PAUSED"
+            detail.text = "TAP THE TIMER TO RESUME"
+            renderFace()
+        }
+        prompt.text = if (command == "pause") "TAP TIMER TO RESUME" else "TAP TIMER TO PAUSE"
+    }
+
+    private fun applyOptimisticTimerToggle(timerEnvelope: JSONObject?) {
+        val plan = timerEnvelope?.optJSONObject("plan") ?: return
+        val command = optimisticTimerCommand ?: timerEnvelope.optString("command", "start")
+        val base = optimisticElapsedBase ?: plan.optLong("startOffsetSeconds", 0)
+        val sentAt = optimisticSentAtEpochMs ?: timerEnvelope.optLong("sentAtEpochMs", System.currentTimeMillis())
+        if (command == "pause") {
+            optimisticTimerCommand = "start"
+            optimisticElapsedBase = base
+            optimisticSentAtEpochMs = System.currentTimeMillis()
+        } else {
+            optimisticTimerCommand = "pause"
+            optimisticElapsedBase = base + max(0, (System.currentTimeMillis() - sentAt) / 1_000)
+            optimisticSentAtEpochMs = System.currentTimeMillis()
+        }
+        renderSession()
+    }
+
+    private fun forceOptimisticPause(timerEnvelope: JSONObject?) {
+        val plan = timerEnvelope?.optJSONObject("plan") ?: return
+        val command = optimisticTimerCommand ?: timerEnvelope.optString("command", "start")
+        val base = optimisticElapsedBase ?: plan.optLong("startOffsetSeconds", 0)
+        val sentAt = optimisticSentAtEpochMs ?: timerEnvelope.optLong("sentAtEpochMs", System.currentTimeMillis())
+        optimisticTimerCommand = "pause"
+        optimisticElapsedBase = if (command == "pause") base else base + max(0, (System.currentTimeMillis() - sentAt) / 1_000)
+        optimisticSentAtEpochMs = System.currentTimeMillis()
+        renderSession()
+    }
+
+    private fun currentElapsedSeconds(timerEnvelope: JSONObject?): Long {
+        val plan = timerEnvelope?.optJSONObject("plan") ?: return 0
+        val command = optimisticTimerCommand ?: timerEnvelope.optString("command", "start")
+        val base = optimisticElapsedBase ?: plan.optLong("startOffsetSeconds", 0)
+        val sentAt = optimisticSentAtEpochMs ?: timerEnvelope.optLong("sentAtEpochMs", System.currentTimeMillis())
+        return base + if (command == "pause") 0 else max(0, (System.currentTimeMillis() - sentAt) / 1_000)
     }
 
     private fun renderPlan(phases: JSONArray, elapsed: Long, plan: JSONObject) {
@@ -219,16 +360,51 @@ class WearWorkoutActivity : Activity() {
         renderFace()
     }
 
+    private fun formatHeartRate(bpm: Int): String {
+        val zone = heartRateZone(bpm)
+        return if (zone == null) "$bpm BPM" else "$bpm BPM · Z$zone"
+    }
+
+    private fun heartRateZone(bpm: Int): Int? {
+        val max = currentSession?.optInt("heartRateZoneMaxBpm", 0) ?: 0
+        if (max <= 0) return null
+        return when {
+            bpm < max * .60 -> 1
+            bpm < max * .70 -> 2
+            bpm < max * .80 -> 3
+            bpm < max * .90 -> 4
+            else -> 5
+        }
+    }
+
     private fun sendWatchAction(action: String): Boolean {
         val source = currentSession ?: return false
         return runCatching {
+            val actionId = UUID.randomUUID().toString()
             val payload = JSONObject()
+                .put("actionId", actionId)
                 .put("action", action)
                 .put("workoutSequence", source.getInt("workoutSequence"))
                 .put("sectionIndex", source.getInt("sectionIndex"))
+                .apply {
+                    if (action == "complete") {
+                        val value = source.optJSONObject("timer")
+                            ?.optJSONObject("manualProgress")
+                            ?.optInt("value", 0) ?: 0
+                        put("completedRounds", max(0, value + optimisticRoundDelta))
+                    }
+                }
                 .toString()
-            // Counters must feel immediate. A direct message reaches the active
-            // phone listener without waiting for Data Layer item coalescing.
+            // A unique Data Item is durable: if the phone app or Bluetooth is
+            // unavailable, Wear OS delivers the action after reconnection.
+            val request = PutDataMapRequest.create("/hoots/workout-actions/$actionId").apply {
+                dataMap.putString("payload", payload)
+                dataMap.putLong("occurredAtEpochMs", System.currentTimeMillis())
+            }.asPutDataRequest().setUrgent()
+            Wearable.getDataClient(this).putDataItem(request)
+            // The Data Item survives disconnection. This message gives a live
+            // paired phone immediate controls; the shared actionId makes the
+            // later durable delivery harmless.
             Wearable.getNodeClient(this).connectedNodes.addOnSuccessListener { nodes ->
                 nodes.forEach { node ->
                     Wearable.getMessageClient(this).sendMessage(
@@ -258,6 +434,20 @@ class WearWorkoutActivity : Activity() {
         exerciseClient.setUpdateCallback(exerciseCallback)
         exerciseClient.startExerciseAsync(ExerciseConfig(ExerciseType.WORKOUT, setOf(DataType.HEART_RATE_BPM), false, false, emptyList())).addListener({
             startedAtElapsedMs = SystemClock.elapsedRealtime(); locallyPaused = false
+            startForegroundService(Intent(this, WorkoutForegroundService::class.java))
+        }, directExecutor)
+    }
+
+    /** Reconnect after a process restart while an exercise we own continues. */
+    private fun reconnectOwnedExercise() {
+        val infoFuture = exerciseClient.getCurrentExerciseInfoAsync()
+        infoFuture.addListener({
+            val info = runCatching { infoFuture.get() }.getOrNull() ?: return@addListener
+            if (info.exerciseTrackedStatus != ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS) {
+                return@addListener
+            }
+            exerciseClient.setUpdateCallback(exerciseCallback)
+            startedAtElapsedMs = SystemClock.elapsedRealtime()
             startForegroundService(Intent(this, WorkoutForegroundService::class.java))
         }, directExecutor)
     }

@@ -238,6 +238,17 @@ class ExternalWorkoutDisplay {
     }
   }
 
+  static Future<List<String>> drainWatchActions() async {
+    try {
+      final values = await _channel.invokeMethod<List<dynamic>>(
+        'drainWatchActions',
+      );
+      return values?.whereType<String>().toList(growable: false) ?? const [];
+    } on MissingPluginException {
+      return const [];
+    }
+  }
+
   static void listen(Future<void> Function(MethodCall call) handler) {
     _channel.setMethodCallHandler(handler);
   }
@@ -546,6 +557,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   // remains implemented but is intentionally disabled in the workout flow.
   static const bool _showCompletionStrikeAnimation = false;
   static const _customMovementReplacementMarker = '__athlete_custom__';
+  static const _activeTimerStorageKey = 'active_timer_session_v1';
   final Map<String, bool> _sectionState = {};
   final Map<String, int> _fractureSeeds = {};
   final Map<String, MovementSubstitution> _movementSwaps = {};
@@ -591,6 +603,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
   Timer? _cardTimerTicker;
   WorkoutDay? _activeTimerWorkout;
   int? _activeTimerSectionIndex;
+  bool _openedRestoredTimer = false;
   final Map<String, bool> _sectionExpanded = {};
   final Map<String, bool> _timerPanelExpanded = {};
   final Map<String, GlobalKey> _sectionCardKeys = {};
@@ -639,9 +652,22 @@ class _WorkoutHomeState extends State<WorkoutHome>
         });
       } else if (call.method == 'watchAction' && call.arguments is String) {
         await _handleWatchAction(call.arguments! as String);
+      } else if (call.method == 'watchActionsAvailable') {
+        await _drainWatchActions();
       }
     });
+    unawaited(_drainWatchActions());
     _load();
+  }
+
+  Future<void> _drainWatchActions() async {
+    // Keep the native inbox intact until the workout catalog exists; actions
+    // received during a cold phone launch must not disappear before they can
+    // resolve their workout sequence.
+    if (_workouts.isEmpty) return;
+    for (final action in await ExternalWorkoutDisplay.drainWatchActions()) {
+      await _handleWatchAction(action);
+    }
   }
 
   Future<void> _load() async {
@@ -829,7 +855,156 @@ class _WorkoutHomeState extends State<WorkoutHome>
     if (start == null) {
       await store.setString('schedule_start', _scheduleStart.toIso8601String());
     }
+    await _restoreActiveTimer();
+    unawaited(_drainWatchActions());
   }
+
+  /// Keeps the phone, watch, and Cast surface attached to one timer even if
+  /// Android removes the phone process. Wall-clock time lets restoration catch
+  /// up without writing to disk once per second.
+  Future<void> _persistActiveTimer() async {
+    final store = _store;
+    final timer = _cardTimer;
+    final workout = _activeTimerWorkout;
+    final index = _activeTimerSectionIndex;
+    if (store == null) return;
+    if (timer == null || workout == null || index == null || !timer.isActive) {
+      await store.remove(_activeTimerStorageKey);
+      return;
+    }
+    await store.setString(
+      _activeTimerStorageKey,
+      jsonEncode({
+        'workoutSequence': workout.sequence,
+        'sectionIndex': index,
+        'stage': timer.stage.index,
+        'targetSeconds': timer.targetSeconds,
+        'remainingSeconds': timer.remainingSeconds,
+        'cooldownSteps': timer.cooldownSteps,
+        'cooldownStepIndex': timer.cooldownStepIndex,
+        'sideChangeRequired': timer.sideChangeRequired,
+        'sideChanged': timer.sideChanged,
+        'transitionIsSideChange': timer.transitionIsSideChange,
+        'mode': timer.mode,
+        'roundCount': timer.roundCount,
+        'castPlan': timer.castPlan,
+        'lastTickAt': timer.lastTickAt?.toIso8601String(),
+        'elapsedPlanSeconds': timer.elapsedPlanSeconds,
+        'manualProgress': timer.manualProgress,
+      }),
+    );
+  }
+
+  Future<void> _restoreActiveTimer() async {
+    final store = _store;
+    if (store == null) return;
+    final encoded = await store.getString(_activeTimerStorageKey);
+    if (encoded == null) return;
+    try {
+      final raw = jsonDecode(encoded);
+      if (raw is! Map) throw const FormatException('Invalid timer snapshot');
+      final sequence = raw['workoutSequence'];
+      final sectionIndex = raw['sectionIndex'];
+      final stageIndex = raw['stage'];
+      if (sequence is! num || sectionIndex is! num || stageIndex is! num) {
+        throw const FormatException('Incomplete timer snapshot');
+      }
+      final workout = _workouts
+          .where((item) => item.sequence == sequence.toInt())
+          .firstOrNull;
+      final index = sectionIndex.toInt();
+      final stages = _CardTimerStage.values;
+      if (workout == null ||
+          index < 0 ||
+          index >= _visibleSections(workout).length ||
+          stageIndex.toInt() < 0 ||
+          stageIndex.toInt() >= stages.length) {
+        throw const FormatException('Timer no longer matches the program');
+      }
+      final section = _visibleSections(workout)[index];
+      final timer = _CardTimer(
+        sectionKey: _key(workout, index),
+        label: _sectionHeading(section.title),
+        targetSeconds: (raw['targetSeconds'] as num?)?.toInt() ?? 0,
+        stage: stages[stageIndex.toInt()],
+        remainingSeconds: (raw['remainingSeconds'] as num?)?.toInt() ?? 0,
+        cooldownSteps: (raw['cooldownSteps'] as List?)
+                ?.whereType<String>()
+                .toList(growable: false) ??
+            const <String>[],
+        cooldownStepIndex: (raw['cooldownStepIndex'] as num?)?.toInt() ?? 0,
+        mode: raw['mode'] as String? ?? 'countdown',
+        roundCount: (raw['roundCount'] as num?)?.toInt() ?? 0,
+      )
+        ..sideChangeRequired = raw['sideChangeRequired'] == true
+        ..sideChanged = raw['sideChanged'] == true
+        ..transitionIsSideChange = raw['transitionIsSideChange'] == true
+        ..castPlan = (raw['castPlan'] as Map?)?.cast<String, dynamic>()
+        ..elapsedPlanSeconds = (raw['elapsedPlanSeconds'] as num?)?.toInt() ?? 0
+        ..manualProgress = (raw['manualProgress'] as num?)?.toInt() ?? 0
+        ..lastTickAt = _timerStageUsesClock(stages[stageIndex.toInt()])
+            ? DateTime.tryParse(raw['lastTickAt'] as String? ?? '')
+            : null;
+      if (timer.lastTickAt == null && _timerStageUsesClock(timer.stage)) {
+        timer.lastTickAt = DateTime.now();
+      }
+      _advanceCardTimerToNow(timer);
+      if (!timer.isActive) {
+        await store.remove(_activeTimerStorageKey);
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _cardTimer = timer;
+        _activeTimerWorkout = workout;
+        _activeTimerSectionIndex = index;
+      });
+      _cardTimerTicker?.cancel();
+      _cardTimerTicker = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => _tickCardTimer(),
+      );
+      await _persistActiveTimer();
+      _sendTimerToCast(
+        command: timer.stage == _CardTimerStage.paused ? 'pause' : 'resume',
+        includePlan: true,
+      );
+      unawaited(_publishWatchSession(workout, section, index));
+      // The native Cast SDK may restore its receiver session while Flutter was
+      // dead. Re-send the complete card envelope, not merely a timer command,
+      // so the TV is immediately useful after the phone comes back.
+      if (_castConnected) {
+        unawaited(_showOnChromecast(workout, section, index));
+      }
+      _openRestoredTimer(workout, index);
+    } catch (_) {
+      await store.remove(_activeTimerStorageKey);
+    }
+  }
+
+  void _openRestoredTimer(WorkoutDay workout, int index) {
+    if (_openedRestoredTimer) return;
+    _openedRestoredTimer = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _cardTimer == null || _activeTimerWorkout != workout) {
+        return;
+      }
+      final assignment = _schedule
+          .where((item) => item.sequence == workout.sequence)
+          .firstOrNull;
+      if (assignment != null) {
+        setState(() => _selected = assignment.date);
+      }
+      await _startGuidedWorkout(
+        workout,
+        initialIndex: index,
+        projectToDisplays: false,
+      );
+    });
+  }
+
+  bool _timerStageUsesClock(_CardTimerStage stage) =>
+      stage != _CardTimerStage.paused && stage != _CardTimerStage.finished;
 
   // Retained temporarily as a migration reference while offline tooling owns
   // snapshot publication; no athlete-facing path invokes this method.
@@ -1010,6 +1185,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     bool strengthOnly = false,
     String? strengthLiftKey,
     bool skillsOnly = false,
+    bool identityOnly = false,
     bool benchmarksOnly = false,
   }) async {
     final store = _store;
@@ -1023,6 +1199,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
           strengthOnly: strengthOnly,
           focusLiftKey: strengthLiftKey,
           skillsOnly: skillsOnly,
+          identityOnly: identityOnly,
           benchmarksOnly: benchmarksOnly,
           benchmarkHistory: movementOnly ? const [] : _benchmarkHistory,
           onBenchmarkEdited: movementOnly
@@ -2223,12 +2400,15 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final timer = _cardTimer;
     final isCurrentTimer =
         timer != null && timer.sectionKey == _key(workout, index);
+    final heartRateZoneMaxBpm = _estimatedHeartRateMaxBpm;
     final payload = <String, dynamic>{
       'version': 1,
       'workoutSequence': workout.sequence,
       'sectionIndex': index,
       'sectionTitle': _sectionHeading(section.title),
       'sectionBody': _externalSectionBody(workout, section, index),
+      if (heartRateZoneMaxBpm case final maxBpm?)
+        'heartRateZoneMaxBpm': maxBpm,
       'timer': isCurrentTimer
           ? {
               'plan': {
@@ -2240,11 +2420,34 @@ class _WorkoutHomeState extends State<WorkoutHome>
                   : 'start',
               'sentAtEpochMs': DateTime.now().millisecondsSinceEpoch,
               if (_manualProgressKind(workout, section) case final kind?)
-                'manualProgress': {'kind': kind, 'value': timer.manualProgress},
+                'manualProgress': {
+                  'kind': kind,
+                  'value': timer.manualProgress,
+                  if (_manualRoundTarget(workout, section) case final target?)
+                    'target': target,
+                },
             }
           : null,
     };
     await ExternalWorkoutDisplay.publishWatchSession(jsonEncode(payload));
+  }
+
+  /// Tanaka's age-based estimate. This feeds an informational watch label,
+  /// never medical advice, readiness scoring, or workout prescription.
+  int? get _estimatedHeartRateMaxBpm {
+    final settings = _athleteSettings;
+    final birthYear = settings.birthYear;
+    if (birthYear == null) return null;
+    final today = DateTime.now();
+    final birthdayHasNotOccurred =
+        settings.birthMonth != null &&
+        settings.birthDay != null &&
+        (today.month < settings.birthMonth! ||
+            (today.month == settings.birthMonth! &&
+                today.day < settings.birthDay!));
+    final age = today.year - birthYear - (birthdayHasNotOccurred ? 1 : 0);
+    if (age < 13 || age > 126) return null;
+    return (208 - (.7 * age)).round();
   }
 
   Future<void> _handleWatchAction(String encoded) async {
@@ -2278,18 +2481,35 @@ class _WorkoutHomeState extends State<WorkoutHome>
         _adjustManualProgress(workout, sections[index], index, -1);
         return;
       case 'complete':
-        await _guidedCompleteSection(workout, index);
+        final timer = _cardTimer;
+        final completedRounds = raw['completedRounds'];
+        if (timer != null &&
+            completedRounds is num &&
+            timer.sectionKey == _key(workout, index)) {
+          timer.manualProgress = math.max(timer.manualProgress, completedRounds.toInt());
+          unawaited(_persistActiveTimer());
+          unawaited(_publishWatchSession(workout, sections[index], index));
+        }
+        if (timer != null &&
+            timer.sectionKey == _key(workout, index) &&
+            timer.stage != _CardTimerStage.paused &&
+            timer.stage != _CardTimerStage.finished) {
+          _toggleCardTimer();
+        }
+        if (_sectionState[_key(workout, index)] != true) {
+          await _guidedCompleteSection(workout, index);
+        }
         return;
       default:
         return;
     }
   }
 
-  /// Human-completed work is different from timer-created rounds. EMOMs and
-  /// intervals advance themselves; AMRAPs, for-time work, strength, skill and
-  /// accessory work expose a deliberate tap counter on the watch.
+  /// Human-completed rounds are different from timer-created rounds. EMOMs and
+  /// intervals advance themselves; only conditioning formats with explicit
+  /// rounds expose controls on the watch. Strength and accessories stay
+  /// uncluttered until their dedicated set-logging experience exists.
   String? _manualProgressKind(WorkoutDay workout, WorkoutSection section) {
-    final title = section.title.toLowerCase();
     final format = _conditioningFor(workout)?.format.toLowerCase() ?? '';
     if (format.contains('emom') ||
         (format.contains('interval') &&
@@ -2301,12 +2521,18 @@ class _WorkoutHomeState extends State<WorkoutHome>
         format.contains('for-time')) {
       return 'ROUND';
     }
-    if (title.contains('strength') ||
-        title.contains('accessory') ||
-        title.contains('skill')) {
-      return 'SET';
-    }
     return null;
+  }
+
+  int? _manualRoundTarget(WorkoutDay workout, WorkoutSection section) {
+    if (_manualProgressKind(workout, section) == null) return null;
+    final conditioning = _conditioningFor(workout);
+    if (conditioning?.format.toLowerCase().contains('amrap') == true) return null;
+    final quantity = conditioning?.tasks
+        .where((task) => task.movement == 'round structure')
+        .expand((task) => task.quantities)
+        .firstOrNull;
+    return quantity != null && quantity.value > 0 ? quantity.value.round() : null;
   }
 
   void _adjustManualProgress(
@@ -2321,6 +2547,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     setState(() {
       timer.manualProgress = math.max(0, timer.manualProgress + delta);
     });
+    unawaited(_persistActiveTimer());
     unawaited(_publishWatchSession(workout, section, index));
   }
 
@@ -2378,10 +2605,19 @@ class _WorkoutHomeState extends State<WorkoutHome>
     });
   }
 
-  Future<void> _startGuidedWorkout(WorkoutDay workout) async {
-    final initialIndex = _nextRequiredIncompleteIndex(workout);
-    if (initialIndex == null) return;
-    await _openGuidedSection(workout, initialIndex, scrollIntoView: false);
+  Future<void> _startGuidedWorkout(
+    WorkoutDay workout, {
+    int? initialIndex,
+    bool projectToDisplays = true,
+  }) async {
+    final startIndex = initialIndex ?? _nextRequiredIncompleteIndex(workout);
+    if (startIndex == null) return;
+    await _openGuidedSection(
+      workout,
+      startIndex,
+      scrollIntoView: false,
+      projectToDisplays: projectToDisplays,
+    );
     if (!mounted) return;
     final sections = _visibleSections(workout);
     await Navigator.of(context).push<void>(
@@ -2390,7 +2626,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
         builder: (_) => GuidedWorkoutPage(
           workout: workout,
           sections: sections,
-          initialIndex: initialIndex,
+          initialIndex: startIndex,
           headingFor: _sectionHeading,
           bodyFor: (index) => _sectionBody(workout, sections[index], index),
           isComplete: (index) => _sectionState[_key(workout, index)] == true,
@@ -4560,6 +4796,38 @@ class _WorkoutHomeState extends State<WorkoutHome>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
+                  'ATHLETE DETAILS',
+                  style: TextStyle(color: cyan, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  _athleteSettings.birthYear == null
+                      ? 'Add your name and date of birth. Your watch uses age to estimate heart-rate zones.'
+                      : '${_athleteSettings.displayName.isEmpty ? 'Athlete details saved' : _athleteSettings.displayName} • watch zones are based on your date of birth.',
+                  style: const TextStyle(
+                    color: muted,
+                    fontSize: 16,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => _openAthleteProfile(identityOnly: true),
+                    icon: const Icon(Icons.person_outline),
+                    label: const Text('EDIT ATHLETE DETAILS'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
                   'STRENGTH RECORDS',
                   style: TextStyle(color: ember, fontWeight: FontWeight.w900),
                 ),
@@ -5332,38 +5600,37 @@ class _WorkoutHomeState extends State<WorkoutHome>
           _variantTabs(workout),
           if (!completed) ...[
             const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: const Color(0xff122b43),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: border),
+            FilledButton.icon(
+              onPressed: () => _startGuidedWorkout(workout),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(58),
+                backgroundColor: ember,
+                foregroundColor: paper,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'GUIDED • $done / $required',
-                      style: const TextStyle(
-                        color: cyan,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: anySectionDone
-                        ? 'Resume guided workout'
-                        : 'Start guided workout',
-                    onPressed: () => _startGuidedWorkout(workout),
-                    icon: Icon(
-                      anySectionDone
-                          ? Icons.play_arrow_rounded
-                          : Icons.bolt_rounded,
-                    ),
-                    color: ember,
-                  ),
-                ],
+              icon: Icon(
+                anySectionDone ? Icons.play_arrow_rounded : Icons.bolt_rounded,
+                size: 25,
+              ),
+              label: Text(
+                anySectionDone ? 'RESUME WORKOUT' : 'START WORKOUT',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: .7,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'GUIDED • $done / $required  •  WATCH READY',
+                style: const TextStyle(
+                  color: cyan,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
             if (currentIndex != null)
@@ -6708,6 +6975,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       (_) => _tickCardTimer(),
     );
     _sendTimerToCast(command: 'start', includePlan: true);
+    unawaited(_persistActiveTimer());
     unawaited(_publishWatchSession(workout, section, index));
   }
 
@@ -6735,6 +7003,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     _sendTimerToCast(
       command: timer.stage == _CardTimerStage.paused ? 'pause' : 'resume',
     );
+    unawaited(_persistActiveTimer());
     final workout = _activeTimerWorkout;
     final index = _activeTimerSectionIndex;
     if (workout != null && index != null) {
@@ -6761,6 +7030,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
       (_) => _tickCardTimer(),
     );
     _sendTimerToCast(command: 'reset', includePlan: true);
+    unawaited(_persistActiveTimer());
     final workout = _activeTimerWorkout;
     final index = _activeTimerSectionIndex;
     if (workout != null && index != null) {
@@ -6834,6 +7104,7 @@ class _WorkoutHomeState extends State<WorkoutHome>
     final workout = _activeTimerWorkout;
     final index = _activeTimerSectionIndex;
     if (justFinished && workout != null && index != null) {
+      unawaited(_persistActiveTimer());
       unawaited(_guidedCompleteSection(workout, index));
     }
   }
