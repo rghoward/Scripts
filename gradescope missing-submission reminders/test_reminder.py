@@ -8,14 +8,19 @@ from zoneinfo import ZoneInfo
 
 import sqlite3
 from requests.cookies import create_cookie
+from requests.exceptions import ConnectionError, ReadTimeout
 
 import reminder
 from reminder import (
     GradescopeAuthenticationBackoff,
     GradescopeAuthenticationExpired,
+    LateSubmission,
     PersistentGradescopeConnection,
     Student,
     effective_late_deadline,
+    failure_summary_message,
+    late_report_message,
+    parse_lateness,
     student_message,
     summary_message,
     sync_assignment_schedule,
@@ -57,7 +62,11 @@ class ReminderTests(unittest.TestCase):
         self.assertIn("Thursday, July 23 at 11:59 PM EDT", body)
         self.assertIn("lowest homework grade", body)
         self.assertIn("already contacted me", body)
+        self.assertIn("email address on your Gradescope account matches", body)
+        self.assertIn("merge them", body)
         self.assertIn("Course policy", html_body)
+        self.assertIn("Already submitted?", html_body)
+        self.assertIn("Canvas account", html_body)
         self.assertIn("background:#003057", html_body)
 
     def test_summary_html_contains_counts_and_exclusions(self):
@@ -83,6 +92,12 @@ class ReminderTests(unittest.TestCase):
         )
         database.execute(
             "CREATE TABLE assignment_schedules (course_id TEXT, assignment_id TEXT, due_at TEXT, late_at TEXT, observed_at TEXT, PRIMARY KEY (course_id, assignment_id))"
+        )
+        database.execute(
+            "CREATE TABLE late_reports (course_id TEXT, assignment_id TEXT, sent_at TEXT, PRIMARY KEY (course_id, assignment_id))"
+        )
+        database.execute(
+            "CREATE TABLE late_submissions (course_id TEXT, assignment_id TEXT, student_key TEXT, PRIMARY KEY (course_id, assignment_id, student_key))"
         )
         due = datetime(2026, 7, 22, 23, 59, tzinfo=self.zone)
         late = datetime(2026, 7, 23, 23, 59, tzinfo=self.zone)
@@ -188,6 +203,65 @@ class ReminderTests(unittest.TestCase):
                 with run_lock() as second:
                     self.assertTrue(first)
                     self.assertFalse(second)
+
+    def test_failure_summary_explains_dns_failure_and_retry(self):
+        subject, body, html_body = failure_summary_message(
+            ConnectionError("Failed to resolve 'www.gradescope.com'")
+        )
+        self.assertIn("Network or DNS", subject)
+        self.assertIn("did not reject the login", body)
+        self.assertIn("next five-minute check", body)
+        self.assertIn("duplicate protection", body)
+        self.assertIn("background:#003057", html_body)
+        self.assertIn("Student-email impact", html_body)
+        self.assertIn("Technical detail", html_body)
+
+    def test_failure_summary_distinguishes_timeout(self):
+        subject, body, html_body = failure_summary_message(ReadTimeout("read timed out"))
+        self.assertIn("timed out", subject)
+        self.assertIn("usually temporary", body)
+        self.assertIn("Next step", html_body)
+
+    def test_parse_lateness_supports_hours_over_one_day(self):
+        self.assertEqual(parse_lateness("00:00:00"), 0)
+        self.assertEqual(parse_lateness("00:00:25"), 25)
+        self.assertEqual(parse_lateness("49:02:03"), 176523)
+
+    def test_late_report_flags_third_late_submission(self):
+        database = sqlite3.connect(":memory:")
+        database.execute(
+            """CREATE TABLE late_submissions (
+            course_id TEXT, assignment_id TEXT, student_key TEXT, sid TEXT,
+            first_name TEXT, last_name TEXT, email TEXT, submitted_at TEXT,
+            lateness_seconds INTEGER, recorded_at TEXT,
+            PRIMARY KEY (course_id, assignment_id, student_key))"""
+        )
+        for assignment_id in ("1", "2", "3"):
+            database.execute(
+                "INSERT INTO late_submissions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                ("10", assignment_id, "sid:123", "123", "John", "Example",
+                 "john@example.edu", "time", 25, "now"),
+            )
+        assignment = SimpleNamespace(name="Homework 3")
+        course = {
+            "id": "10", "code": "CS 2050", "name": "Discrete Math",
+            "term": "Fall 2026",
+        }
+        due = datetime(2026, 9, 18, 23, 59, tzinfo=self.zone)
+        late = datetime(2026, 9, 20, 23, 59, tzinfo=self.zone)
+        current = [
+            LateSubmission(
+                "sid:123", "123", "John", "Example", "john@example.edu",
+                "time", 25,
+            )
+        ]
+        subject, body, html_body = late_report_message(
+            database, course, assignment, due, late, current
+        )
+        self.assertIn("Late-submission totals", subject)
+        self.assertIn("John Example <john@example.edu>: 3", body)
+        self.assertIn("ZERO-POLICY THRESHOLD EXCEEDED", body)
+        self.assertIn("REVIEW FOR ZERO", html_body)
 
 
 if __name__ == "__main__":

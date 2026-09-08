@@ -18,6 +18,8 @@ Current status: Microsoft authentication and test delivery work. The reminder ru
 - A daily health check verifies Microsoft delivery, Gradescope login, live mode, and the next matching homework for each configured course.
 - A shared process lock prevents reminder, preview, discovery, and health-check runs from overlapping.
 - Failed Gradescope logins use persistent exponential backoff, beginning at five minutes and capped at six hours.
+- After each effective late deadline, a one-time report records within-window late submissions by student ID, shows cumulative course totals, and flags a third or later late submission for zero-policy review.
+- Student reminders include guidance for resolving mismatched Canvas and Gradescope email addresses or duplicate Gradescope accounts.
 
 ## Authentication check
 

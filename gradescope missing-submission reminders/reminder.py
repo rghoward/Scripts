@@ -25,6 +25,7 @@ from zoneinfo import ZoneInfo
 from gradescopeapi.classes.connection import GSConnection
 from gradescopeapi.classes.account import Account
 from requests.cookies import RequestsCookieJar, create_cookie
+from requests import exceptions as requests_exceptions
 
 from auth_check import create_account, secure_token_cache
 
@@ -56,6 +57,17 @@ class Student:
     first_name: str
     last_name: str
     email: str
+
+
+@dataclass(frozen=True)
+class LateSubmission:
+    student_key: str
+    sid: str
+    first_name: str
+    last_name: str
+    email: str
+    submitted_at: str
+    lateness_seconds: int
 
 
 def load_config() -> dict:
@@ -112,6 +124,20 @@ def open_database() -> sqlite3.Connection:
         """CREATE TABLE IF NOT EXISTS authentication_state (
         provider TEXT PRIMARY KEY, consecutive_failures INTEGER NOT NULL,
         retry_after TEXT NOT NULL, last_error TEXT NOT NULL)"""
+    )
+    database.execute(
+        """CREATE TABLE IF NOT EXISTS late_submissions (
+        course_id TEXT NOT NULL, assignment_id TEXT NOT NULL,
+        student_key TEXT NOT NULL, sid TEXT NOT NULL,
+        first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT NOT NULL,
+        submitted_at TEXT NOT NULL, lateness_seconds INTEGER NOT NULL,
+        recorded_at TEXT NOT NULL,
+        PRIMARY KEY (course_id, assignment_id, student_key))"""
+    )
+    database.execute(
+        """CREATE TABLE IF NOT EXISTS late_reports (
+        course_id TEXT NOT NULL, assignment_id TEXT NOT NULL, sent_at TEXT NOT NULL,
+        PRIMARY KEY (course_id, assignment_id))"""
     )
     database.commit()
     path.chmod(0o600)
@@ -313,6 +339,14 @@ def sync_assignment_schedule(
             "DELETE FROM completed_runs WHERE course_id=? AND assignment_id=?",
             (course_id, assignment_id),
         )
+        database.execute(
+            "DELETE FROM late_reports WHERE course_id=? AND assignment_id=?",
+            (course_id, assignment_id),
+        )
+        database.execute(
+            "DELETE FROM late_submissions WHERE course_id=? AND assignment_id=?",
+            (course_id, assignment_id),
+        )
     database.commit()
     return changed
 
@@ -333,6 +367,139 @@ def missing_students(connection: PersistentGradescopeConnection, course_id: str,
         if email:
             missing.append(Student(row["First Name"].strip(), row["Last Name"].strip(), email))
     return missing
+
+
+def parse_lateness(value: str | None) -> int:
+    """Convert Gradescope's H:M:S lateness value to whole seconds."""
+    if not value:
+        return 0
+    parts = value.strip().split(":")
+    if len(parts) != 3:
+        raise RuntimeError(f"Unexpected Gradescope lateness value: {value!r}")
+    try:
+        hours, minutes, seconds = (int(part) for part in parts)
+    except ValueError as exc:
+        raise RuntimeError(f"Unexpected Gradescope lateness value: {value!r}") from exc
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def late_submissions(
+    connection: PersistentGradescopeConnection,
+    course_id: str,
+    assignment_id: str,
+    late_hours: int,
+) -> list[LateSubmission]:
+    """Return submissions made late but within the configured course-policy window."""
+    url = (
+        f"{connection.connection.gradescope_base_url}/courses/{course_id}/"
+        f"assignments/{assignment_id}/scores.csv"
+    )
+    response = connection.get(url, timeout=30)
+    response.raise_for_status()
+    reader = csv.DictReader(io.StringIO(response.text.lstrip("\ufeff")))
+    required = {
+        "First Name", "Last Name", "SID", "Email", "Status",
+        "Submission Time", "Lateness (H:M:S)",
+    }
+    if not reader.fieldnames or not required.issubset(reader.fieldnames):
+        raise RuntimeError(f"Unexpected Gradescope CSV columns for assignment {assignment_id}")
+    maximum = late_hours * 3600
+    result = []
+    for row in reader:
+        if row["Status"].strip().casefold() == "missing":
+            continue
+        seconds = parse_lateness(row.get("Lateness (H:M:S)"))
+        if seconds <= 0 or seconds > maximum:
+            continue
+        sid = (row.get("SID") or "").strip()
+        email = (row.get("Email") or "").strip()
+        student_key = f"sid:{sid.casefold()}" if sid else f"email:{email.casefold()}"
+        if not sid and not email:
+            continue
+        result.append(
+            LateSubmission(
+                student_key, sid, row["First Name"].strip(), row["Last Name"].strip(),
+                email, (row.get("Submission Time") or "").strip(), seconds,
+            )
+        )
+    return result
+
+
+def record_late_submissions(
+    database: sqlite3.Connection,
+    course_id: str,
+    assignment_id: str,
+    submissions: list[LateSubmission],
+    recorded_at: datetime,
+) -> None:
+    for item in submissions:
+        database.execute(
+            """INSERT INTO late_submissions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(course_id, assignment_id, student_key) DO UPDATE SET
+            sid=excluded.sid, first_name=excluded.first_name,
+            last_name=excluded.last_name, email=excluded.email,
+            submitted_at=excluded.submitted_at,
+            lateness_seconds=excluded.lateness_seconds,
+            recorded_at=excluded.recorded_at""",
+            (
+                course_id, assignment_id, item.student_key, item.sid,
+                item.first_name, item.last_name, item.email, item.submitted_at,
+                item.lateness_seconds, recorded_at.isoformat(),
+            ),
+        )
+    database.commit()
+
+
+def late_report_message(
+    database: sqlite3.Connection,
+    course: dict,
+    assignment,
+    due: datetime,
+    late: datetime,
+    current_submissions: list[LateSubmission],
+) -> tuple[str, str, str]:
+    rows = database.execute(
+        """SELECT student_key, MAX(first_name), MAX(last_name), MAX(email), COUNT(*)
+        FROM late_submissions WHERE course_id=?
+        GROUP BY student_key ORDER BY COUNT(*) DESC, MAX(last_name), MAX(first_name)""",
+        (str(course["id"]),),
+    ).fetchall()
+    subject = f"Late-submission totals: {course['code']} — {assignment.name}"
+    lines = [
+        "Gradescope late-submission report", "",
+        f"Course: {course['name']} ({course['term']})",
+        f"Assignment closed: {assignment.name}",
+        f"Regular deadline: {display_time(due)}",
+        f"Late deadline: {display_time(late)}", "",
+        f"Late submissions for this assignment: {len(current_submissions)}",
+        f"Students with late submissions this semester: {len(rows)}", "",
+        "Running totals:",
+    ]
+    if rows:
+        for _key, first, last, email, count in rows:
+            flag = " — ZERO-POLICY THRESHOLD EXCEEDED" if count >= 3 else ""
+            lines.append(f"- {first} {last} <{email}>: {count}{flag}")
+    else:
+        lines.append("- None")
+    body = "\n".join(lines) + "\n"
+    table_rows = "".join(
+        f'<tr><td style="padding:10px 8px;border-bottom:1px solid #e4e8ed;font-size:14px;">{html.escape(first + " " + last)}<br><span style="color:#687687;">{html.escape(email)}</span></td>'
+        f'<td align="center" style="padding:10px 8px;border-bottom:1px solid #e4e8ed;font-size:18px;font-weight:750;color:{"#a12622" if count >= 3 else "#243142"};">{count}</td>'
+        f'<td style="padding:10px 8px;border-bottom:1px solid #e4e8ed;font-size:12px;font-weight:700;color:#a12622;">{"REVIEW FOR ZERO" if count >= 3 else ""}</td></tr>'
+        for _key, first, last, email, count in rows
+    ) or '<tr><td colspan="3" style="padding:14px;color:#687687;">No late submissions recorded.</td></tr>'
+    content = f"""
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;line-height:21px;margin-bottom:20px;">
+<tr><td style="color:#687687;width:145px;padding:3px 0;">Assignment closed</td><td style="font-weight:650;padding:3px 0;">{html.escape(assignment.name)}</td></tr>
+<tr><td style="color:#687687;padding:3px 0;">Regular deadline</td><td style="padding:3px 0;">{html.escape(display_time(due))}</td></tr>
+<tr><td style="color:#687687;padding:3px 0;">Late deadline</td><td style="padding:3px 0;">{html.escape(display_time(late))}</td></tr>
+</table>
+<div style="background:#f7f8fa;border:1px solid #e1e5ea;border-radius:9px;padding:16px 18px;margin-bottom:22px;font-size:15px;line-height:23px;"><strong>{len(current_submissions)}</strong> late submission(s) for this assignment; <strong>{len(rows)}</strong> student(s) with a semester late-submission count.</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><th align="left" style="padding:8px;color:#52657a;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Student</th><th style="padding:8px;color:#52657a;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Late count</th><th align="left" style="padding:8px;color:#52657a;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Policy status</th></tr>{table_rows}</table>
+"""
+    return subject, body, email_shell(
+        f"{course['code']} — {assignment.name}", "Late-submission totals", content
+    )
 
 
 def email_shell(title: str, subtitle: str, content: str) -> str:
@@ -360,6 +527,8 @@ You can still submit the assignment through Gradescope by {display_time(late)}. 
 
 If you plan to submit, please do so early enough to avoid any last-minute technical difficulties. If you believe you already submitted the assignment, please check Gradescope to confirm that your submission appears correctly.
 
+In the rare case that you received this reminder despite already submitting, please make sure the email address on your Gradescope account matches the one associated with your Canvas account. If you have Gradescope accounts under different email addresses, please merge them so your submission and course enrollment are connected to the same account.
+
 This is an automated reminder based on the current information in Gradescope. If you have already contacted me about your circumstances or made other arrangements with me, there is no need to reply to this message or explain your situation again.
 
 Take care,
@@ -378,6 +547,7 @@ Ronnie Howard
 </tr></table>
 <div style="border-left:4px solid #b3a369;background:#fbfaf5;padding:16px 18px;margin:0 0 22px;border-radius:0 7px 7px 0;"><div style="font-size:12px;letter-spacing:.7px;text-transform:uppercase;color:#6d5b22;font-weight:700;margin-bottom:7px;">Course policy</div><div style="font-size:15px;line-height:23px;color:#394657;">{safe_policy}</div></div>
 <p style="font-size:15px;line-height:24px;margin:0 0 18px;">If you plan to submit, please do so early enough to avoid any last-minute technical difficulties. If you believe you already submitted the assignment, please check Gradescope to confirm that your submission appears correctly.</p>
+<div style="border:1px solid #d7e0e8;background:#f7fafc;border-radius:7px;padding:14px 16px;margin:0 0 22px;"><div style="font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#52657a;font-weight:700;margin-bottom:6px;">Already submitted?</div><div style="font-size:14px;line-height:22px;color:#465568;">In the rare case that you received this reminder despite already submitting, please make sure the email address on your Gradescope account matches the one associated with your Canvas account. If you have Gradescope accounts under different email addresses, please merge them so your submission and course enrollment are connected to the same account.</div></div>
 <div style="font-size:13px;line-height:20px;color:#627083;background:#f3f5f7;border-radius:7px;padding:13px 15px;margin:22px 0;">This is an automated reminder based on the current information in Gradescope. If you have already contacted me about your circumstances or made other arrangements with me, there is no need to reply or explain your situation again.</div>
 <p style="font-size:15px;line-height:23px;margin:0;">Take care,<br><strong>Ronnie Howard</strong></p>
 """
@@ -395,18 +565,97 @@ def send_message(account, recipient: str, subject: str, body: str, html_body: st
         raise RuntimeError("Microsoft Graph did not confirm delivery")
 
 
+def failure_summary_message(error: Exception) -> tuple[str, str, str]:
+    """Explain an automatic-run failure in actionable, non-technical language."""
+    detail = str(error) or type(error).__name__
+    lowered = detail.casefold()
+    if isinstance(error, requests_exceptions.Timeout) or "timed out" in lowered:
+        category = "Gradescope connection timed out"
+        explanation = (
+            "The laptop reached the network, but Gradescope did not respond before "
+            "the request timed out. This is usually temporary."
+        )
+        retry = "The system will try again during the next five-minute check."
+    elif isinstance(error, requests_exceptions.ConnectionError) or any(
+        phrase in lowered
+        for phrase in ("failed to resolve", "name resolution", "network is unreachable")
+    ):
+        category = "Network or DNS connection failure"
+        explanation = (
+            "The laptop could not reach www.gradescope.com. Its internet connection "
+            "or DNS lookup was temporarily unavailable; Gradescope did not reject the login."
+        )
+        retry = "The system will try again during the next five-minute check."
+    elif isinstance(error, GradescopeAuthenticationExpired) or any(
+        phrase in lowered
+        for phrase in ("authentication failed", "invalid credentials", "must be logged in")
+    ):
+        category = "Gradescope authentication failure"
+        explanation = (
+            "The saved Gradescope session could not be refreshed with the configured "
+            "credentials. No additional login attempts will be made until the active "
+            "authentication backoff expires."
+        )
+        retry = "Check the stored Gradescope password if this message recurs after the backoff."
+    elif isinstance(error, requests_exceptions.HTTPError):
+        category = "Gradescope web-service error"
+        explanation = (
+            "Gradescope returned an unsuccessful HTTP response while the assignment "
+            "data was being checked."
+        )
+        retry = "The system will try again during the next five-minute check."
+    else:
+        category = "Unexpected reminder-system error"
+        explanation = (
+            "The reminder run stopped because of an error that was not recognized as "
+            "a routine network or authentication problem."
+        )
+        retry = "Review the technical detail below and the system journal before intervening."
+
+    subject = f"Gradescope reminder check failed: {category}"
+    body = (
+        "The automated Gradescope reminder check did not complete.\n\n"
+        f"What happened: {category}\n"
+        f"Explanation: {explanation}\n\n"
+        "Student-email impact: Processing stopped at the error. Any messages sent "
+        "successfully before it occurred remain recorded, and duplicate protection "
+        "will prevent them from being sent again.\n\n"
+        f"Next step: {retry}\n\n"
+        f"Technical detail: {type(error).__name__}: {detail}\n"
+    )
+    content = f"""
+<div style="background:#fff4f2;border:1px solid #e7b8b3;border-left:5px solid #a12622;border-radius:8px;padding:17px 19px;margin:0 0 24px;">
+<div style="font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#8e2521;font-weight:750;margin-bottom:6px;">Check did not complete</div>
+<div style="font-size:18px;line-height:25px;color:#75201d;font-weight:700;">{html.escape(category)}</div>
+</div>
+<div style="font-size:12px;letter-spacing:.7px;text-transform:uppercase;color:#5c6978;font-weight:700;margin:0 0 7px;">What happened</div>
+<p style="font-size:15px;line-height:24px;margin:0 0 23px;color:#394657;">{html.escape(explanation)}</p>
+<div style="font-size:12px;letter-spacing:.7px;text-transform:uppercase;color:#5c6978;font-weight:700;margin:0 0 7px;">Student-email impact</div>
+<p style="font-size:15px;line-height:24px;margin:0 0 23px;color:#394657;">Processing stopped at the error. Any messages sent successfully before it occurred remain recorded, and duplicate protection will prevent them from being sent again.</p>
+<div style="background:#fbfaf5;border-left:4px solid #b3a369;border-radius:0 7px 7px 0;padding:15px 17px;margin:0 0 24px;">
+<div style="font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:#6d5b22;font-weight:700;margin-bottom:6px;">Next step</div>
+<div style="font-size:15px;line-height:23px;color:#394657;">{html.escape(retry)}</div>
+</div>
+<div style="font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:#687687;font-weight:700;margin:0 0 7px;">Technical detail</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:19px;color:#536171;background:#f3f5f7;border:1px solid #e1e5ea;border-radius:7px;padding:13px 15px;overflow-wrap:anywhere;">{html.escape(type(error).__name__ + ': ' + detail)}</div>
+"""
+    rendered_html = email_shell(category, "Gradescope reminder check failed", content)
+    return subject, body, rendered_html
+
+
 def send_failure_summary(config: dict, error: Exception) -> None:
     """Best-effort notification for an automatic run that failed before its normal report."""
     try:
         account, _ = create_account()
         if not account.is_authenticated:
             return
+        subject, body, html_body = failure_summary_message(error)
         send_message(
             account,
             config["delivery"]["summary_email"],
-            "Gradescope reminder run FAILED",
-            "The automated Gradescope reminder check did not complete.\n\n"
-            f"Error: {error}\n\nNo further messages were attempted after this error.\n",
+            subject,
+            body,
+            html_body,
         )
         secure_token_cache()
     except Exception:
@@ -504,6 +753,51 @@ def run(dry_run: bool, now: datetime | None = None) -> int:
                         f"{course['code']} {assignment.name}: deadline changed; "
                         "reopened using the current Gradescope schedule"
                     )
+                if current > late:
+                    report_sent = database.execute(
+                        "SELECT 1 FROM late_reports WHERE course_id=? AND assignment_id=?",
+                        (str(course["id"]), assignment.assignment_id),
+                    ).fetchone()
+                    if report_sent and not dry_run:
+                        continue
+                    submissions = late_submissions(
+                        gs, str(course["id"]), assignment.assignment_id,
+                        int(course["late_hours"]),
+                    )
+                    if not dry_run:
+                        record_late_submissions(
+                            database, str(course["id"]), assignment.assignment_id,
+                            submissions, current,
+                        )
+                    subject, body, html_body = late_report_message(
+                        database, course, assignment, due, late, submissions
+                    )
+                    if dry_run:
+                        print(f"\n{subject}\n{body}")
+                    else:
+                        if mail_account is None:
+                            mail_account, _ = create_account()
+                            if not mail_account.is_authenticated:
+                                raise RuntimeError(
+                                    "Microsoft authentication is unavailable; run auth_check.py"
+                                )
+                        send_message(
+                            mail_account, config["delivery"]["summary_email"],
+                            subject, body, html_body,
+                        )
+                        database.execute(
+                            "INSERT INTO late_reports VALUES (?, ?, ?)",
+                            (
+                                str(course["id"]), assignment.assignment_id,
+                                current.isoformat(),
+                            ),
+                        )
+                        database.commit()
+                    print(
+                        f"{course['code']} {assignment.name}: late-window report; "
+                        f"late submissions={len(submissions)}"
+                    )
+                    continue
                 if current < due + delay or current > late:
                     continue
                 completed = database.execute(
