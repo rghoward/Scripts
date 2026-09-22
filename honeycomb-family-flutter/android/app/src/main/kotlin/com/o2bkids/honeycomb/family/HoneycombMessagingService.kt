@@ -4,13 +4,24 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
+import android.webkit.CookieManager
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import java.net.HttpURLConnection
+import java.net.URL
 
 class HoneycombMessagingService : FirebaseMessagingService() {
+    companion object {
+        private const val honeycombOrigin = "https://honeycomb.o2bkids.com"
+        private const val maxThumbnailBytes = 2 * 1024 * 1024
+        private const val maxThumbnailDimension = 512
+    }
+
     override fun onMessageReceived(message: RemoteMessage) {
         val data = message.data
         val title = data["title"].orEmpty().ifBlank {
@@ -25,6 +36,12 @@ class HoneycombMessagingService : FirebaseMessagingService() {
         val childId = data["childId"].orEmpty()
         val tab = data["tab"].orEmpty().ifBlank { "today" }
         val photoId = data["photoId"].orEmpty()
+        val photoFilename = data["photoFilename"].orEmpty()
+        val thumbnail = if (type == "photo" && photoFilename.isNotBlank()) {
+            fetchPhotoThumbnail(photoFilename)
+        } else {
+            null
+        }
         val uri = "honeycombfamily://open?childId=$childId&tab=$tab&momentId=$photoId"
         val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(uri), this, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -56,8 +73,54 @@ class HoneycombMessagingService : FirebaseMessagingService() {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pending)
-            .build()
-        getSystemService(NotificationManager::class.java).notify(notificationId, notification)
+        if (thumbnail != null) {
+            notification
+                .setLargeIcon(thumbnail)
+                .setStyle(
+                    NotificationCompat.BigPictureStyle()
+                        .bigPicture(thumbnail)
+                        .bigLargeIcon(null as Bitmap?)
+                        .setContentDescription("New Honeycomb photo"),
+                )
+        }
+        getSystemService(NotificationManager::class.java).notify(notificationId, notification.build())
+    }
+
+    private fun fetchPhotoThumbnail(photoFilename: String): Bitmap? {
+        if (!photoFilename.startsWith('/')) return null
+        val cookies = CookieManager.getInstance().getCookie(honeycombOrigin)
+        if (cookies.isNullOrBlank()) return null
+        var connection: HttpURLConnection? = null
+        return try {
+            val separator = if (photoFilename.contains('?')) "&" else "?"
+            val url = URL("$honeycombOrigin$photoFilename${separator}preset=moment-image-thumb")
+            connection = url.openConnection() as HttpURLConnection
+            connection.connectTimeout = 3500
+            connection.readTimeout = 5000
+            connection.setRequestProperty("Cookie", cookies)
+            connection.setRequestProperty("Accept", "image/*")
+            connection.useCaches = false
+            if (connection.responseCode !in 200..299) return null
+            if (connection.contentLengthLong > maxThumbnailBytes) return null
+            connection.inputStream.use { scaleThumbnail(BitmapFactory.decodeStream(it)) }
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private fun scaleThumbnail(bitmap: Bitmap?): Bitmap? {
+        bitmap ?: return null
+        val largest = maxOf(bitmap.width, bitmap.height)
+        if (largest <= maxThumbnailDimension) return bitmap
+        val scale = maxThumbnailDimension.toFloat() / largest
+        return Bitmap.createScaledBitmap(
+            bitmap,
+            (bitmap.width * scale).toInt(),
+            (bitmap.height * scale).toInt(),
+            true,
+        )
     }
 
     private fun notificationIcon(type: String) = when (type.lowercase()) {

@@ -15,9 +15,28 @@ import 'package:path_provider/path_provider.dart';
 import 'core/honeycomb_api.dart';
 
 const secure = FlutterSecureStorage();
+const notificationSession = MethodChannel('honeycomb/notification-session');
 const gold = Color(0xffffb743);
 final appThemeMode = ValueNotifier(ThemeMode.dark);
 void main() => runApp(const HoneycombApp());
+
+Future<void> syncNotificationSession(String cookies) async {
+  if (!Platform.isAndroid) return;
+  try {
+    await notificationSession.invokeMethod<void>('setCookies', {
+      'cookies': cookies,
+    });
+  } catch (_) {
+    // Notifications remain usable without rich photo previews.
+  }
+}
+
+Future<void> clearNotificationSession() async {
+  if (!Platform.isAndroid) return;
+  try {
+    await notificationSession.invokeMethod<void>('clearCookies');
+  } catch (_) {}
+}
 
 class HoneycombApp extends StatefulWidget {
   const HoneycombApp({super.key});
@@ -101,6 +120,7 @@ class _LoginState extends State<Login> {
       final session = await secure.read(key: 'honeycomb_session') ?? '';
       if (session.isNotEmpty) {
         api.restoreSessionCookies(session);
+        await syncNotificationSession(session);
         try {
           // Validate the saved session with a lightweight authenticated request.
           await api.children();
@@ -116,6 +136,7 @@ class _LoginState extends State<Login> {
           // seamless fallback rather than making the parent type it again.
           api.restoreSessionCookies('');
           await secure.delete(key: 'honeycomb_session');
+          await clearNotificationSession();
         }
       }
       if (email.text.isNotEmpty && password.text.isNotEmpty) {
@@ -142,6 +163,7 @@ class _LoginState extends State<Login> {
       await secure.write(key: 'honeycomb_email', value: email.text.trim());
       await secure.write(key: 'honeycomb_password', value: password.text);
       await secure.write(key: 'honeycomb_session', value: api.sessionCookies);
+      await syncNotificationSession(api.sessionCookies);
       if (mounted)
         Navigator.pushReplacement(
           context,
@@ -2458,6 +2480,7 @@ class _DashboardState extends State<Dashboard>
     await secure.delete(key: 'honeycomb_email');
     await secure.delete(key: 'honeycomb_password');
     await secure.delete(key: 'honeycomb_session');
+    await clearNotificationSession();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const Login()),

@@ -43,6 +43,24 @@ const ubuntuMonitor = await readFile(
   new URL("../ubuntu-monitor/monitor.mjs", import.meta.url),
   "utf8",
 );
+const flutterMain = await readFile(
+  new URL("../../honeycomb-family-flutter/lib/main.dart", import.meta.url),
+  "utf8",
+);
+const flutterAndroid = await readFile(
+  new URL(
+    "../../honeycomb-family-flutter/android/app/src/main/kotlin/com/o2bkids/honeycomb/family/MainActivity.kt",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const flutterMessaging = await readFile(
+  new URL(
+    "../../honeycomb-family-flutter/android/app/src/main/kotlin/com/o2bkids/honeycomb/family/HoneycombMessagingService.kt",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const iosAppDelegate = await readFile(
   new URL("../ios/App/App/AppDelegate.swift", import.meta.url),
   "utf8",
@@ -161,7 +179,18 @@ test("Ubuntu push alerts include watch-readable activity details", () => {
   assert.match(ubuntuMonitor, /case 4:\s*title = '🩲 Diaper'/);
   assert.match(ubuntuMonitor, /case 5:\s*title = '🚽 Potty'/);
   assert.match(ubuntuMonitor, /case 3:\s*title = '😴 Nap'/);
-  assert.match(ubuntuMonitor, /alerts\.push\(\.\.\.newReports\.map\(report => reportNotification/);
+  assert.match(ubuntuMonitor, /const eventTime = reportTime/);
+  assert.match(ubuntuMonitor, /eventTime \? `\$\{eventTime\} · `/);
+  assert.match(
+    ubuntuMonitor,
+    /photo: \{ title: '📷 New photo', tab: 'photos' \}/,
+  );
+  assert.match(ubuntuMonitor, /reportTime\(newMoments\[0\]\.Created\)/);
+  assert.match(ubuntuMonitor, /reportTime\(newBadges\[0\]\.Created\)/);
+  assert.match(
+    ubuntuMonitor,
+    /alerts\.push\(\.\.\.newReports\.map\(report => reportNotification/,
+  );
   assert.match(ubuntuMonitor, /type: alert\.type/);
   assert.match(ubuntuMonitor, /body: alert\.body\.slice/);
   assert.match(ubuntuMonitor, /childId: alert\.childId/);
@@ -255,6 +284,19 @@ test("photo notifications attach an authenticated thumbnail for Wear OS", () => 
   assert.match(androidMessaging, /preset=moment-image-thumb/);
   assert.match(androidMessaging, /NotificationCompat\.BigPictureStyle/);
   assert.match(androidMessaging, /MAX_THUMBNAIL_DIMENSION/);
+});
+
+test("Flutter photo notifications sync authentication and show thumbnails", () => {
+  assert.match(flutterMain, /syncNotificationSession\(session\)/);
+  assert.match(flutterMain, /syncNotificationSession\(api\.sessionCookies\)/);
+  assert.match(flutterMain, /clearNotificationSession\(\)/);
+  assert.match(flutterAndroid, /honeycomb\/notification-session/);
+  assert.match(flutterAndroid, /CookieManager\.getInstance\(\)/);
+  assert.match(flutterAndroid, /manager\.setCookie\(honeycombOrigin, it\)/);
+  assert.match(flutterMessaging, /data\["photoFilename"\]/);
+  assert.match(flutterMessaging, /fetchPhotoThumbnail\(photoFilename\)/);
+  assert.match(flutterMessaging, /preset=moment-image-thumb/);
+  assert.match(flutterMessaging, /NotificationCompat\.BigPictureStyle/);
 });
 
 test("login theme keeps accessible focus and reduced-motion behavior", () => {

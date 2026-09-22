@@ -1,17 +1,16 @@
-# honeycomb_family_native
+# Honeycomb Family Flutter
 
-A new Flutter project.
+Native Flutter client for the private Honeycomb Family dashboard.
 
-## Getting Started
+## Android notifications
 
-This project is a starting point for a Flutter application.
+The Ubuntu monitor sends concise FCM data messages. Android displays activity
+times and previews, deep-links photo alerts, and fetches private photo
+thumbnails using the signed-in Honeycomb session stored on the device.
 
-A few resources to get you started if this is your first Flutter project:
+After installing or updating the APK, open the app once and complete or restore
+the Honeycomb sign-in. This synchronizes the private session with Android's
+app-scoped cookie store so background photo notifications can render thumbnails.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Build number 8 (`1.0.1+8`) introduces authenticated notification thumbnails.
+The Firebase `google-services.json` remains private and must not be committed.

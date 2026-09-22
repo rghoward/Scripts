@@ -22,12 +22,18 @@ Do not create a database, Hosting site, Analytics configuration, billing account
 
 The Android app now has dedicated Honeycomb notification glyphs instead of the
 plain launcher circle. The latest monitor source also sends concise daily-report
-previews that a paired Wear OS watch can render directly, for example:
+previews with activity times that a paired Wear OS watch can render directly,
+for example:
 
-- `🩲 Diaper` — `Alex: Pee & BM`
-- `😴 Nap` — `Alex: 12:00 PM – 2:30 PM`
-- `🥞 Breakfast` — `Alex: Ate All`
-- `🧺 Needs supplies` — `Alex: Diapers`
+- `🩲 Diaper` — `Alex: 9:15 AM · Pee & BM`
+- `😴 Nap` — `Alex: 12:00 PM · 12:00 PM – 2:30 PM`
+- `🥞 Breakfast` — `Alex: 8:05 AM · Ate All`
+- `🧺 Needs supplies` — `Alex: 4:30 PM · Diapers`
+
+Flutter Android build `1.0.1+8` synchronizes its signed-in Honeycomb session to
+Android's private cookie store so photo notifications can fetch authenticated
+thumbnails in the background. After installing that APK, open the app once and
+let it restore or complete sign-in before testing a photo alert.
 
 For an already configured Ubuntu monitor, do only the following:
 

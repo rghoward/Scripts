@@ -103,7 +103,7 @@ function newlySeen(items, key, previousIds) {
 const notificationTypes = {
   supply: { title: '🧺 Needs supplies', tab: 'home' },
   report: { title: '📋 Daily report', tab: 'home' },
-  photo: { title: '📷 New photo', tab: 'home' },
+  photo: { title: '📷 New photo', tab: 'photos' },
   badge: { title: '🏅 Badge earned', tab: 'home' },
   test: { title: 'Honeycomb test', tab: 'home' },
 };
@@ -126,7 +126,17 @@ function oneLine(value) {
 }
 
 function reportTime(value) {
-  const time = new Date(value);
+  const text = oneLine(value);
+  const twelveHour = /^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/i.exec(text);
+  if (twelveHour) {
+    return `${Number(twelveHour[1])}:${twelveHour[2]} ${twelveHour[3].toUpperCase()}`;
+  }
+  const twentyFourHour = /^([01]?\d|2[0-3]):(\d{2})(?::\d{2})?$/.exec(text);
+  if (twentyFourHour) {
+    const hour = Number(twentyFourHour[1]);
+    return `${hour % 12 || 12}:${twentyFourHour[2]} ${hour < 12 ? 'AM' : 'PM'}`;
+  }
+  const time = new Date(text);
   if (Number.isNaN(time.getTime())) return '';
   return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
@@ -141,6 +151,7 @@ function reportNotification(report, child) {
   const napStart = reportTime(report?.TimeStart);
   const napEnd = reportTime(report?.TimeEnd);
   const napRange = napStart && napEnd ? `${napStart} – ${napEnd}` : napStart || napEnd;
+  const eventTime = reportTime(report?.StartDate || report?.Created || report?.TimeStart);
   let type = 'report';
   let title = '📋 Daily report';
   let detail = condition || generic;
@@ -185,7 +196,7 @@ function reportNotification(report, child) {
 
   return notification(
     type,
-    `${childName(child)}: ${detail || 'New update'}`,
+    `${childName(child)}: ${eventTime ? `${eventTime} · ` : ''}${detail || 'New update'}`,
     child?.ChildID,
     '',
     '',
@@ -325,14 +336,14 @@ async function monitor() {
         alerts.push(...newReports.map(report => reportNotification(report, reading.child)));
         if (newMoments.length) alerts.push(notification(
           'photo',
-          `${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
+          `${childName(reading.child)}: ${reportTime(newMoments[0].Created) ? `${reportTime(newMoments[0].Created)} · ` : ''}${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
           reading.childId,
           newMoments[0].DailyMomentId,
           newMoments[0].Filename,
         ));
         if (newBadges.length) alerts.push(notification(
           'badge',
-          `${childName(reading.child)}: ${newBadges.length} new badge${newBadges.length === 1 ? '' : 's'}`,
+          `${childName(reading.child)}: ${reportTime(newBadges[0].Created) ? `${reportTime(newBadges[0].Created)} · ` : ''}${newBadges.length} new badge${newBadges.length === 1 ? '' : 's'}`,
           reading.childId,
         ));
       }
