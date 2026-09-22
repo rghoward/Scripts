@@ -1,8 +1,8 @@
 # Ubuntu Honeycomb monitor
 
-This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends a short count-only summary to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
+This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends concise, watch-readable updates to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
 
-It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. It sends counts, not photo URLs, report content, or badge details. Supply requests, daily reports, photos, and badges use distinct notification titles. Android app version 1.2.0 or newer also gives each category its own channel, color, and icon. Tapping a notification opens the relevant child's Today screen.
+It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. Daily reports include a short activity summary such as `Diaper — Alex: Pee & BM` or `Nap — Alex: 12:00 PM – 2:30 PM`; photos and badges remain concise summaries. Supply requests, daily reports, photos, and badges use distinct notification titles and icons. Tapping a notification opens the relevant child's Today screen.
 
 ## Before installing on Ubuntu: Android push expectations
 
@@ -133,6 +133,6 @@ journalctl --user -u honeycomb-monitor.service -f
 ## Privacy and limitations
 
 - Never commit `data/`, the browser profile, `state.json`, or the Telegram environment file.
-- FCM and optional Telegram receive only count summaries, such as `Alex: 2 new photos` or `Alex: 1 new badge`; they do not receive photo URLs, report text, or badge details.
+- FCM and optional Telegram receive concise alert previews. Daily reports may include the activity type, child name, and short outcome/time (for example, `Potty — Alex: Pee`); do not use this monitor if that information should not appear on a notification or paired watch. It does not send photo URLs, images, login credentials, or full report-note text.
 - The monitor needs a desktop-capable Ubuntu session for the one-time login. Normal polling runs headlessly afterward.
 - Ubuntu needs Node.js, Playwright/Chromium, the browser profile, and the private Firebase service-account file. It does **not** need Android Studio, the Android SDK, Gradle, or an APK build.

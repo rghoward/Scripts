@@ -148,16 +148,20 @@ test("Android uses dispatcher-based back navigation", () => {
   assert.doesNotMatch(android, /void onBackPressed\(/);
 });
 
-test("Ubuntu push alerts identify each count-only notification category", () => {
+test("Ubuntu push alerts include watch-readable activity details", () => {
   for (const [type, title] of [
-    ["supply", "Supply request"],
-    ["report", "New daily report"],
-    ["photo", "New Honeycomb photo"],
-    ["badge", "Badge earned"],
+    ["supply", "🧺 Needs supplies"],
+    ["report", "📋 Daily report"],
+    ["photo", "📷 New photo"],
+    ["badge", "🏅 Badge earned"],
   ]) {
     assert.match(ubuntuMonitor, new RegExp(`${type}: \\{ title: '${title}'`));
-    assert.match(ubuntuMonitor, new RegExp(`notification\\(\\n?\\s*'${type}'`));
   }
+  assert.match(ubuntuMonitor, /function reportNotification\(report, child\)/);
+  assert.match(ubuntuMonitor, /case 4:\s*title = '🩲 Diaper'/);
+  assert.match(ubuntuMonitor, /case 5:\s*title = '🚽 Potty'/);
+  assert.match(ubuntuMonitor, /case 3:\s*title = '😴 Nap'/);
+  assert.match(ubuntuMonitor, /alerts\.push\(\.\.\.newReports\.map\(report => reportNotification/);
   assert.match(ubuntuMonitor, /type: alert\.type/);
   assert.match(ubuntuMonitor, /body: alert\.body\.slice/);
   assert.match(ubuntuMonitor, /childId: alert\.childId/);
@@ -212,11 +216,11 @@ test("Android notification taps select the child and open Today", () => {
   assert.match(android, /return "home";/);
   assert.match(
     ubuntuMonitor,
-    /supply: \{ title: 'Supply request', tab: 'home' \}/,
+    /supply: \{ title: '🧺 Needs supplies', tab: 'home' \}/,
   );
   assert.match(
     ubuntuMonitor,
-    /report: \{ title: 'New daily report', tab: 'home' \}/,
+    /report: \{ title: '📋 Daily report', tab: 'home' \}/,
   );
 });
 

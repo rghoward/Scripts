@@ -100,30 +100,97 @@ function newlySeen(items, key, previousIds) {
   return items.filter(item => item?.[key] != null && !known.has(String(item[key])));
 }
 
-function reportIsSupplyRequest(report) {
-  const text = `${report?.GenericReportInfo || ''} ${report?.ChildCondition || ''}`.toLowerCase();
-  return Number(report?.DailyReportTypeID) === 6 || /suppl|wipes|clothes|diaper/.test(text);
-}
-
 const notificationTypes = {
-  supply: { title: 'Supply request', tab: 'home' },
-  report: { title: 'New daily report', tab: 'home' },
-  photo: { title: 'New Honeycomb photo', tab: 'home' },
-  badge: { title: 'Badge earned', tab: 'home' },
+  supply: { title: '🧺 Needs supplies', tab: 'home' },
+  report: { title: '📋 Daily report', tab: 'home' },
+  photo: { title: '📷 New photo', tab: 'home' },
+  badge: { title: '🏅 Badge earned', tab: 'home' },
   test: { title: 'Honeycomb test', tab: 'home' },
 };
 
-function notification(type, body, childId = '', photoId = '', photoFilename = '') {
+function notification(type, body, childId = '', photoId = '', photoFilename = '', title = '') {
   const details = notificationTypes[type] || { title: 'Honeycomb update', tab: 'home' };
   return {
     type,
-    title: details.title,
+    title: title || details.title,
     body,
     childId: String(childId),
     tab: details.tab,
     photoId: String(photoId),
     photoFilename: String(photoFilename),
   };
+}
+
+function oneLine(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function reportTime(value) {
+  const time = new Date(value);
+  if (Number.isNaN(time.getTime())) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(time);
+}
+
+function reportNotification(report, child) {
+  const typeId = Number(report?.DailyReportTypeID);
+  const generic = oneLine(report?.GenericReportInfo);
+  const condition = oneLine(report?.ChildCondition);
+  const napStart = reportTime(report?.TimeStart);
+  const napEnd = reportTime(report?.TimeEnd);
+  const napRange = napStart && napEnd ? `${napStart} – ${napEnd}` : napStart || napEnd;
+  let type = 'report';
+  let title = '📋 Daily report';
+  let detail = condition || generic;
+
+  switch (typeId) {
+    case 1:
+      title = '🍼 Bottle';
+      detail = generic || condition;
+      break;
+    case 2: {
+      const meal = generic || 'Meal';
+      const mealName = meal.toLowerCase();
+      const icon = mealName.includes('breakfast') ? '🥞'
+        : mealName.includes('lunch') ? '🥪'
+          : mealName.includes('snack') ? '🍎' : '🍴';
+      title = `${icon} ${meal}`;
+      detail = condition || generic;
+      break;
+    }
+    case 3:
+      title = '😴 Nap';
+      detail = napRange || condition || generic;
+      break;
+    case 4:
+      title = '🩲 Diaper';
+      detail = condition || generic;
+      break;
+    case 5:
+      title = '🚽 Potty';
+      detail = condition || generic;
+      break;
+    case 6:
+      type = 'supply';
+      title = '🧺 Needs supplies';
+      detail = condition || generic;
+      break;
+    case 7:
+      title = '📝 Message';
+      detail = generic || condition || 'New message from the classroom';
+      break;
+  }
+
+  return notification(
+    type,
+    `${childName(child)}: ${detail || 'New update'}`,
+    child?.ChildID,
+    '',
+    '',
+    title,
+  );
 }
 
 async function sendTelegram(alert) {
@@ -255,24 +322,13 @@ async function monitor() {
         const newBadges = Array.isArray(previous.badgeIds)
           ? newlySeen(reading.badges, 'BadgeID', previous.badgeIds)
           : [];
-        const supplies = newReports.filter(reportIsSupplyRequest).length;
-        if (supplies) alerts.push(notification(
-          'supply',
-          `${childName(reading.child)}: ${supplies} new supply request${supplies === 1 ? '' : 's'}`,
-          reading.childId,
-        ));
+        alerts.push(...newReports.map(report => reportNotification(report, reading.child)));
         if (newMoments.length) alerts.push(notification(
           'photo',
           `${childName(reading.child)}: ${newMoments.length} new photo${newMoments.length === 1 ? '' : 's'}`,
           reading.childId,
           newMoments[0].DailyMomentId,
           newMoments[0].Filename,
-        ));
-        const otherReports = newReports.length - supplies;
-        if (otherReports) alerts.push(notification(
-          'report',
-          `${childName(reading.child)}: ${otherReports} new report${otherReports === 1 ? '' : 's'}`,
-          reading.childId,
         ));
         if (newBadges.length) alerts.push(notification(
           'badge',

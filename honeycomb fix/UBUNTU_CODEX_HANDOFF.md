@@ -78,7 +78,7 @@ Every 15 minutes, the monitor checks each child for new:
 - photos / daily moments;
 - earned badges.
 
-It sends one count-only FCM summary, for example `Alex: 2 new photos`. It must not include report text, photo URLs, image bytes, badge details, or other private content. Photo alerts may include the uploaded filename so the phone can fetch its own authenticated thumbnail for the paired watch.
+It sends concise FCM alerts. Daily reports include the activity type and short outcome/time, for example `🚽 Potty` with `Alex: Pee`; photos and badges remain short summaries. It must not include photo URLs, image bytes, login credentials, or full report-note text. Photo alerts may include the uploaded filename so the phone can fetch its own authenticated thumbnail for the paired watch.
 
 The badge-alert support is already committed in the latest `main` branch. Existing monitor state silently establishes a badge baseline once, so old badges do not cause an alert flood.
 
