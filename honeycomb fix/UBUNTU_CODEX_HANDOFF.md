@@ -18,6 +18,30 @@ Do not create a database, Hosting site, Analytics configuration, billing account
 - Keep the private files below readable only by the Ubuntu user (`chmod 600`).
 - Do not change or commit unrelated files.
 
+## Latest update: watch-readable notification previews
+
+The Android app now has dedicated Honeycomb notification glyphs instead of the
+plain launcher circle. The latest monitor source also sends concise daily-report
+previews that a paired Wear OS watch can render directly, for example:
+
+- `🩲 Diaper` — `Alex: Pee & BM`
+- `😴 Nap` — `Alex: 12:00 PM – 2:30 PM`
+- `🥞 Breakfast` — `Alex: Ate All`
+- `🧺 Needs supplies` — `Alex: Diapers`
+
+For an already configured Ubuntu monitor, do only the following:
+
+```sh
+git pull --ff-only origin main
+cd 'honeycomb fix/ubuntu-monitor'
+systemctl --user restart honeycomb-monitor.timer
+```
+
+Do **not** replace the Firebase service-account JSON, environment file,
+Honeycomb browser profile, or `data/state.json`; no new login or baseline is
+needed. Then send one test notification using the existing private environment
+configuration and confirm that the Android phone receives it.
+
 ## Required work
 
 1. Pull the latest `main` branch of `https://github.com/rghoward/Scripts.git`.
