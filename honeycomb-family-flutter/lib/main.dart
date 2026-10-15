@@ -13,9 +13,13 @@ import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'core/honeycomb_api.dart';
+import 'core/memories.dart';
 
 const secure = FlutterSecureStorage();
 const notificationSession = MethodChannel('honeycomb/notification-session');
+const memoriesChannel = MethodChannel('honeycomb/memories');
+const photoThemesChannel = MethodChannel('honeycomb/photo-themes');
+const currentPersonAnalysisVersion = 2;
 const gold = Color(0xffffb743);
 final appThemeMode = ValueNotifier(ThemeMode.dark);
 void main() => runApp(const HoneycombApp());
@@ -283,6 +287,7 @@ class _DashboardState extends State<Dashboard>
   final Map<String, Map<String, dynamic>> reportDetailCache = {};
   Map<String, String> childPhotoPaths = {};
   Map<String, Map<String, String>> lastSeen = {};
+  List<MemoryRecord> memoryIndex = [];
   String savedEmail = '';
   String? connectionNotice;
   DateTime? lastUpdated;
@@ -291,6 +296,7 @@ class _DashboardState extends State<Dashboard>
   Tab tab = Tab.today;
   Activity activity = Activity.agenda;
   String activityTypeFilter = 'all';
+  String smartAlbum = 'all';
   bool photoSelectionMode = false;
   Set<String> selectedPhotos = {};
   int batchDownloadProgress = 0;
@@ -304,6 +310,8 @@ class _DashboardState extends State<Dashboard>
       refreshing = false,
       loadingMore = false,
       loadingHistory = false;
+  bool memoriesEnabled = true, memoryIndexing = false;
+  int memoryIndexProgress = 0, memoryIndexTarget = 0;
   PhotoRange photoRange = PhotoRange.all;
   InsightRange insightRange = InsightRange.loaded;
   int calendarTransitionDirection = 1;
@@ -317,6 +325,7 @@ class _DashboardState extends State<Dashboard>
   DateTime? selectedDay;
   double drag = 0;
   final childOffset = ValueNotifier<double>(0);
+  final memoryIndexRevision = ValueNotifier<int>(0);
   late final AnimationController childMotion;
   double _motionStart = 0, _motionEnd = 0;
   VoidCallback? _afterChildMotion;
@@ -357,6 +366,7 @@ class _DashboardState extends State<Dashboard>
     timer?.cancel();
     childMotion.dispose();
     childOffset.dispose();
+    memoryIndexRevision.dispose();
     search.dispose();
     super.dispose();
   }
@@ -369,6 +379,9 @@ class _DashboardState extends State<Dashboard>
   Future<void> restore() async {
     try {
       savedEmail = await secure.read(key: 'honeycomb_email') ?? '';
+      memoriesEnabled =
+          (await secure.read(key: 'honeycomb_memories_enabled')) != 'false';
+      await restoreMemoryIndex();
       Set<String> read(String x) =>
           (jsonDecode(x) as List).map((v) => v.toString()).toSet();
       favorites = read(await secure.read(key: 'honeycomb_favorites') ?? '[]');
@@ -429,7 +442,351 @@ class _DashboardState extends State<Dashboard>
         'mondayWeek': mondayWeek,
       }),
     ),
+    secure.write(
+      key: 'honeycomb_memories_enabled',
+      value: memoriesEnabled.toString(),
+    ),
   ]);
+
+  Future<File> get memoryIndexFile async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/honeycomb_memory_index_v1.json');
+  }
+
+  Future<void> restoreMemoryIndex() async {
+    try {
+      final file = await memoryIndexFile;
+      if (!await file.exists()) return;
+      final decoded = jsonDecode(await file.readAsString());
+      final values = decoded is Map ? decoded['records'] : null;
+      if (values is! List) return;
+      memoryIndex = values
+          .whereType<Map>()
+          .map(
+            (value) => MemoryRecord.fromJson(Map<String, dynamic>.from(value)),
+          )
+          .whereType<MemoryRecord>()
+          .toList();
+    } catch (_) {
+      // An interrupted index is disposable; the next Wi-Fi index repairs it.
+      memoryIndex = [];
+    }
+  }
+
+  Future<void> saveMemoryIndex() async {
+    try {
+      final file = await memoryIndexFile;
+      await file.writeAsString(
+        jsonEncode({
+          'version': 1,
+          'updatedAt': DateTime.now().toIso8601String(),
+          'records': memoryIndex.map((record) => record.toJson()).toList(),
+        }),
+      );
+    } catch (_) {
+      // The feature remains useful for this session if private storage is full.
+    }
+  }
+
+  MemoryRecord? memoryRecordFromMoment(
+    FamilyChild owner,
+    Map<String, dynamic> moment,
+  ) {
+    final day = DateTime.tryParse(date(moment));
+    final filename = (moment['Filename'] ?? moment['ImageUrl'] ?? '')
+        .toString()
+        .trim();
+    if (day == null || filename.isEmpty) return null;
+    return MemoryRecord(
+      childId: owner.id,
+      momentId: id(moment),
+      filename: filename,
+      day: DateTime(day.year, day.month, day.day),
+      lesson: (moment['Lesson'] ?? '').toString().trim(),
+      caption: (moment['Caption'] ?? moment['Description'] ?? '')
+          .toString()
+          .trim(),
+    );
+  }
+
+  Future<void> mergeMemoryIndexFromLoaded() async {
+    if (children.isEmpty) return;
+    final merged = {for (final record in memoryIndex) record.key: record};
+    for (final owner in children) {
+      for (final moment
+          in data[owner.id]?.moments ?? const <Map<String, dynamic>>[]) {
+        final record = memoryRecordFromMoment(owner, moment);
+        if (record != null) {
+          final existing = merged[record.key];
+          merged[record.key] = existing == null
+              ? record
+              : record.copyWith(
+                  labels: existing.labels,
+                  analyzed: existing.analyzed,
+                  hasPerson: existing.hasPerson,
+                  personChecked: existing.personChecked,
+                  personAnalysisVersion: existing.personAnalysisVersion,
+                );
+        }
+      }
+    }
+    memoryIndex = merged.values.toList()
+      ..sort((a, b) => b.day.compareTo(a.day));
+    await saveMemoryIndex();
+    await syncMemoryPlan();
+  }
+
+  Future<bool> isOnWifi() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      return await memoriesChannel.invokeMethod<bool>('isWifi') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> syncMemoryPlan() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final names = {for (final child in children) child.id: child.firstName};
+      final excluded = await recentMemoryExclusions();
+      final plan = <Map<String, dynamic>>[];
+      for (var offset = 0; offset < 45; offset++) {
+        final scheduled = DateTime.now().add(Duration(days: offset));
+        final suggestions = buildMemorySuggestions(
+          memoryIndex,
+          scheduled,
+          excluded: excluded,
+          favoriteMomentIds: favorites,
+        );
+        if (suggestions.isEmpty) continue;
+        plan.add({
+          'day': dayKey(scheduled),
+          'items': suggestions
+              .map(
+                (suggestion) => {
+                  'childId': suggestion.childId,
+                  'childName': names[suggestion.childId] ?? 'Your child',
+                  'momentId': suggestion.records.first.momentId,
+                  'referenceDay': dayKey(suggestion.referenceDay),
+                  'count': suggestion.records.length,
+                  'kind': memoryKindTitle(suggestion.kind),
+                },
+              )
+              .toList(),
+        });
+        for (final suggestion in suggestions) {
+          excluded.addAll(suggestion.records.map((record) => record.key));
+        }
+      }
+      await memoriesChannel.invokeMethod<void>('syncPlan', {
+        'enabled': memoriesEnabled,
+        'plan': jsonEncode(plan),
+      });
+    } catch (_) {
+      // Local cards continue to work if Android cannot schedule its reminder.
+    }
+  }
+
+  Future<Set<String>> recentMemoryExclusions() async {
+    try {
+      final raw = await memoriesChannel.invokeMethod<String>('recentShown');
+      final values = jsonDecode(raw ?? '[]');
+      if (values is! List) return {};
+      final excluded = <String>{};
+      for (final value in values.whereType<Map>()) {
+        final childId = value['childId']?.toString() ?? '';
+        final momentId = value['momentId']?.toString() ?? '';
+        final shown = memoryIndex.where(
+          (record) => record.childId == childId && record.momentId == momentId,
+        );
+        if (shown.isEmpty) continue;
+        final center = shown.first;
+        // A photo story is a nearby date cluster. Keeping an eight-day buffer
+        // prevents the next daily plan from resurfacing the same little day.
+        excluded.addAll(
+          memoryIndex
+              .where(
+                (record) =>
+                    record.childId == childId &&
+                    record.day.difference(center.day).inDays.abs() <= 8,
+              )
+              .map((record) => record.key),
+        );
+      }
+      return excluded;
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<void> sendMemoryTestNotification() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await memoriesChannel.invokeMethod<void>('sendTestNotification');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Test Little Moment notification sent.'),
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not send the test notification.'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> buildMemoryIndex({bool quiet = false}) async {
+    if (memoryIndexing || children.isEmpty) return;
+    if (!await isOnWifi()) {
+      if (mounted && !quiet) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Connect to Wi-Fi to build photo memories.'),
+          ),
+        );
+      }
+      return;
+    }
+    final target = children.fold<int>(
+      0,
+      (total, child) => total + (data[child.id]?.momentCount ?? 0),
+    );
+    setState(() {
+      memoryIndexing = true;
+      memoryIndexProgress = memoryIndex.length;
+      memoryIndexTarget = target;
+    });
+    memoryIndexRevision.value++;
+    try {
+      final updated = Map<String, ChildSnapshot>.from(data);
+      for (final owner in children) {
+        if (updated[owner.id] == null) continue;
+        var snapshot = updated[owner.id]!;
+        // Once a child's known photo count is indexed, avoid walking their
+        // whole history again on every cold start. New photos raise the count
+        // and naturally make the next Wi-Fi pass pick up only the difference.
+        final indexedForChild = memoryIndex
+            .where((record) => record.childId == owner.id)
+            .length;
+        if (indexedForChild >= snapshot.momentCount) continue;
+        while (snapshot.moments.length < snapshot.momentCount) {
+          final next = await widget.api.loadMore(snapshot, moments: true);
+          if (next.moments.length == snapshot.moments.length) break;
+          snapshot = next;
+          updated[owner.id] = snapshot;
+          if (mounted) {
+            setState(() {
+              data = Map<String, ChildSnapshot>.from(updated);
+              memoryIndexProgress = updated.values.fold<int>(
+                0,
+                (total, value) => total + value.moments.length,
+              );
+            });
+            memoryIndexRevision.value++;
+          }
+          await mergeMemoryIndexFromLoaded();
+        }
+      }
+      if (mounted) await saveSnapshotCache();
+      await labelMemoryPhotos();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Memory indexing paused. It can safely resume on Wi-Fi.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => memoryIndexing = false);
+      memoryIndexRevision.value++;
+      await mergeMemoryIndexFromLoaded();
+    }
+  }
+
+  Future<void> labelMemoryPhotos() async {
+    if (!Platform.isAndroid || !await isOnWifi()) return;
+    final now = DateTime.now();
+    final pending =
+        memoryIndex
+            .where(
+              (record) =>
+                  !record.analyzed ||
+                  !record.personChecked ||
+                  record.personAnalysisVersion < currentPersonAnalysisVersion,
+            )
+            .toList()
+          ..sort((a, b) {
+            int priority(MemoryRecord record) {
+              final age = now.difference(record.day).inDays;
+              // Prior-year pictures from this calendar month unlock Seasonal
+              // Return, so they should not wait behind an entire photo archive.
+              if (record.day.year < now.year && record.day.month == now.month) {
+                return 0;
+              }
+              if (age >= 0 && age <= 14) return 1;
+              if (age >= 90) return 2;
+              return 3;
+            }
+
+            final result = priority(a).compareTo(priority(b));
+            return result != 0 ? result : b.day.compareTo(a.day);
+          });
+    if (pending.isEmpty) return;
+    // Two small thumbnails at a time keeps the phone cool and gives
+    // Honeycomb's protected image endpoint room to respond reliably.
+    for (var start = 0; start < pending.length; start += 2) {
+      final batch = pending.skip(start).take(2);
+      await Future.wait(batch.map(_labelMemoryRecord));
+      await saveMemoryIndex();
+      await syncMemoryPlan();
+      memoryIndexRevision.value++;
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+    }
+  }
+
+  Future<void> _labelMemoryRecord(MemoryRecord record) async {
+    List<String> labels = record.labels;
+    var hasPerson = record.hasPerson;
+    try {
+      final value = await photoThemesChannel
+          .invokeMethod<Map<dynamic, dynamic>>('labelsForPhoto', {
+            'filename': record.filename,
+            'cookies': widget.api.sessionCookies,
+          });
+      if (value?['available'] != true) return;
+      labels = (value?['labels'] as List? ?? const [])
+          .whereType<Map>()
+          .map((label) => label['text']?.toString().trim() ?? '')
+          .where((label) => label.isNotEmpty)
+          .take(5)
+          .toList();
+      hasPerson = value?['hasPerson'] == true;
+    } catch (_) {
+      // An unavailable thumbnail is deliberately left pending. Treating a
+      // download failure as “not a person” hides legitimate old memories.
+      return;
+    }
+    final position = memoryIndex.indexWhere((item) => item.key == record.key);
+    if (position >= 0) {
+      memoryIndex[position] = record.copyWith(
+        labels: labels,
+        analyzed: true,
+        hasPerson: hasPerson,
+        personChecked: true,
+        personAnalysisVersion: currentPersonAnalysisVersion,
+      );
+    }
+  }
 
   Future<bool> restoreSnapshotCache() async {
     try {
@@ -542,6 +899,8 @@ class _DashboardState extends State<Dashboard>
       if (link != null) routeDeepLink(link);
       markAllSeenSoon();
       saveSnapshotCache();
+      await mergeMemoryIndexFromLoaded();
+      if (memoriesEnabled) unawaited(buildMemoryIndex(quiet: true));
       unawaited(cacheRecentHistory());
     } catch (_) {
       if (!mounted) return;
@@ -569,6 +928,7 @@ class _DashboardState extends State<Dashboard>
         });
         markAllSeenSoon();
         saveSnapshotCache();
+        await mergeMemoryIndexFromLoaded();
         unawaited(cacheRecentHistory());
       }
     } catch (_) {
@@ -613,6 +973,7 @@ class _DashboardState extends State<Dashboard>
       'activity' => Tab.activity,
       'photos' || 'photo' => Tab.photos,
       'insights' || 'stats' => Tab.insights,
+      'memory' || 'memories' => Tab.today,
       _ => Tab.today,
     };
     setState(() {
@@ -629,6 +990,10 @@ class _DashboardState extends State<Dashboard>
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => openLinkedPhoto(owner, momentId, latest),
       );
+    }
+    if ((requestedTab == 'memory' || requestedTab == 'memories') &&
+        childIndex >= 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => openMemoryFor(child));
     }
   }
 
@@ -670,6 +1035,34 @@ class _DashboardState extends State<Dashboard>
           .toList();
   List<Map<String, dynamic>> reports(FamilyChild c) =>
       data[c.id]?.reports ?? [];
+
+  MemoryRecord? memoryRecordFor(FamilyChild owner, Map<String, dynamic> photo) {
+    final key = '${owner.id}:${id(photo)}';
+    for (final record in memoryIndex) {
+      if (record.key == key) return record;
+    }
+    return null;
+  }
+
+  String photoTheme(FamilyChild owner, Map<String, dynamic> photo) {
+    final record = memoryRecordFor(owner, photo);
+    return visualThemeFor(
+      labels: record?.labels ?? const [],
+      text:
+          '${photo['Lesson'] ?? ''} ${photo['Caption'] ?? photo['Description'] ?? ''}',
+    );
+  }
+
+  bool photoMatches(FamilyChild owner, Map<String, dynamic> photo) {
+    final query = search.text.trim().toLowerCase();
+    final record = memoryRecordFor(owner, photo);
+    final searchable = [
+      ...photo.values,
+      ...?record?.labels,
+      photoTheme(owner, photo),
+    ].join(' ').toLowerCase();
+    return query.isEmpty || searchable.contains(query);
+  }
 
   String _newestTimestamp(Iterable<Map<String, dynamic>> items) {
     final timestamps =
@@ -726,6 +1119,7 @@ class _DashboardState extends State<Dashboard>
       if (mounted) {
         setState(() => data = {...data, target.id: next});
         saveSnapshotCache();
+        unawaited(mergeMemoryIndexFromLoaded());
       }
     } finally {
       if (mounted) setState(() => loadingMore = false);
@@ -774,6 +1168,7 @@ class _DashboardState extends State<Dashboard>
       if (mounted) {
         setState(() => data = updated);
         saveSnapshotCache();
+        unawaited(mergeMemoryIndexFromLoaded());
       }
     } finally {
       if (mounted) setState(() => loadingHistory = false);
@@ -846,6 +1241,7 @@ class _DashboardState extends State<Dashboard>
           data = {...data, for (final value in values) value.childId: value};
         });
         saveSnapshotCache();
+        unawaited(mergeMemoryIndexFromLoaded());
       }
     } finally {
       if (mounted) setState(() => loadingHistory = false);
@@ -1097,60 +1493,69 @@ class _DashboardState extends State<Dashboard>
     save();
   }
 
-  Widget picker() => Material(
-    color: const Color(0xff29313a),
-    child: InkWell(
-      onTap: chooseChild,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: chooseChildPhoto,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  avatar(child),
-                  const Positioned(
-                    right: -4,
-                    bottom: -4,
-                    child: CircleAvatar(
-                      radius: 9,
-                      backgroundColor: gold,
-                      child: Icon(Icons.edit, size: 12, color: Colors.black),
+  Widget picker() {
+    final light = Theme.of(context).brightness == Brightness.light;
+    final foreground = light ? const Color(0xff34220d) : Colors.white;
+    final muted = light ? const Color(0xff6c5639) : Colors.white60;
+    return Material(
+      color: light ? const Color(0xffffefd5) : const Color(0xff29313a),
+      child: InkWell(
+        onTap: chooseChild,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: chooseChildPhoto,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    avatar(child),
+                    const Positioned(
+                      right: -4,
+                      bottom: -4,
+                      child: CircleAvatar(
+                        radius: 9,
+                        backgroundColor: gold,
+                        child: Icon(Icons.edit, size: 12, color: Colors.black),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    everyone ? 'Everyone' : child.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    everyone
-                        ? 'Combined family activity'
-                        : child.learningDaysCount.toString() +
-                              ' learning days' +
-                              (unseenCount(child) > 0
-                                  ? ' · ${unseenCount(child)} new'
-                                  : ''),
-                    style: const TextStyle(fontSize: 12, color: Colors.white60),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      everyone ? 'Everyone' : child.name,
+                      style: TextStyle(
+                        color: foreground,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      everyone
+                          ? 'Combined family activity'
+                          : child.learningDaysCount.toString() +
+                                ' learning days' +
+                                (unseenCount(child) > 0
+                                    ? ' · ${unseenCount(child)} new'
+                                    : ''),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.keyboard_arrow_down),
-          ],
+              Icon(Icons.keyboard_arrow_down, color: foreground),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
+
   Future<void> chooseChild() async {
     final x = await showModalBottomSheet<int>(
       context: context,
@@ -1278,6 +1683,428 @@ class _DashboardState extends State<Dashboard>
     Tab.insights => insights(),
     Tab.more => const SizedBox(),
   };
+
+  MemorySuggestion? memoryFor(FamilyChild owner, [DateTime? day]) {
+    final matches = buildMemorySuggestions(
+      memoryIndex,
+      day ?? DateTime.now(),
+      favoriteMomentIds: favorites,
+    ).where((suggestion) => suggestion.childId == owner.id);
+    return matches.isEmpty ? null : matches.first;
+  }
+
+  MemorySuggestion? memoryPreviewFor(FamilyChild owner, MemoryKind kind) {
+    final matches = buildMemorySuggestions(
+      memoryIndex,
+      DateTime.now(),
+      favoriteMomentIds: favorites,
+      forceKind: kind,
+    ).where((suggestion) => suggestion.childId == owner.id);
+    return matches.isEmpty ? null : matches.first;
+  }
+
+  String unavailableMemoryReason(MemoryKind kind) => switch (kind) {
+    MemoryKind.timeCapsule =>
+      'Needs a person photo near the same date in earlier history.',
+    MemoryKind.themedChapter =>
+      'Needs at least two person photos with a shared visual theme.',
+    MemoryKind.firstWeeks =>
+      'Needs at least two person photos from the first three school weeks.',
+    MemoryKind.thenAndNow =>
+      'Needs one person photo 3+ months old and one from the last two weeks.',
+    MemoryKind.classroomChapter =>
+      'Needs the same named classroom activity on at least two different days.',
+    MemoryKind.familiarFavorite =>
+      'Needs a visual theme that appears in at least two person photos.',
+    MemoryKind.favoriteRediscovery =>
+      'Star a person photo in Photos first, then it can rediscover it.',
+    MemoryKind.seasonalReturn =>
+      'Needs two person photos from this month in an earlier year.',
+  };
+
+  void previewMemoryKinds() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(
+              leading: avatar(child, 20),
+              title: Text('Preview ${child.firstName}’s memories'),
+              subtitle: const Text(
+                'Only formats supported by their photo history will open.',
+              ),
+            ),
+            const Divider(),
+            ...MemoryKind.values.map(
+              (kind) => ListTile(
+                leading: const Icon(Icons.auto_awesome_outlined, color: gold),
+                title: Text(memoryKindTitle(kind)),
+                onTap: () {
+                  final suggestion = memoryPreviewFor(child, kind);
+                  if (suggestion == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(unavailableMemoryReason(kind))),
+                    );
+                    return;
+                  }
+                  // Keep the picker route open underneath the full-screen
+                  // memory. Back then returns directly to this list so it is
+                  // effortless to try every format in sequence.
+                  openMemory(suggestion, child);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String memoryAge(MemorySuggestion suggestion) {
+    final days = DateTime.now().difference(suggestion.referenceDay).inDays;
+    if (days >= 360 && days <= 370) return 'one year ago';
+    if (days >= 60) return '${(days / 30).round()} months ago';
+    return '$days days ago';
+  }
+
+  Widget memoryCards() {
+    if (!memoriesEnabled) return const SizedBox();
+    if (children.isEmpty) return const SizedBox();
+    final suggestion = memoryFor(child);
+    if (suggestion == null || suggestion.records.isEmpty) {
+      return const SizedBox();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: memoryCard(child, suggestion),
+    );
+  }
+
+  Widget memoryCard(FamilyChild owner, MemorySuggestion suggestion) {
+    final photo = suggestion.records.first;
+    final lesson = photo.lesson.trim();
+    final theme = memoryTheme(suggestion);
+    final dateLabel =
+        suggestion.kind == MemoryKind.thenAndNow &&
+            suggestion.records.length >= 2
+        ? '${readDate(dayKey(suggestion.records.first.day))} → ${readDate(dayKey(suggestion.records.last.day))}'
+        : readDate(dayKey(photo.day));
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => openMemory(suggestion, owner),
+        child: SizedBox(
+          height: 148,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CachedNetworkImage(
+                imageUrl: widget.api.imageUrl(photo.filename, thumbnail: true),
+                httpHeaders: widget.api.imageHeaders,
+                fit: BoxFit.cover,
+                placeholder: (_, __) =>
+                    const ColoredBox(color: Color(0xff765226)),
+                errorWidget: (_, __, ___) => const ColoredBox(
+                  color: Color(0xff765226),
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: Colors.white,
+                    size: 42,
+                  ),
+                ),
+              ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xc9000000), Color(0x10000000)],
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.auto_awesome, color: gold, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          'A LITTLE MOMENT · ${owner.firstName.toUpperCase()}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      suggestion.kind == MemoryKind.thenAndNow
+                          ? 'Then & now'
+                          : theme.isNotEmpty
+                          ? '$theme · ${memoryAge(suggestion)}'
+                          : lesson.isEmpty
+                          ? '${memoryKindTitle(suggestion.kind)} · ${memoryAge(suggestion)}'
+                          : '$lesson · ${memoryAge(suggestion)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '$dateLabel · ${suggestion.records.length} photo${suggestion.records.length == 1 ? '' : 's'} · Tap to revisit',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void openMemoryFor(FamilyChild owner) {
+    final suggestion = memoryFor(owner);
+    if (suggestion != null) openMemory(suggestion, owner);
+  }
+
+  void openMemory(MemorySuggestion suggestion, FamilyChild owner) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        var page = 0;
+        var saving = false;
+        return StatefulBuilder(
+          builder: (_, setDialogState) => Dialog.fullscreen(
+            child: Scaffold(
+              backgroundColor: Colors.black,
+              body: SafeArea(
+                child: Stack(
+                  children: [
+                    PageView.builder(
+                      itemCount: suggestion.records.length,
+                      onPageChanged: (value) =>
+                          setDialogState(() => page = value),
+                      itemBuilder: (_, index) {
+                        final record = suggestion.records[index];
+                        return Column(
+                          children: [
+                            const SizedBox(height: 56),
+                            Expanded(
+                              child: InteractiveViewer(
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.api.imageUrl(
+                                    record.filename,
+                                    full: true,
+                                  ),
+                                  httpHeaders: widget.api.imageHeaders,
+                                  fit: BoxFit.contain,
+                                  placeholder: (_, __) => const Center(
+                                    child: CircularProgressIndicator(
+                                      color: gold,
+                                    ),
+                                  ),
+                                  errorWidget: (_, __, ___) => const Center(
+                                    child: Icon(
+                                      Icons.broken_image_outlined,
+                                      color: Colors.white54,
+                                      size: 42,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                28,
+                                12,
+                                28,
+                                30,
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    owner.firstName,
+                                    style: const TextStyle(
+                                      color: gold,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    suggestion.kind == MemoryKind.thenAndNow
+                                        ? '${index == 0 ? 'THEN' : 'NOW'} · ${readDate(dayKey(record.day))}'
+                                        : readDate(dayKey(record.day)),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: gold,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: .8,
+                                    ),
+                                  ),
+                                  Text(
+                                    memoryTheme(suggestion).isNotEmpty
+                                        ? memoryTheme(suggestion)
+                                        : record.lesson.isNotEmpty
+                                        ? record.lesson
+                                        : readDate(dayKey(record.day)),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (record.caption.isNotEmpty) ...[
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      record.caption,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 11),
+                                  Text(
+                                    '${page + 1} of ${suggestion.records.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    Positioned(
+                      top: 4,
+                      left: 8,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            tooltip: 'Close memory',
+                          ),
+                          IconButton(
+                            onPressed: saving
+                                ? null
+                                : () {
+                                    setDialogState(() => saving = true);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Saving original in the background…',
+                                        ),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                    unawaited(
+                                      saveMemoryPhoto(
+                                        suggestion.records[page],
+                                      ).whenComplete(() {
+                                        if (dialogContext.mounted) {
+                                          setDialogState(() => saving = false);
+                                        }
+                                      }),
+                                    );
+                                  },
+                            icon: Icon(
+                              saving
+                                  ? Icons.downloading_outlined
+                                  : Icons.download_outlined,
+                              color: Colors.white,
+                            ),
+                            tooltip: 'Save original',
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 18,
+                      right: 22,
+                      child: Row(
+                        children: [
+                          Icon(Icons.auto_awesome, color: gold, size: 18),
+                          SizedBox(width: 6),
+                          Text(
+                            memoryKindTitle(suggestion.kind).toUpperCase(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget fridayRewind() {
+    final photos = moments(child).where(inWeek).take(6).toList();
+    if (photos.length < 2) return const SizedBox();
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${child.firstName}’s Friday rewind',
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'A little look back at the week.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 96,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: photos.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 7),
+                itemBuilder: (_, index) =>
+                    SizedBox(width: 96, child: photo(photos[index], child)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget today() {
     final cutoff = supplyAlertCutoff();
     final alerts =
@@ -1294,22 +2121,69 @@ class _DashboardState extends State<Dashboard>
             )
             .toList()
           ..sort((a, b) => stamp(b.$2).compareTo(stamp(a.$2)));
+    final suppliesCallout = alerts.isEmpty
+        ? null
+        : Builder(
+            builder: (context) {
+              final light = Theme.of(context).brightness == Brightness.light;
+              final requests = alerts
+                  .map((alert) => supplyRequest(alert.$2))
+                  .where((request) => request.isNotEmpty)
+                  .toSet();
+              final icons = alerts
+                  .map((alert) => supplyEmoji(alert.$2))
+                  .toSet();
+              return Card(
+                color: light
+                    ? const Color(0xffffe7c2)
+                    : const Color(0xff4b3b25),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: light ? const Color(0xffd96400) : gold,
+                    width: 1.5,
+                  ),
+                ),
+                child: ListTile(
+                  leading: Text(
+                    icons.length == 1 ? icons.first : '🧺',
+                    style: const TextStyle(fontSize: 25),
+                  ),
+                  title: Text(
+                    'Supplies needed',
+                    style: TextStyle(
+                      color: light ? const Color(0xff3b260b) : Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    requests.isEmpty
+                        ? '${alerts.length} unacknowledged alert${alerts.length == 1 ? '' : 's'} · Tap to see the request'
+                        : 'Needed now: ${requests.join(' · ')}',
+                    style: TextStyle(
+                      color: light ? const Color(0xff6c5639) : Colors.white70,
+                    ),
+                  ),
+                  onTap: () => supplies(alerts),
+                ),
+              );
+            },
+          );
     return RefreshIndicator(
       onRefresh: refresh,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (alerts.isNotEmpty)
-            Card(
-              color: const Color(0xff4b3b25),
-              child: ListTile(
-                leading: const Icon(Icons.inventory_2_outlined, color: gold),
-                title: const Text('Supplies needed'),
-                subtitle: Text(
-                  '${alerts.length} unacknowledged alert${alerts.length == 1 ? '' : 's'} · Past 5 business days',
-                ),
-                onTap: () => supplies(alerts),
-              ),
+          if (suppliesCallout != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: suppliesCallout,
+            ),
+          memoryCards(),
+          if (!week && DateTime.now().weekday == DateTime.friday)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: fridayRewind(),
             ),
           SegmentedButton<bool>(
             segments: const [
@@ -1368,6 +2242,7 @@ class _DashboardState extends State<Dashboard>
   );
   Widget weekly() {
     final rs = reports(child).where(inWeek).toList();
+    final story = moments(child).where(inWeek).take(8).toList();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -1396,6 +2271,24 @@ class _DashboardState extends State<Dashboard>
                 ),
               ],
             ),
+            if (story.isNotEmpty) ...[
+              const Divider(height: 26),
+              const Text(
+                'This week in photos',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 104,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: story.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (_, index) =>
+                      SizedBox(width: 104, child: photo(story[index], child)),
+                ),
+              ),
+            ],
             const Divider(height: 26),
             ...List.generate(7, (i) {
               final d = selectedWeek.add(Duration(days: i));
@@ -1931,9 +2824,15 @@ class _DashboardState extends State<Dashboard>
           (x) =>
               (!favoriteFilter || favorites.contains(id(x))) &&
               photoInRange(x) &&
-              matches(x),
+              photoMatches(child, x) &&
+              (smartAlbum == 'all' || photoTheme(child, x) == smartAlbum),
         )
         .toList();
+    final currentMonth =
+        '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}';
+    final monthly = moments(
+      child,
+    ).where((photo) => date(photo).startsWith(currentMonth)).take(9).toList();
     final groups = <String, List<Map<String, dynamic>>>{};
     for (final x in ps) (groups[date(x)] ??= []).add(x);
     return RefreshIndicator(
@@ -1949,7 +2848,7 @@ class _DashboardState extends State<Dashboard>
                   onChanged: (_) => setState(() {}),
                   decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.search),
-                    hintText: 'Search photos',
+                    hintText: 'Search photos, art, outside, books…',
                   ),
                 ),
               ),
@@ -1996,6 +2895,27 @@ class _DashboardState extends State<Dashboard>
                 selected: photoRange == PhotoRange.week,
                 onSelected: (_) => setState(() => photoRange = PhotoRange.week),
               ),
+              ...[
+                    'Creative days',
+                    'Outdoor days',
+                    'Happy playtime',
+                    'Story time',
+                    'Little mealtimes',
+                  ]
+                  .where(
+                    (theme) => moments(
+                      child,
+                    ).any((photo) => photoTheme(child, photo) == theme),
+                  )
+                  .map(
+                    (theme) => ChoiceChip(
+                      label: Text(theme),
+                      selected: smartAlbum == theme,
+                      onSelected: (_) => setState(
+                        () => smartAlbum = smartAlbum == theme ? 'all' : theme,
+                      ),
+                    ),
+                  ),
               if (hiddenPhotoCount(child) > 0)
                 ActionChip(
                   avatar: const Icon(Icons.restore, size: 18),
@@ -2008,6 +2928,45 @@ class _DashboardState extends State<Dashboard>
                 ),
             ],
           ),
+          if (monthly.length >= 2) ...[
+            const SizedBox(height: 12),
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${monthName(DateTime.now())} in photos · ${child.firstName}',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${monthly.length} little moment${monthly.length == 1 ? '' : 's'} from this month',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 96,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: monthly.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 7),
+                        itemBuilder: (_, index) => SizedBox(
+                          width: 96,
+                          child: photo(monthly[index], child),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           if (photoSelectionMode)
             Card(
               color: const Color(0xff3c4854),
@@ -2392,6 +3351,85 @@ class _DashboardState extends State<Dashboard>
                     save();
                   },
                 ),
+                SwitchListTile(
+                  secondary: const Icon(Icons.auto_awesome_outlined),
+                  title: const Text('Little moments'),
+                  subtitle: const Text(
+                    'One gentle memory each morning around 9:00 AM',
+                  ),
+                  value: memoriesEnabled,
+                  onChanged: (value) async {
+                    setState(() => memoriesEnabled = value);
+                    localSetState(() {});
+                    await save();
+                    await syncMemoryPlan();
+                  },
+                ),
+                ValueListenableBuilder<int>(
+                  valueListenable: memoryIndexRevision,
+                  builder: (_, __, ___) {
+                    final visuallyIndexed = memoryIndex
+                        .where(
+                          (record) =>
+                              record.personAnalysisVersion >=
+                              currentPersonAnalysisVersion,
+                        )
+                        .length;
+                    final labeling =
+                        memoryIndexProgress >= memoryIndexTarget &&
+                        visuallyIndexed < memoryIndex.length;
+                    return ListTile(
+                      leading: const Icon(Icons.wifi_outlined),
+                      title: Text(
+                        memoryIndexing
+                            ? labeling
+                                  ? 'Finding visual themes…'
+                                  : 'Building photo memories…'
+                            : 'Build photo memories',
+                      ),
+                      subtitle: Text(
+                        memoryIndexing
+                            ? labeling
+                                  ? '$visuallyIndexed of ${memoryIndex.length} thumbnails visually analyzed'
+                                  : '$memoryIndexProgress of $memoryIndexTarget photo records indexed'
+                            : memoryIndex.isEmpty
+                            ? 'Fetches photo history on Wi-Fi only'
+                            : '${memoryIndex.length} photos ready · $visuallyIndexed visually indexed · Wi-Fi only',
+                      ),
+                      trailing: memoryIndexing
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.chevron_right),
+                      onTap: memoryIndexing
+                          ? null
+                          : () {
+                              Navigator.pop(c);
+                              buildMemoryIndex();
+                            },
+                    );
+                  },
+                ),
+                if (Platform.isAndroid)
+                  ListTile(
+                    leading: const Icon(Icons.notifications_active_outlined),
+                    title: const Text('Send a test Little Moment'),
+                    subtitle: const Text(
+                      'See exactly what your phone and watch receive',
+                    ),
+                    onTap: sendMemoryTestNotification,
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.auto_awesome_motion_outlined),
+                  title: const Text('Preview memory types'),
+                  subtitle: const Text('Try every available format now'),
+                  onTap: () {
+                    Navigator.pop(c);
+                    previewMemoryKinds();
+                  },
+                ),
                 ValueListenableBuilder<ThemeMode>(
                   valueListenable: appThemeMode,
                   builder: (_, mode, __) => ListTile(
@@ -2753,6 +3791,48 @@ class _DashboardState extends State<Dashboard>
     );
   }
 
+  String supplyRequest(Map<String, dynamic> report) {
+    final candidates =
+        [
+              report['ChildCondition'],
+              report['GenericReportInfo'],
+              report['Description'],
+              report['Message'],
+              report['Comment'],
+              report['Comments'],
+              report['Note'],
+              report['Notes'],
+            ]
+            .map((value) => value?.toString().trim() ?? '')
+            .where((value) => value.isNotEmpty)
+            .where(
+              (value) => !RegExp(
+                r'^(needs? )?supplies?$',
+                caseSensitive: false,
+              ).hasMatch(value),
+            )
+            .toSet();
+    return candidates.join(' · ');
+  }
+
+  String supplyEmoji(Map<String, dynamic> report) {
+    final request = supplyRequest(report).toLowerCase();
+    if (RegExp(r'diaper|pull[ -]?up|training pants').hasMatch(request)) {
+      return '🩲';
+    }
+    if (RegExp(r'wipe|tissue').hasMatch(request)) return '🧻';
+    if (RegExp(
+      r'clothes?|shirt|pants|sock|shoe|jacket|outfit',
+    ).hasMatch(request)) {
+      return '👕';
+    }
+    if (RegExp(r'formula|milk|bottle').hasMatch(request)) return '🍼';
+    if (RegExp(r'sunscreen|lotion').hasMatch(request)) return '🧴';
+    if (RegExp(r'snack|food|meal').hasMatch(request)) return '🍎';
+    if (RegExp(r'medication|medicine').hasMatch(request)) return '💊';
+    return '🧺';
+  }
+
   void supplies(List<(FamilyChild, Map<String, dynamic>)> rows) =>
       showModalBottomSheet(
         context: context,
@@ -2760,38 +3840,35 @@ class _DashboardState extends State<Dashboard>
         builder: (c) => ListView(
           shrinkWrap: true,
           children: [
-            const ListTile(
-              leading: Icon(Icons.inventory_2_outlined, color: gold),
-              title: Text(
+            ListTile(
+              leading: const Text('🧺', style: TextStyle(fontSize: 23)),
+              title: const Text(
                 'Supplies needed',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text('Requests from the past 5 business days'),
+              subtitle: const Text('Requests from the past 5 business days'),
             ),
             ...rows.map(
               (e) => Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: ListTile(
-                  leading: const Text('🧺', style: TextStyle(fontSize: 23)),
+                  leading: Text(
+                    supplyEmoji(e.$2),
+                    style: const TextStyle(fontSize: 23),
+                  ),
                   title: Text('${e.$1.firstName}: ${title(e.$2)}'),
                   subtitle: Text(
                     [
-                      if ((e.$2['ChildCondition'] ?? '')
-                          .toString()
-                          .trim()
-                          .isNotEmpty)
-                        (e.$2['ChildCondition']).toString().trim(),
+                      if (supplyRequest(e.$2).isNotEmpty)
+                        'What they need: ${supplyRequest(e.$2)}'
+                      else
+                        'Open to see the requested item',
                       '${supplyAlertAge(e.$2)} · ${eventTime(e.$2)}',
                       if (reportHasNote(e.$2)) '📝 Note available',
                     ].join('\n'),
                   ),
-                  isThreeLine:
-                      reportHasNote(e.$2) ||
-                      (e.$2['ChildCondition'] ?? '')
-                          .toString()
-                          .trim()
-                          .isNotEmpty,
-                  onTap: reportHasNote(e.$2) ? () => report(e.$2, e.$1) : null,
+                  isThreeLine: true,
+                  onTap: () => report(e.$2, e.$1),
                   trailing: TextButton(
                     onPressed: () {
                       setState(() => ack.add(id(e.$2)));
@@ -2855,6 +3932,39 @@ class _DashboardState extends State<Dashboard>
         content: Text('$saved of ${items.length} photos saved to Photos.'),
       ),
     );
+  }
+
+  Future<bool> saveMemoryPhoto(MemoryRecord record) async {
+    try {
+      final bytes = await widget.api.originalPhotoBytes(record.filename);
+      final result = await ImageGallerySaverPlus.saveImage(
+        bytes,
+        quality: 100,
+        name: 'Honeycomb_memory_${record.momentId}',
+      );
+      final saved = result is Map && result['isSuccess'] == true;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              saved
+                  ? 'Memory photo saved to Photos.'
+                  : 'Could not save this photo.',
+            ),
+          ),
+        );
+      }
+      return saved;
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not download the original photo.'),
+          ),
+        );
+      }
+      return false;
+    }
   }
 
   Widget photo(
