@@ -7,7 +7,8 @@
   "scripts": {
     "login": "node monitor.mjs --login",
     "start": "node monitor.mjs",
-    "test-notification": "node monitor.mjs --test-notification"
+    "test-notification": "node monitor.mjs --test-notification",
+    "setup-auto-login": "node monitor.mjs --setup-auto-login"
   },
   "dependencies": {
     "firebase-admin": "^13.7.0",

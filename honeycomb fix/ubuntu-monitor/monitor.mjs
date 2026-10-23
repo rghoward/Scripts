@@ -8,6 +8,7 @@ import { stdin, stdout } from 'node:process';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 import { chromium } from 'playwright';
+import { isAuthenticationError, restoreSignIn, setupAutoLogin } from './auto-login.mjs';
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const dataDirectory = path.join(directory, 'data');
@@ -16,6 +17,7 @@ const profileDirectory = process.env.HONEYCOMB_MONITOR_PROFILE_DIR
 const stateFile = path.join(dataDirectory, 'state.json');
 const origin = 'https://honeycomb.o2bkids.com';
 const pageSize = 10;
+const isSetupAutoLogin = process.argv.includes('--setup-auto-login');
 const isLogin = process.argv.includes('--login');
 const isTestNotification = process.argv.includes('--test-notification');
 
@@ -68,7 +70,11 @@ async function api(page, url, method = 'GET', body) {
     try { json = JSON.parse(text); } catch { /* The login page is not JSON. */ }
     return { ok: response.ok, status: response.status, json };
   }, { url, method, body });
-  if (!result.ok || !result.json) throw new Error(`Honeycomb request failed (${result.status}). Sign in again with npm run login.`);
+  if (!result.ok || !result.json) {
+    const error = new Error(`Honeycomb request failed (${result.status}). Sign in again with npm run login.`);
+    error.status = result.status;
+    throw error;
+  }
   if (result.json.Success === false) throw new Error(result.json.Message || 'Honeycomb declined the request. Sign in again with npm run login.');
   return result.json;
 }
@@ -299,7 +305,15 @@ async function monitor() {
   try {
     const page = context.pages()[0] || await context.newPage();
     await page.goto(origin, { waitUntil: 'domcontentloaded' });
-    const childrenPayload = await api(page, '/api/membership/children');
+    const readChildren = () => api(page, '/api/membership/children');
+    let childrenPayload;
+    try {
+      childrenPayload = await readChildren();
+    } catch (error) {
+      if (!isAuthenticationError(error)) throw error;
+      childrenPayload = await restoreSignIn(page, readChildren);
+      log('Honeycomb session renewed automatically.');
+    }
     const children = Array.isArray(childrenPayload.Data) ? childrenPayload.Data : [];
     if (!children.length) throw new Error('No children were returned. Sign in again with npm run login.');
 
@@ -371,7 +385,17 @@ async function monitor() {
 }
 
 try {
-  if (isLogin) await login();
+  if (isSetupAutoLogin) {
+    // Isolated browser proves that the password works without reusing saved cookies.
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const page = await browser.newPage();
+      await setupAutoLogin(page, () => api(page, '/api/membership/children'));
+      log('Automatic login verified and saved locally.');
+    } finally {
+      await browser.close();
+    }
+  } else if (isLogin) await login();
   else await monitor();
 } catch (error) {
   console.error(`[honeycomb-monitor] ${error.message}`);

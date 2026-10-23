@@ -1,6 +1,6 @@
 # Ubuntu Honeycomb monitor
 
-This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends concise, watch-readable updates to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. It does **not** store your Honeycomb password, and its signed-in browser profile and alert state stay only on that laptop.
+This is a personal, free starter for reliable alerts while the phone app is closed. An always-on Ubuntu laptop checks the Honeycomb website and sends concise, watch-readable updates to the installed Android app through Firebase Cloud Messaging (FCM). Telegram remains available as an optional second destination. Its signed-in browser profile and alert state stay only on that laptop. Optional automatic login stores your credentials in the Ubuntu login keyring.
 
 It is intentionally a starter: it detects the most recent ten reports, photos, and earned badges per child every fifteen minutes. Daily reports include the activity time and a short summary such as `Diaper — Alex: 9:15 AM · Pee & BM` or `Nap — Alex: 12:00 PM · 12:00 PM – 2:30 PM`; photos and badges include their latest timestamp and remain concise summaries. Supply requests, daily reports, photos, and badges use distinct notification titles and icons. Tapping a photo notification opens the relevant photo; other alerts open the child's Today screen.
 
@@ -136,3 +136,11 @@ journalctl --user -u honeycomb-monitor.service -f
 - FCM and optional Telegram receive concise alert previews. Daily reports may include the activity type, child name, and short outcome/time (for example, `Potty — Alex: Pee`); do not use this monitor if that information should not appear on a notification or paired watch. It does not send photo URLs, images, login credentials, or full report-note text.
 - The monitor needs a desktop-capable Ubuntu session for the one-time login. Normal polling runs headlessly afterward.
 - Ubuntu needs Node.js, Playwright/Chromium, the browser profile, and the private Firebase service-account file. It does **not** need Android Studio, the Android SDK, Gradle, or an APK build.
+
+## Optional automatic re-login
+
+Run `npm run setup-auto-login` on the Ubuntu desktop. Enter your Honeycomb email and password in local dialogs. Setup verifies them in a fresh browser before saving them in Ubuntu Secret Service (your login keyring). Credentials are passed through private pipes, never command arguments or logs. Python 3, PyGObject/libsecret, and Zenity must be installed.
+
+When the saved session receives HTTP 401, the monitor makes one login attempt and continues the same check. Failed attempts pause automatic login for 15 minutes. Network/server errors do not trigger login. MFA or CAPTCHA may require `npm run login`. To replace credentials or clear the retry pause, rerun setup. To disable automatic login, remove the “Honeycomb monitor automatic login” entry in Ubuntu Passwords and Keys.
+
+The login keyring must be unlocked for automatic re-login. It normally unlocks when you sign into Ubuntu; unattended boot before desktop login may require manual keyring unlocking. Existing Honeycomb browser sessions continue working while the keyring is locked.
