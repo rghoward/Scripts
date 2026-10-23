@@ -907,8 +907,8 @@ class _DashboardState extends State<Dashboard>
       setState(() {
         loading = false;
         connectionNotice = restored
-            ? 'Offline — showing your last saved updates.'
-            : 'Honeycomb could not be reached. Pull down to try again.';
+            ? 'Couldn\'t load updates — showing your last saved updates.'
+            : 'Couldn\'t load Honeycomb updates. Pull down to try again.';
       });
     }
   }

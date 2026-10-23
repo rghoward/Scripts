@@ -6,6 +6,13 @@ import 'package:http/http.dart' as http;
 class HoneycombApi {
   HoneycombApi({http.Client? client}) : _client = client ?? http.Client();
   static const origin = 'https://honeycomb.o2bkids.com';
+  // Honeycomb requires same-origin context on authenticated POST requests,
+  // including those sent by a native client rather than a browser.
+  static const _requestHeaders = {
+    'Accept': 'application/json',
+    'Origin': origin,
+    'Referer': '$origin/',
+  };
   final http.Client _client;
   String _cookies = '';
 
@@ -17,10 +24,7 @@ class HoneycombApi {
   Future<void> signIn(String email, String password) async {
     final response = await _client.post(
       Uri.parse('$origin/api/membership/login'),
-      headers: const {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+      headers: const {..._requestHeaders, 'Content-Type': 'application/json'},
       body: jsonEncode({'username': email, 'password': password}),
     );
     _saveCookies(response);
@@ -288,17 +292,26 @@ class HoneycombApi {
       '${item['DateTime'] ?? item['CreatedDate'] ?? item['GroupDate'] ?? ''}';
 
   Map<String, String> get _headers => {
-    'Accept': 'application/json',
+    ..._requestHeaders,
     if (_cookies.isNotEmpty) 'Cookie': _cookies,
   };
   Map<String, dynamic> _decode(http.Response response) {
-    final decoded = jsonDecode(response.body);
-    if (response.statusCode < 200 ||
-        response.statusCode >= 300 ||
-        decoded is! Map<String, dynamic>)
+    // Rejections can contain plain text instead of the API's JSON envelope.
+    // Preserve the HTTP failure instead of hiding it behind a JSON parse error.
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw HoneycombApiException(
         'Honeycomb request failed (${response.statusCode}).',
       );
+    }
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } on FormatException {
+      throw HoneycombApiException('Honeycomb returned an unexpected response.');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw HoneycombApiException('Honeycomb returned an unexpected response.');
+    }
     return decoded;
   }
 
