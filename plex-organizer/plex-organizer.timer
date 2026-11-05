@@ -1,0 +1,10 @@
+[Unit]
+Description=Organize Plex downloads every five minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=5min
+AccuracySec=20s
+
+[Install]
+WantedBy=timers.target

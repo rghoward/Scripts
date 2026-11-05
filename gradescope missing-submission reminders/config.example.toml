@@ -14,6 +14,9 @@ password_env = "GRADESCOPE_REMINDER_PASSWORD"
 [schedule]
 timezone = "America/New_York"
 check_delay_minutes = 5
+late_report_delay_minutes = 10
+backcheck_weekday = "Monday"
+backcheck_hour = 8
 
 [delivery]
 mode = "dry-run"
@@ -26,7 +29,16 @@ name = "Course name"
 term = "Fall 2026"
 assignment_pattern = '(?i)\b(?:hw|homework)\s*0*\d+\b'
 late_hours = 24
+allowed_late_submissions = 2
 policy = "Course-specific student-facing late policy."
+# Optional instructors or TAs who should also receive this course's reminder
+# summaries and late-window CSV reports. Student reminders are unaffected.
+#additional_report_emails = ["ta1@example.edu", "ta2@example.edu"]
+# Optional recipients for only the late-window email and attached CSV.
+#additional_late_report_emails = ["late-reviewer@example.edu"]
+# Extra recipients stop receiving mail after this date. On the following day,
+# the owner receives one reminder to configure the next semester's recipients.
+#additional_email_end_date = 2026-12-25
 
 # Optional one-assignment exception. Keep real student exceptions only in
 # config.local.toml, which is excluded from Git.

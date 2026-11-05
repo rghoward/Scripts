@@ -1,0 +1,27 @@
+{
+  "sources": [
+    "/media/ronnie/bulk",
+    "/home/ronnie/Downloads"
+  ],
+  "destination": "/home/ronnie/Videos/Plex",
+  "settle_minutes": 10,
+  "plex_configured": true,
+  "sections": [
+    6,
+    7
+  ],
+  "shows": {
+    "scrubs": "Scrubs (2026)",
+    "euphoriaus": "Euphoria (2019)",
+    "euphoria": "Euphoria (2019)",
+    "widowsbay": "Widow's Bay (2026)",
+    "silo": "Silo (2023)",
+    "dyingforsex": "Dying for Sex (2025)",
+    "thegreat": "The Great (2020)",
+    "seekingpersephone": "Seeking Persephone (2026)",
+    "normalpeople": "Normal People (2020)"
+  },
+  "required_mounts": [
+    "/media/ronnie/bulk"
+  ]
+}
