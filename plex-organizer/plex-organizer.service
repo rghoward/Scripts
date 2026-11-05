@@ -1,0 +1,6 @@
+[Unit]
+Description=Organize mixed downloads into linked Plex movie and TV folders
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 "/home/ronnie/Desktop/My Stuff/Scripts/plex-organizer/organize.py" --apply
