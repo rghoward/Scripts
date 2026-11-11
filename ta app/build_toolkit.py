@@ -23,6 +23,7 @@ FEATURES = (
     Feature("instructor-home", "Instructor Home", "features/instructor-home/index.js"),
     Feature("page-enhancer", "Page Enhancer", "features/page-enhancer/index.js"),
     Feature("my-courses", "My Courses Dashboard", "features/my-courses/index.js"),
+    Feature("manager-allotment", "TA Allotment", "features/manager-allotment/index.js"),
     Feature("manager-home", "Manager Home", "features/manager-home/index.js"),
     Feature("manager-users", "Manager Users", "features/manager-users/index.js"),
     Feature("manager-user-form", "Manager User Form", "features/manager-user-form/index.js"),
@@ -41,10 +42,11 @@ FEATURES = (
 HEADER = """// ==UserScript==
 // @name         GT TA Hiring Toolkit
 // @namespace    https://gatech.edu/
-// @version      2.10.0
+// @version      2.23.1
 // @description  Unified dashboards, search, ranking tools, student details, and styling for the GT TA Hiring application.
 // @match        https://ta-app.cc.gatech.edu/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
+// @connect      registration.banner.gatech.edu
 // @run-at       document-idle
 // ==/UserScript==
 """
