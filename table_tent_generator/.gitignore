@@ -1,0 +1,6 @@
+/*/input/
+/*/output/
+/*/archive/
+.DS_Store
+__pycache__/
+.venv/
